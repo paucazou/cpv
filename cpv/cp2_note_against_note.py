@@ -56,5 +56,6 @@ def third_rule():
     """
     3 - Le chant donné (ou plain-chant) peut être transposé toutes les fois qu'il ne dépassera pas l'étendue ordinaire, au grave ou à l'aigu, de la voix pour laquelle on le transposera.
     """
-    pass
+    # check the tessitura
+    # check the transposition is correct
 

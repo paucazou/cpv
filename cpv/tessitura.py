@@ -2,7 +2,7 @@
 # -*-coding:Utf-8 -*
 #Deus, in adjutorium meum intende
 
-import note
+import pitch
 
 class Tessitura:
     """Represents a tessitura.
@@ -10,46 +10,47 @@ class Tessitura:
     in that tessitura.
     condoned are notes tolerated
     """
-    def __init__(self,min: note.Note, max: note.Note, condoned=[]):
+    def __init__(self,min: pitch.Pitch, max: pitch.Pitch, condoned=[]):
         self.min = min
         self.max = max
         self.condoned = condoned
 
-    def __contain__(self, n: note.Note) -> bool:
+    def __contains__(self, n: pitch.Pitch) -> bool:
         """True if n is
         above min and beyond max
         condoned are not used here
         """
-        return min <= n <= max
+        return self.min.value.semitone <= n.value.semitone <= self.max.value.semitone
 
-    def isCondoned(self, n: note.Note) -> bool:
+    def isCondoned(self, n: pitch.Pitch) -> bool:
         """True if in the tessitura or
         in condoned notes"""
-        return self.__contain__(n) or n in self.condoned
+        return self.__contains__(n) or n in self.condoned
 
 
-f_str = note.Note.fromString
+p = pitch.Pitch
+
 soprano = Tessitura(
-        f_str("C4 1 0"),
-        f_str("A5 1 0"),
-        [f_str("Bb5 1 0")
+        p.C4,
+        p.A5,
+        [p.Bb5]
             )
 
 alto = Tessitura(
-        f_str("F3 1 0"),
-        f_str("D5 1 0")
+        p.F3,
+        p.D5
         )
 
 tenor = Tessitura(
-        f_str("C3 1 0"),
-        f_str("A4 1 0"),
-        [f_str("Bb4 1 0")]
+        p.C3,
+        p.A4,
+        [p.Bb4]
         )
 
 bass = Tessitura(
-        f_str("F2 1 0"),
-        f_str("D4 1 0"),
-        [f_str("E2 1 0")]
+        p.F2,
+        p.D4,
+        [p.E2]
         )
 
 
