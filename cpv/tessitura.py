@@ -30,26 +30,26 @@ class Tessitura:
 
 f_str = note.Note.fromString
 soprano = Tessitura(
-        f_str("C 0 1 0"),
-        f_str("A 1 1 0"),
-        [f_str("B 1 1 0 b")
+        f_str("C4 1 0"),
+        f_str("A5 1 0"),
+        [f_str("Bb5 1 0")
             )
 
 alto = Tessitura(
-        f_str("F -1 1 0"),
-        f_str("D 1 1 0")
+        f_str("F3 1 0"),
+        f_str("D5 1 0")
         )
 
 tenor = Tessitura(
-        f_str("C -1 1 0"),
-        f_str("A 0 1 0"),
-        [f_str("B 0 1 0 b")]
+        f_str("C3 1 0"),
+        f_str("A4 1 0"),
+        [f_str("Bb4 1 0")]
         )
 
 bass = Tessitura(
-        f_str("F -2 1 0"),
-        f_str("D 0 1 0"),
-        [f_str("E -2 1 0")]
+        f_str("F2 1 0"),
+        f_str("D4 1 0"),
+        [f_str("E2 1 0")]
         )
 
 

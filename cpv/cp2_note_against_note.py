@@ -39,12 +39,12 @@ def _first_rule(s : stave.Stave):
     for nb,bar in enumerate(s.barIter()):
 
         # check that each bar contains only two notes
-        if len(bar) != 2:
-            raise error.CompositionError("Number of breve should be two",bar,nb)
+        if len(bar.elts) != 2:
+            raise error.CompositionError("Number of breve should be two",bar)
 
         # check that each note is a breve
-        if bar[0].duration != bar[1].duration != note.Duration.BREVE:
-            raise error.CompositionError("The notes are not breves",bar,nb)
+        if bar.elts[0].duration != bar.elts[1].duration != note.Duration.BREVE:
+            raise error.CompositionError("The notes are not breves",bar)
 
 def second_rule(staves: list, c: stave.Stave):
     """

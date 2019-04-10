@@ -56,10 +56,12 @@ def test_get_bar():
                  N(4,4),
                  N(8,1)]
     bar1 = s.getBar(0)
+    bar1 = bar1.elts
     assert(len(bar1) == 1)
     assert(bar1[0] is s._stave[0])
 
     bar2 = s.getBar(1)
+    bar2 = bar2.elts
     assert(len(bar2) == 1)
     assert(bar2[0] is s._stave[1])
 

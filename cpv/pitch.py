@@ -320,7 +320,7 @@ class Pitch(enum.Enum):
 
 
 def __generate__pitchs():
-    """Generate enums. Do not use"""
+    """Generate enums."""
 
     returned = ''
 

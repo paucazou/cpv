@@ -86,14 +86,22 @@ class Stave:
         first one is 0
         raise IndexError if i >= barNumber
         """
+        class __bar:
+            def __init__(self,elts,pos,s):
+                self.elts = elts
+                self.pos = pos
+                self.stave = s
+
         if i >= self.barNumber:
             raise IndexError(f"Bar requested does not exist: {i}. Max is {self.barNumber}")
         first_pos = i*self.rythm
         last_pos = first_pos + self.rythm - 1/50
-        return [ elt
+        return __bar([ elt
                 for elt in self._stave
                 if first_pos <= elt.pos <= last_pos or first_pos <= elt.last_pos <= last_pos
-                ]
+                ],
+                i,
+                self)
 
     def extend(self,other):
         """Extend self
