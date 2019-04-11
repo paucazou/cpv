@@ -36,12 +36,41 @@ class Pitch(enum.Enum):
             result -= 12
         return result
 
-    def isFullyConsonantWith(self, other) -> bool:
+    def isPerfectlyConsonantWith(self, other) -> bool:
         """True if self and other are separated
         by the following intervals (and multiple):
         1, 5, 8
+        and the number of intervals are 0 or 7
         """
-        return self.intervalWith(other,True) in (1, 5, 8)
+        return self.intervalWith(other,True) in (1, 5, 8) and self.semitoneWith(other,True) in (0, 7)
+
+    def isInterval(self,*args):
+        """This method must be used
+        with the With() method of the returned
+        value. This method takes the other pitch
+        as argument and return a boolean
+        *args can be any integer, the interval requested.
+        If the last arg is a boolean, it is used to set 'min' argument
+        of the intervalWith() method"""
+        if len(args) == 0:
+            raise ValueError("Args must be at least 1")
+
+        if isinstance(args[-1],bool):
+            min = args[-1]
+            args = args[:-1]
+        else:
+            min = False
+
+        class __is_interval:
+            def __init__(self, p):
+                self.p = p
+            def With(self, other):
+                return self.p.intervalWith(other,min) in args
+
+        return __is_interval(self)
+                    
+
+
 
     C0 = __pitch(0, 0)
     Cs0 = __pitch(0, 1)

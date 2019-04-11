@@ -111,6 +111,12 @@ class Stave:
                 self.pos = pos
                 self.stave = s
 
+            def __len__(self):
+                return len(self.stave)
+
+            def __getitem__(self,i):
+                return self.elts[i]
+
         if i >= self.barNumber:
             raise IndexError(f"Bar requested does not exist: {i}. Max is {self.barNumber}")
         first_pos = i*self.rythm

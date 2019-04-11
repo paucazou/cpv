@@ -49,5 +49,28 @@ def test_semitone_with_min():
     assert(func(p.C4, p.C5) == 0)
     assert(func(p.B2, p.F6) == 6)
 
+def test_is_perfectly_consonant_with():
+    def func(f, s):
+        return f.isPerfectlyConsonantWith(s)
+
+    assert(func(p.C4,p.G4))
+    assert(func(p.C4,p.G5))
+    assert(func(p.C4,p.C5))
+    assert(func(p.C4,p.C4))
+    assert(func(p.C4,p.C0))
+    assert(not func(p.C4,p.E4))
+    assert(not func(p.Cb4,p.G4))
+    assert(func(p.D3,p.A3))
+    assert(func(p.B3,p.Fs4))
+
+
+def test_is_interval_without_min():
+    assert(p.C4.isInterval(8).With(p.C5))
+    assert(p.Gb4.isInterval(4).With(p.C5))
+
+def test_is_interval_with_min():
+    assert(p.C4.isInterval(1,True).With(p.C5))
+    assert(p.Bb3.isInterval(2,True).With(p.C6))
+
 
 
