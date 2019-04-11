@@ -11,7 +11,7 @@ import stave
 import util
 
 
-def first_rule(parts: list):
+def rule_1(parts: list):
     """Wrapper of the first rule.
     Each part in parts is a Stave
     """
@@ -46,16 +46,40 @@ def _first_rule(s : stave.Stave):
         if bar.elts[0].duration != bar.elts[1].duration != note.Duration.BREVE:
             raise error.CompositionError("The notes are not breves",bar)
 
-def second_rule(staves: list, c: stave.Stave):
+def rule_2(staves: list, c: stave.Stave):
     """
     2 - Le chant donné servira trois fois de partie inférieure et trois de partie supérieure. Les trois parties combinées sur le chant donné devront être entièrement différentes - de même pour celles formées sur le chant donné.
     """
     pass
 
-def third_rule():
+def rule_3():
     """
     3 - Le chant donné (ou plain-chant) peut être transposé toutes les fois qu'il ne dépassera pas l'étendue ordinaire, au grave ou à l'aigu, de la voix pour laquelle on le transposera.
     """
     # check the tessitura
     # check the transposition is correct
+    pass
+
+def _fourth_rule(s: stave.Stave):
+    """On doit commencer par une consonance parfaite (unisson, quinte ou douzième, octave ou quinzième) et finir par l'octave ou l'unisson
+    """
+    def nb_error(poss, posi):
+        if len(notes) != 2:
+            raise error.CompositionError(f"Two notes are expected at the {poss} of the track",s.getBar(posi))
+
+    # start
+    notes = s.atFirstPos(0)
+    nb_error("start",0)
+
+    if not notes[0].pitch.isFullyConsonantWith(notes[1].pitch):
+        raise error.CompositionError("The first two notes are not fully consonant.",s.getBar(0))
+
+    # end
+    notes = s.atFirstPos(s.lastFirstPos)
+    nb_error("end",s.getBar(s.barNumber-1))
+
+    if notes[0].pitch.intervalWith(notes[1].pitch) not in (1, 8):
+        raise error.CompositionError("The last interval must be an unison or an octave.",s.getBar(s.barNumber-1))
+
+
 

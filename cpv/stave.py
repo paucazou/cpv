@@ -68,6 +68,25 @@ class Stave:
         for elt in self._stave:
             yield elt
 
+    def atFirstPos(self,i: float):
+        """Return a list of elements at position i
+        This position is the start of the note
+        """
+        return [ elt for elt in self._stave if elt.pos == i ]
+
+    def _lastFirstPos() -> float:
+        """Return the last starting position
+        of a note in the stave.
+        0 means either the first note is the last one,
+        or there is no note
+        """
+        last = 0
+        for elt in self._stave:
+            if last < elt.pos:
+                last = elt.pos
+        
+        return last
+
     def barIter(self):
         """Yields each bar after the other"""
         for i in range(self.barNumber):
@@ -110,3 +129,4 @@ class Stave:
         self._stave.extend(other._stave)
 
     barNumber = property(_get_bar_number)
+    lastFirstPos = property(_lastFirstPos)

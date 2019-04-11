@@ -7,6 +7,19 @@ import cp2_note_against_note
 import note
 import stave
 
+def get_rules(lib):
+    """Takes a module and return a dict
+    with functions called rule_X, where X
+    is an integer which becomes the key
+    in the dict
+    """
+    return {
+            int(elt[5]) : getattr(lib, elt)
+            for elt in dir(lib)
+            if "rule_" in elt
+            }
+
+
 def cp_2_note_vs_note(file: str, not_followed_rules=[]) -> bool:
     """This function takes a file with a special
     syntax as main argument. The second argument
@@ -34,7 +47,7 @@ def cp_2_note_vs_note(file: str, not_followed_rules=[]) -> bool:
     Each part must restart from 0.
     """
     lib = cp2_note_against_note
-    rules = { 1 : lib.first_rule}
+    rules =  get_rules(lib)
     for rule in not_followed_rules:
         del(rules[rule])
 

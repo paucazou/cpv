@@ -36,6 +36,13 @@ class Pitch(enum.Enum):
             result -= 12
         return result
 
+    def isFullyConsonantWith(self, other) -> bool:
+        """True if self and other are separated
+        by the following intervals (and multiple):
+        1, 5, 8
+        """
+        return self.intervalWith(other,True) in (1, 5, 8)
+
     C0 = __pitch(0, 0)
     Cs0 = __pitch(0, 1)
     Css0 = __pitch(0, 2)
