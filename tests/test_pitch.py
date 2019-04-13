@@ -4,6 +4,7 @@
 
 import sys
 sys.path.append('./cpv/')
+import pytest
 
 
 import pitch
@@ -71,6 +72,30 @@ def test_is_interval_without_min():
 def test_is_interval_with_min():
     assert(p.C4.isInterval(1,True).With(p.C5))
     assert(p.Bb3.isInterval(2,True).With(p.C6))
+
+def test_qualify_interval():
+    func = p.qualifyInterval
+    perfect, minor, major, diminished, augmented = "perfect minor major diminished augmented".split()
+
+    assert(func(3,4) == major)
+    assert(func(2,1) == minor)
+    assert(func(8,12) == perfect)
+    assert(func(1,0) == perfect)
+    assert(func(5,6) == diminished)
+    with pytest.raises(ValueError):
+        func(9,3)
+
+def test_qualified_interval_with():
+    def func(f, s, i, q):
+        res = f.qualifiedIntervalWith(s)
+        assert(res.interval == i)
+        assert(res.quality == q)
+    perfect, minor, major, diminished, augmented = "perfect minor major diminished augmented".split()
+
+    func(p.C4,p.C5,1,perfect)
+    func(p.F4,p.B4,4,augmented)
+    func(p.A3,p.F4,6,minor)
+    func(p.B2,p.Fs3,5,perfect)
 
 
 

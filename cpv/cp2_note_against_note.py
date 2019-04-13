@@ -111,6 +111,43 @@ def _ninth_rule(s : stave.Stave):
 
         previous = elt[0]
 
+def _eleventh_rule(cp : stave.Stave, cd : stave.Stave):
+    """Les croisements sont tolérés, employés avec une grande réserve"""
+    cp_high_part = None
+
+    for cp_n, cd_n in zip(cp.barIter(),cd.barIter()):
+
+        if not (len(cp_n) == len(cd_n) == 1):
+            raise error.CompositionError("Two notes are expected",cp_n,cd_n)
+
+        cdn, cpn = cd_n[0], cp_n[0]
+
+        if cp_n.pos is None:
+            cp_high_part = cpn.semitone > cdn.semitone if cpn.semitone != cdn.semitone else None
+        else:
+            if cp_high_part is True:
+                if cdn.semitone > cpn.semitone:
+                    raise error.CompositionWarning("The melodies intersect",cp_n,cd_n)
+                cp_high_part = False
+            else:
+                if cpn.semitone > cdn.semitone:
+                    raise error.CompositionWarning("The melodies interset",cp_n,cd_n)
+                cp_high_part = True
+
+def _fourteenth_part(s : stave.Stave):
+    """Pour la fausse relation de triton, la règle est la même qu'en harmonie : la fausse relation de triton est défendue."""
+    for bar in s.barIter():
+        if len(bar) != 2:
+            raise error.CompositionError("Two notes expected",bar)
+        if abs(bar[0].pitch.semitoneWith(bar[1].pitch) == 6):
+            raise error.CompositionError("Tritone is forbidden",bar)
+
+
+
+
+
+
+
 
 
 
