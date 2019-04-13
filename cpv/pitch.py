@@ -23,7 +23,7 @@ class Pitch(enum.Enum):
         and other. If min is True, then it will
         return the matching interval under 8"""
         result = abs(self.value.step - other.value.step) + 1
-        while result >= 8 and min:
+        while result >= 9 and min:
             result -= 7
         return result
 
@@ -46,7 +46,7 @@ class Pitch(enum.Enum):
         If min is True, then it returns the
         matching semitones in the octave"""
         result = abs(self.value.semitone - other.value.semitone)
-        while result >= 12 and min:
+        while result >= 13 and min:
             result -= 12
         return result
 
@@ -56,7 +56,22 @@ class Pitch(enum.Enum):
         1, 5, 8
         and the number of intervals are 0 or 7
         """
-        return self.intervalWith(other,True) in (1, 5, 8) and self.semitoneWith(other,True) in (0, 7)
+        return self.intervalWith(other,True) in (1, 5, 8) and self.semitoneWith(other,True) in (0, 7, 12)
+
+    def isImperfectlyConsonantWith(self,other) -> bool:
+        """True if self and other have
+        an imperfect consonance
+        """
+        return self.isQualifiedInterval(
+                (3,"minor"),
+                (3,"major"),
+                (6,"minor"),
+                (6,"major")
+                ).With(other)
+
+    def isConsonantWith(self,other) -> bool:
+        """True if other is consonant with self"""
+        return self.isImperfectlyConsonantWith(other) or self.isPerfectlyConsonantWith(other)
 
     def isInterval(self,*args):
         """This method must be used
@@ -82,6 +97,17 @@ class Pitch(enum.Enum):
                 return self.p.intervalWith(other,min) in args
 
         return __is_interval(self)
+
+    def isQualifiedInterval(self, *args):
+        """Same as isInterval, but the args
+        must be a tuple: interval/quality.
+        """
+        class __is_qual_interval:
+            @staticmethod
+            def With(other):
+                return self.qualifiedIntervalWith(other) in args
+
+        return __is_qual_interval()
 
     @staticmethod
     def qualifyInterval(interval : int, semitones : int):

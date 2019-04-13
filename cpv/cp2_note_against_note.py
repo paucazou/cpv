@@ -96,6 +96,37 @@ def _fifth_rule(s : stave.Stave):
         if elt[0].pitch == elt[1].pitch:
             raise error.CompositionError("Unison is forbidden insided the couterpoint",elt)
 
+def _seventh_rule(s : stave.Stave):
+    """Les intervalles formant consonance parfaites ou imparfaites avec le chant donné sont seuls employés"""
+    for bar in s.barIter():
+        if len(bar) != 2:
+            raise error.CompositionError("Two notes expected",bar)
+        f, s = bar[0].pitch, bar[1].pitch
+        if not f.isConsonantWith(s):
+            raise error.CompositionError("The notes must be consonant",bar)
+
+def _eighth_rule(s : stave.Stave):
+    """On ne doit pas entendre plus de trois tierces ou trois sixtes de suite"""
+    _6, _3 = 0
+    intervals = {3:0,6:0}
+
+    for bar in s.barIter():
+        if len(bar) != 2:
+            raise error.CompositionError("Two notes expected",bar)
+        f, s = bar[0].pitch, bar[1].pitch
+        int_ = f.intervalWith(s)
+        if int_ == 3:
+            _3 += 1
+            _6 = 0
+        elif int_ == 6:
+            _6 += 1
+            _3 = 0
+        else:
+            _6 = _3 = 0
+
+        if 4 in (_6,_3):
+            raise error.CompositionError("It is forbidden to use more than three sixths or thirds in a row", bar)
+
 def _ninth_rule(s : stave.Stave):
     """Les notes ne peuvent pas êtres répétées plus d'une fois - on ne peut les faire entendre plus de deux fois de suite."""
     nb = 0
