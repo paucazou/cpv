@@ -119,6 +119,11 @@ def test_is_imperfectly_consonant_with():
     func(p.G4,p.Eb3)
     func(p.B2,p.B3,False)
 
+def test_lower_higher_degree():
+    assert(p.lowerDegree().value.step == min(p,key=lambda x : x.value.step).value.step)
+
+    assert(p.higherDegree().value.step == max(p,key=lambda x : x.value.step).value.step)
+
 
 
 

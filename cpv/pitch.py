@@ -144,6 +144,19 @@ class Pitch(enum.Enum):
 
         raise ValueError(f"Impossible to find the quality: {interval} / {semitones}")
 
+    @classmethod
+    def lowerDegree(cls):
+        """Return the lower degree.
+        Note that it can be an accidental value"""
+        return list(cls)[0]
+
+    @classmethod
+    def higherDegree(cls):
+        """Return the higher degree.
+        It can be an accidental value"""
+        return list(cls)[-1]
+    
+
                     
 
 

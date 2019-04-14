@@ -158,20 +158,59 @@ def _eleventh_rule(cp : stave.Stave, cd : stave.Stave):
         else:
             if cp_high_part is True:
                 if cdn.semitone > cpn.semitone:
-                    raise error.CompositionWarning("The melodies intersect",cp_n,cd_n)
+                    error.warn("The melodies intersect",cp_n,cd_n)
                 cp_high_part = False
             else:
                 if cpn.semitone > cdn.semitone:
-                    raise error.CompositionWarning("The melodies interset",cp_n,cd_n)
+                    error.warn("The melodies interset",cp_n,cd_n)
                 cp_high_part = True
 
-def _fourteenth_part(s : stave.Stave):
+def _fourteenth_rule(s : stave.Stave):
     """Pour la fausse relation de triton, la règle est la même qu'en harmonie : la fausse relation de triton est défendue."""
     for bar in s.barIter():
         if len(bar) != 2:
             raise error.CompositionError("Two notes expected",bar)
         if abs(bar[0].pitch.semitoneWith(bar[1].pitch) == 6):
             raise error.CompositionError("Tritone is forbidden",bar)
+
+def _fifteeth_rule(s : stave.Stave):
+    """Le contrepoint ne doit pas parcourir une étendue plus grande que la dixième et par exception la onzième."""
+    min = pitch.higherDegree()
+    max = pitch.lowerDegree()
+    for n in s:
+        if n.intervalWith(min) > max.intervalWith(min):
+            max = n
+        if n.intervalWith(max) < min.interval(max):
+            min = n
+
+    if max.intervalWith(min) == 11:
+        error.warn("The counterpoint can exceed the 11th by tolerance only.",*s.iterBar())
+    if max.intervalWith(min) > 11:
+        raise error.CompositionError("It is strictly forbidden to exceed the 11th.",*s.iterBar())
+
+def _sixteenth_rule(s : stave.Stave):
+    """Le mouvement conjoint est celui qui convient le mieux au style du Contrepoint rigoureux. Employer le mouvement disjoint très discrètement."""
+    previous = None
+    for bar in s.barIter():
+        if previous is not None and bar[0].intervalWith(previous[0]) != 2:
+            error.warn("It is better to avoid disjunct motion",previous, bar)
+        previous = bar
+
+def _seventeenth_rule(s : stave.Stave):
+    """Les mouvements de quarte augmentée (triton), quinte dimininuée, de septième majeure et mineure sont défendus"""
+    previous = None
+    for bar in s.barIter():
+        if previous is not None and bar[0].isQualifiedInterval(
+                (5,"diminished"),
+                (4,"augmented"),
+                (7,"minor"),
+                (7,"major")
+                ).With(previous[0]):
+            raise error.CompositionError("Melodic motion can't be a 4th augmented, 5th diminished, 7th minor or major",previous, bar)
+        previous = bar
+
+
+
 
 
 
