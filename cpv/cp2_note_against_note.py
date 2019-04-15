@@ -6,9 +6,12 @@ by Andre Geldage in his Traité de
 Contrepoint"""
 
 import error
+import motion
 import note
 import stave
 import util
+
+_semitone = lambda x : x.value.semitone
 
 
 def rule_1(parts: list):
@@ -173,7 +176,7 @@ def _fourteenth_rule(s : stave.Stave):
         if abs(bar[0].pitch.semitoneWith(bar[1].pitch) == 6):
             raise error.CompositionError("Tritone is forbidden",bar)
 
-def _fifteeth_rule(s : stave.Stave):
+def _fifteenth_rule(s : stave.Stave):
     """Le contrepoint ne doit pas parcourir une étendue plus grande que la dixième et par exception la onzième."""
     min = pitch.higherDegree()
     max = pitch.lowerDegree()
@@ -208,6 +211,62 @@ def _seventeenth_rule(s : stave.Stave):
                 ).With(previous[0]):
             raise error.CompositionError("Melodic motion can't be a 4th augmented, 5th diminished, 7th minor or major",previous, bar)
         previous = bar
+
+def _eighteenth_rule(s: stave.Stave):
+    """Comme pour l'harmonie, le mouvement contraire est préférable à l'oblique, et ce dernier au direct"""
+    movs = {motion.MotionType.direct : 0,
+            motion.MotionType.contrary : 0,
+            motion.MotionType.oblique : 0
+            }
+    previous_bar = None
+
+    for bar in s.barIter():
+        notes = [*bar]
+        notes.sort(key=lambda x : x.value.semitone]
+        if previous_bar is not None:
+            movs[motion.MotionType.motion(previous_bar,*notes)] += 1
+        previous_bar = [*notes]
+
+
+    error.warn(f"Number of contrary movements: {movs[motion.MotionType.direct]}; oblique movements: {movs[motion.MotionType.oblique]}; direct movements: {movs[motion.MotionType.direct]}")
+    error.warn("Prefer the contrary movement to the oblique, and the oblique to the direct")
+
+def _nineteenth_rule(s : stave.Stave):
+    """Ne jamais arriver sur une quinte ou une octave par mouvement direct. A priori, deux quintes ou deux octaves sont défendues."""
+    # 2 5th/8ve in a row
+    previous = None
+    for bar in s.barIter():
+        interval = bar[0].intervalWith(bar[1])
+        if previous is not None and interval in (8,5):
+            if interval == previous:
+                raise error.CompositionError("Two 5th or two 8ve in a row is forbidden",previous_bar, bar)
+            # direct motion?
+            previous_notes = [*previous]
+            notes = [*bar]
+            previous_notes.sort(key=_semitone)
+            notes.sort(key=_semitone)
+            if motion.MotionType.motion(*previous_notes,*notes) == motion.MotionType.direct:
+                raise error.CompositionError("It is forbidden to go to a 5th or an 8ve by direct motion",previous,bar)
+
+        previous_bar = bar
+        previous = interval
+
+def _twentieth_rule(cd : stave.Stave, max_size = 20):
+    """Prendre de préférence des chants donnés courts, en majeur et en mineur."""
+    if len(s) > max_size:
+        error.warn(f"Be careful to take shorts canti firmi. Recommanded size is {max_size}. This cantus firmus is {len(cd)}.",*s.barIter())
+
+def _twentyfirst_rule(s : stave.Stave, ratio = 5/20):
+    """Employer de préférence les consonances imparfaites"""
+    bars = []
+    for bar in s.barIter():
+        f, s = bar
+        if f.isPerfectlyConsonantWith(s):
+            bars.append(bar)
+        
+
+    if len(perfect) / len(s) > ratio:
+        error.warn("The number of perfect consonances is possibly higher than requested",*bars)
 
 
 

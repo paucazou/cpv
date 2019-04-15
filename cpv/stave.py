@@ -68,6 +68,10 @@ class Stave:
         for elt in self._stave:
             yield elt
 
+    def __len__(self):
+        """Return the number of notes"""
+        return len(self._stave)
+
     def atFirstPos(self,i: float):
         """Return a list of elements at position i
         This position is the start of the note
@@ -112,7 +116,7 @@ class Stave:
                 self.stave = s
 
             def __len__(self):
-                return len(self.stave)
+                return len(self.elts)
 
             def __getitem__(self,i):
                 return self.elts[i]
