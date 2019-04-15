@@ -109,6 +109,11 @@ class Pitch(enum.Enum):
 
         return __is_qual_interval()
 
+    def isChromaticInflectionWith(self, other):
+        """True if a melodic motion between self and other
+        is a chromatic inflection"""
+        return self.value.step == other.value.step and self.value.semitone != other.value.semitone
+
     @staticmethod
     def qualifyInterval(interval : int, semitones : int):
         """Return the quality of interval

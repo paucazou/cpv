@@ -99,6 +99,15 @@ def _fifth_rule(s : stave.Stave):
         if elt[0].pitch == elt[1].pitch:
             raise error.CompositionError("Unison is forbidden insided the couterpoint",elt)
 
+def _sixth_rule(s : stave.Stave):
+    """Le mouvement chromatique est défendu"""
+    previous = None
+    for elt in s.barIter():
+        note = elt[0]
+        if previous is not None and previous[0].isChromaticInflectionWith(note):
+            raise error.CompositionError("Chromatic inflection is forbidden",previous,bar)
+        previous = bar
+
 def _seventh_rule(s : stave.Stave):
     """Les intervalles formant consonance parfaites ou imparfaites avec le chant donné sont seuls employés"""
     for bar in s.barIter():
@@ -222,7 +231,7 @@ def _eighteenth_rule(s: stave.Stave):
 
     for bar in s.barIter():
         notes = [*bar]
-        notes.sort(key=lambda x : x.value.semitone]
+        notes.sort(key=lambda x : x.value.semitone)
         if previous_bar is not None:
             movs[motion.MotionType.motion(previous_bar,*notes)] += 1
         previous_bar = [*notes]

@@ -124,6 +124,16 @@ def test_lower_higher_degree():
 
     assert(p.higherDegree().value.step == max(p,key=lambda x : x.value.step).value.step)
 
+def test_chromatic_inflection():
+    def func(f, s):
+        return f.isChromaticInflectionWith(s)
+
+    assert(func(p.C4,p.Cb4) is True)
+    assert(func(p.C4,p.C4) is False)
+    assert(func(p.E4,p.Es4) is True)
+    assert(func(p.E4,p.F4) is False)
+    assert(func(p.E4,p.D4) is False)
+
 
 
 

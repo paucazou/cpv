@@ -16,11 +16,11 @@ class MotionType(enum.Flag):
     contrary = 2
     oblique = 3
 
-    def match(self, seq) -> bool:
+    def match(self, *seq) -> bool:
         """True if seq, an iterable of four Pitch,
         has self motion"""
         assert(len(seq) == 4)
-        return self.motion(seq) == self
+        return self.motion(*seq) == self
     
     @classmethod
     def motion(cls, *seq):
