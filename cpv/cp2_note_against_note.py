@@ -272,10 +272,30 @@ def _twentyfirst_rule(s : stave.Stave, ratio = 5/20):
         f, s = bar
         if f.isPerfectlyConsonantWith(s):
             bars.append(bar)
-        
 
     if len(perfect) / len(s) > ratio:
         error.warn("The number of perfect consonances is possibly higher than requested",*bars)
+
+def _twentysecond_rule(cp : stave.Stave, cf : stave.Stave):
+    """À l'avant dernière mesure, on emploiera la sixte majeure lorsque le chant donné sera à la basse et la tierce mineure suivie de l'octave ou de l'unisson lorsqu'il sera à la partie supérieure"""
+    # is the cantus firmus at above or beyond?
+    for cpn, cfn in zip(cp.barIter(),cf.barIter()):
+        if cpn[0] != cfn[0]:
+            cp_above = cpn[0].value.step > cfn[0].value.step
+            break
+    
+    # check the before last one bar
+    cpn = cp.getBar(cp.barNumber-2)[0]
+    cfn = cf.getBar(cf.barNumber-2)[0]
+    cp.extend(cd)
+    before_last_bar = cp.getBar(cp.barNumber-2)
+
+    if cp_above and not cfn.isQualifiedInterval((6,"major")):
+        raise error.CompositionError("The before last interval must be a 6th major",before_last_bar)
+    elif not cp_above and not cfn.isQualifiedInterval((3,"minor")):
+        raise error.CompositionError("The before last interval must be a 3rd minor",before_last_bar)
+
+
 
 
 

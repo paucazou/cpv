@@ -103,6 +103,15 @@ class Stave:
         last_elt = max(self._stave,key=lambda x : x.pos + x.duration.value)
         return math.ceil( (last_elt.pos + last_elt.duration.value) / self.rythm)
 
+    def _get_notes(self):
+        self._stave.sort(key = lambda x : x.pos)
+        return self._stave
+
+    def _set_notes(self, value):
+        """Set the notes of the stave. Value must be an interable"""
+        self._stave = value
+
+
     def getBar(self,i: int) -> list:
         """Return every element which
         is in bar i
@@ -120,6 +129,9 @@ class Stave:
 
             def __getitem__(self,i):
                 return self.elts[i]
+
+        if i < 0:
+            i = self.barNumber - i
 
         if i >= self.barNumber:
             raise IndexError(f"Bar requested does not exist: {i}. Max is {self.barNumber}")
@@ -140,3 +152,4 @@ class Stave:
 
     barNumber = property(_get_bar_number)
     lastFirstPos = property(_lastFirstPos)
+    notes = property(fget=_get_notes,fset=_set_notes)
