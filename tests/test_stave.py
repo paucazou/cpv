@@ -28,13 +28,13 @@ def test_fromString(note_):
     note_.fromString.return_value = 'N'
     from_str = stave.Stave.fromString
 
-    first = from_str("""4/4\n# comment\nA 0 1 0""")[0]
+    first = from_str("""4/4\nCM\n# comment\nA 0 1 0""")[0]
     assert(first.rythm == 4 == first.breve_value)
     assert(len(first._stave) == 1)
     assert(first._stave == ['N'])
 
     title2 = "A title"
-    second = from_str(f"""3/4\n* {title2}\nA 0 1 0""")[0]
+    second = from_str(f"""3/4\nCM\n* {title2}\nA 0 1 0""")[0]
     assert(second.rythm == 3)
     assert(second.breve_value == 4)
     assert(second.title == title2)

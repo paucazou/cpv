@@ -8,6 +8,7 @@ Contrepoint"""
 import error
 import motion
 import note
+import scale
 import stave
 import util
 
@@ -176,6 +177,17 @@ def _eleventh_rule(cp : stave.Stave, cd : stave.Stave):
                 if cpn.semitone > cdn.semitone:
                     error.warn("The melodies interset",cp_n,cd_n)
                 cp_high_part = True
+
+def _twelfth_rule(s : stave.Stave):
+    """On ne doit moduler qu'aux tons relatifs"""
+    scale = scale.Scale(s.keynote,s.mode)
+    relative = s.relative(scale.Mode.m_harmonic)
+    for bar in s:
+        note = bar[0]
+        if note not in scale:
+            if note not in relative:
+                raise error.CompositionError("It is forbidden to modulate outside the relative key",bar)
+
 
 def _fourteenth_rule(s : stave.Stave):
     """Pour la fausse relation de triton, la règle est la même qu'en harmonie : la fausse relation de triton est défendue."""

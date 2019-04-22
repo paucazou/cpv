@@ -89,6 +89,39 @@ class Scale:
         fifth = self.notes[4]
         return Scale(fourth,self.mode), Scale(fifth,self.mode)
 
+    def isTonic(self,note):
+        return self.isDegree(note, 1)
+
+    def isDominant(self,note):
+        return self.isDegree(note, 5)
+
+    def isMediant(self,note):
+        return 
+        pass
+    def isLeading(self,note):
+        pass
+
+    def isDegree(self, note, i : int):
+        """True if note is the degree i
+        i can't be more than 7 and under 1
+        """
+        assert 0 < i < 8
+        if note not in self:
+            raise ValueError(f"{note} not in scale { self }")
+
+        bnote = pitch.Pitch[ note.name[:-1] + '0']
+        if bnote not in self:
+            bnote = pitch.Pitch[ note.name[:-1] + '1']
+
+        return i == self.notes.index(bnote)  + 1
+
+for i, name in enumerate(("Tonic", "Supertonic","Mediant","Subdominant","Dominant","Submediant","Leading")):
+    def __function(self, note):
+        return self.isDegree(note, i)
+
+    setattr(Scale,f'is{name}',__function)
+
+
         
 
 

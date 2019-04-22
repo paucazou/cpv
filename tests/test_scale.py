@@ -6,6 +6,7 @@ sys.path.append('./cpv/')
 
 import scale as S
 import pitch
+import pytest
 P = pitch.Pitch
 
 def test_init():
@@ -42,4 +43,15 @@ def test_contains():
     assert(not P.F3 in major)
     assert(not (P.F3,P.G4) in major)
 
+def test_is_degree():
+    def func(s, n, i, b=True):
+        assert s.isDegree(n, i) is b
+
+    cmajor = S.Scale(P.C4, S.Mode.M)
+    func(cmajor, P.C2, 1)
+    func(cmajor, P.G5, 5)
+    func(cmajor, P.B1, 7)
+
+    with pytest.raises(ValueError):
+        func(cmajor, P.Cb4, 1)
 

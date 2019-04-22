@@ -4,15 +4,19 @@
 
 import math
 import note
+import pitch
+import scale
 
 class Stave:
     """Represents the stave
     """
-    def __init__(self,rythm=4,breve_value=4,name=''):
+    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M):
         self._stave = []
         self.rythm = rythm
         self.breve_value = breve_value
         self.title = name
+        self.keynote = keynote
+        self.mode = mode
 
     @staticmethod
     def fromString(string: str):
@@ -22,6 +26,13 @@ class Stave:
         The first element, separated by /, must represent the rythm
         and the breve value. They must be int.
         example: 4/4
+        The second element, a line above,
+        is the key tone with following syntax:
+        note in upper case, accidental in lower case, followed by M or m
+        examples:
+            - CM
+            - Ebm
+            - Dm
 
         Add a line comment by starting the line with #:
         # everything after in this line is commented
@@ -35,6 +46,7 @@ class Stave:
         """
         values = string.split('\n')
         values = [val for val in values if val and val[0] != '#']
+        # rythm and breve value
         try:
             rythm, breve_val = values[0].split('/')
             rythm = int(rythm)
@@ -43,13 +55,28 @@ class Stave:
         except ValueError:
             raise SyntaxError(f"Rythm and breve value can't be set: {values[0]}")
 
-        values = values[1:]
-        list_of_staves = [Stave(rythm,breve_value)]
+        # keytone
+        try:
+            string = values[1]
+            keynote_s = string[:-1]
+            mode_s = string[-1]
+            # mode
+            assert(mode_s in 'Mm')
+            mode = scale.Mode.M if mode_s == 'M' else scale.Mode.m_full
+            # keynote
+            keynote = pitch.Pitch[keynote_s + '0']
+
+        except (AssertionError, KeyError):
+            raise SyntaxError(f"Keytone can't be set: {string}")
+
+
+        values = values[2:]
+        list_of_staves = [Stave(rythm,breve_value,keynote,mode)]
         current = list_of_staves[0]
         for val in values:
             if val[0] == '*':
                 if len(current._stave) != 0:
-                    list_of_staves.append(Stave(rythm,breve_value))
+                    list_of_staves.append(Stave(rythm,breve_value,keynote,mode))
                     current=list_of_staves[-1]
 
                 current.title = val[2:]
@@ -109,6 +136,7 @@ class Stave:
 
     def _set_notes(self, value):
         """Set the notes of the stave. Value must be an interable"""
+        self._stave.sort(key = lambda x : x.pos)
         self._stave = value
 
 
