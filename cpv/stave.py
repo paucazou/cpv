@@ -99,6 +99,12 @@ class Stave:
         """Return the number of notes"""
         return len(self._stave)
 
+    def __getitem__(self,i):
+        return self.notes[i]
+
+    def __eq__(self,other):
+        return self.notes == other.notes
+
     def atFirstPos(self,i: float):
         """Return a list of elements at position i
         This position is the start of the note
@@ -127,8 +133,8 @@ class Stave:
         """Get the number of bar in
         the Stave
         """
-        last_elt = max(self._stave,key=lambda x : x.pos + x.duration.value)
-        return math.ceil( (last_elt.pos + last_elt.duration.value) / self.rythm)
+        last_elt = max(self._stave,key=lambda x : x.pos + x.duration)
+        return math.ceil( (last_elt.pos + last_elt.duration) / self.rythm)
 
     def _get_notes(self):
         self._stave.sort(key = lambda x : x.pos)
@@ -164,10 +170,10 @@ class Stave:
         if i >= self.barNumber:
             raise IndexError(f"Bar requested does not exist: {i}. Max is {self.barNumber}")
         first_pos = i*self.rythm
-        last_pos = first_pos + self.rythm - 1/50
+        last_pos = first_pos + self.rythm 
         return __bar([ elt
                 for elt in self._stave
-                if first_pos <= elt.pos <= last_pos or first_pos <= elt.last_pos <= last_pos
+                if first_pos <= elt.pos < last_pos or first_pos < elt.last_pos < last_pos
                 ],
                 i,
                 self)

@@ -3,6 +3,7 @@
 #Deus, in adjutorium meum intende
 
 import enum
+from fractions import Fraction as F
 from pitch import Pitch
 
 class Note:
@@ -12,23 +13,18 @@ class Note:
     class Duration(enum.Enum):
         """Represents the duration
         of the note"""
-        #MAXIMA = 32
-        #LONGA  = 16
+        MAXIMA = 32
+        LONGA  = 16
         BREVE  = 8
         SEMIBREVE = 4
         MINIM  = 2
         CROTCHET = 1
-        QUAVER = 1/2
-        SEMIQUAVER = 1/4
-        DEMISEMIQUAVER = 1/8
-        HEMIDEMISEQUAVER = 1/16
-        SEMIHEMIDEMISEMIQUAVER = 1/32
-        DEMISEMIHEMIDEMISEMIQUAVER = 1/64
-
-    Duration.symbols = {
-            member : chr(value)
-            for member, value in zip(list(Duration),range(119132,119141))
-            }
+        QUAVER = F('1/2')
+        SEMIQUAVER = F('1/4')
+        DEMISEMIQUAVER = F('1/8')
+        HEMIDEMISEQUAVER = F('1/16')
+        SEMIHEMIDEMISEMIQUAVER = F('1/32')
+        DEMISEMIHEMIDEMISEMIQUAVER = F('1/64')
 
     @staticmethod
     def fromString(string : str):
@@ -42,20 +38,22 @@ class Note:
                     Central C is C4
                 2 - Duration (Crotchet=1)
                 3 - Position in the stave (first=0)
+
+            For the duration and the position,
+            if they can't be expressed as an integer,
+            the first part is an integral part followed
+            by a fraction:
+                1+1/2 -> a dotted crotchet / a note starting one time and a half after the starting of the stave
+
+            !!!Note that withespaces are not allowed !!!
         """
         try:
             values = string.split()
 
             pitch = Pitch.__members__.get(values[0])
-            duration = eval(values[1])
-            for elt in Duration.__members__.values():
-                if elt.value == duration:
-                    duration = elt
-                    break
-            else:
-                raise ValueError
 
-            pos = eval(values[2])
+            duration = Note.__to_fraction(values[1])
+            pos = Note.__to_fraction(values[2])
 
             return Note(pitch,pos,duration)
 
@@ -64,8 +62,8 @@ class Note:
 
     def __init__(self,
             pitch: Pitch,
-            pos: float,
-            duration: Duration,
+            pos: F,
+            duration: F,
             ):
         """
         pos is the position in the stave,
@@ -78,22 +76,26 @@ class Note:
         self.duration = duration
 
     def __repr__(self):
-        return f"{self.Duration.symbols[self.duration]}{self.pitch.name}. Stave pos: {self.pos}"
+        return f"Duration: {self.duration}{self.pitch.name}. Stave pos: {self.pos}"
 
     def _get_last_pos(self):
         """Return the last position
-        of the note, excluding
+        of the note, including
         the starting of the following one"""
-        return self.pos + self.duration.value - 1/50
+        return self.pos + self.duration
 
     last_pos = property(_get_last_pos)
 
     def __eq__(self, other):
         return self.pitch == other.pitch and self.pos == other.pos and self.duration == other.duration
 
-    """
-    def is(interval).with():
-    def intervalWith() -> int;
-    """
+    @staticmethod
+    def __to_fraction(string: str) -> F:
+        if '+' not in string:
+            return F(string)
+
+        elts = string.split('+')
+        return F(elts[0]) + F(elts[1])
+
 
 Duration = Note.Duration

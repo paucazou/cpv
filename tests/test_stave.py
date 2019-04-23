@@ -13,15 +13,14 @@ class N:
     """A mock of Note"""
     def __init__(self,pos,duration):
         self.pos = pos
-        self.duration = mock.Mock()
-        self.duration.value = duration
-        self.last_pos = pos + duration - 0.0001
+        self.duration= duration
+        self.last_pos = pos + duration 
 
     def __equal__(self,other):
-        return self.pos == other.pos and self.duration.value == other.duration.value
+        return self.pos == other.pos and self.duration == other.duration
 
     def __repr__(self):
-        return f"N({self.pos},{self.duration.value})"
+        return f"N({self.pos},{self.duration})"
 
 @mock.patch('note.Note')
 def test_fromString(note_):
@@ -46,7 +45,7 @@ def test_bar_number():
     s._stave = [ N(0,4),
                  N(4,4),
                  N(8,1)]
-    assert(isinstance(s._stave[0].duration.value,int))
+    assert(isinstance(s._stave[0].duration,int))
     assert(s.barNumber == 3)
 
 

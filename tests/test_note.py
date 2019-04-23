@@ -17,5 +17,5 @@ def test_equal():
 
 def test_from_String():
     func = note.Note.fromString
-    assert( func('A1 2 0') == N(P.A1, 0, note.Duration.MINIM))
+    assert( func('A1 2 0') == N(P.A1, 0, note.Duration.MINIM.value))
 

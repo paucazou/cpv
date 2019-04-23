@@ -10,6 +10,7 @@ import motion
 import note
 import scale
 import stave
+import tessitura
 import util
 
 _semitone = lambda x : x.value.semitone
@@ -56,13 +57,36 @@ def rule_2(staves: list, c: stave.Stave):
     """
     pass
 
-def rule_3():
+def _third_rule(cf : stave.Stave, base_cf : stave.Stave):
     """
     3 - Le chant donné (ou plain-chant) peut être transposé toutes les fois qu'il ne dépassera pas l'étendue ordinaire, au grave ou à l'aigu, de la voix pour laquelle on le transposera.
     """
     # check the tessitura
+
+    valid_tessitura = True
+    for tess in (T.soprano,T.tenor,T.bass,T.alto):
+        valid_note = True
+        for n in cf:
+            if n not in tess:
+                valid_note = False
+
+        if not valid_note:
+            valid_tessitura = False
+
+    if not valid_tessitura:
+        raise error.CompositionError("The cantus firmus transposed is too high or too low")
+    
     # check the transposition is correct
-    pass
+    def _semitone_sum(n,n2):
+        return n.pitch.semitone - n2.pitch.semitone
+
+    for i, (b1, b2) in enumerate(zip(cf,base_cf)):
+        if i + 1 == len(cf):
+            break
+        if _semitone_sum(b1,cf[i+1]) != _semitone_sum(b2,base_cf[i+1]):
+            raise error.CompositionError("Cantus firmus transposed doesn't match with original cantus firmus",b1,b2)
+
+
 
 def _fourth_rule(s: stave.Stave):
     """On doit commencer par une consonance parfaite (unisson, quinte ou douzième, octave ou quinzième) et finir par l'octave ou l'unisson
@@ -154,6 +178,13 @@ def _ninth_rule(s : stave.Stave):
             raise error.CompositionError("It is forbidden to use the same note more than two times in a row",elt)
 
         previous = elt[0]
+
+def _tenth_rule(s : stave.Stave):
+    """Éviter les marches d'harmonie"""
+    for starting_bar in s.barIter():
+        for following_bar in s.barIter():
+            pass
+
 
 def _eleventh_rule(cp : stave.Stave, cd : stave.Stave):
     """Les croisements sont tolérés, employés avec une grande réserve"""
