@@ -4,6 +4,8 @@
 
 import enum
 import collections
+import math
+
 class pitch:
     def __init__(self,step,semitone):
         self.step = step
@@ -160,6 +162,17 @@ class Pitch(enum.Enum):
         """Return the higher degree.
         It can be an accidental value"""
         return list(cls)[-1]
+
+    def findFrequency(self, A4=440):
+        """Return the frequency of the pitch,
+        relative to the base, which is A4
+        """
+        semitones = self.value.semitone - Pitch.A4.value.semitone
+        return A4 * (2** (semitones/12))
+
+    frequency = property(findFrequency)
+
+
     
 
                     

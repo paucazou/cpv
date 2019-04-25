@@ -134,6 +134,15 @@ def test_chromatic_inflection():
     assert(func(p.E4,p.F4) is False)
     assert(func(p.E4,p.D4) is False)
 
+def test_find_frequency():
+    def func(n, nb):
+        assert round(n.findFrequency(),2) == nb
+
+    assert p.A4.findFrequency() == 440
+    func(p.C0, 16.35)
+    func(p.Fs4, 369.99)
+
+
 
 
 

@@ -89,18 +89,6 @@ class Scale:
         fifth = self.notes[4]
         return Scale(fourth,self.mode), Scale(fifth,self.mode)
 
-    def isTonic(self,note):
-        return self.isDegree(note, 1)
-
-    def isDominant(self,note):
-        return self.isDegree(note, 5)
-
-    def isMediant(self,note):
-        return 
-        pass
-    def isLeading(self,note):
-        pass
-
     def isDegree(self, note, i : int):
         """True if note is the degree i
         i can't be more than 7 and under 1

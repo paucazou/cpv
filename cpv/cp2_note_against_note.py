@@ -5,12 +5,15 @@
 by Andre Geldage in his Traité de
 Contrepoint"""
 
+import chord
 import error
 import motion
 import note
 import scale
+import scalenote
 import stave
 import tessitura
+import tools
 import util
 
 _semitone = lambda x : x.value.semitone
@@ -55,7 +58,24 @@ def rule_2(staves: list, c: stave.Stave):
     """
     2 - Le chant donné servira trois fois de partie inférieure et trois de partie supérieure. Les trois parties combinées sur le chant donné devront être entièrement différentes - de même pour celles formées sur le chant donné.
     """
-    pass
+    #is every part present?
+    parts = {f"{n}cp":False for n in range(7)}
+    for s in staves:
+        parts[s.title] = True
+    for val in parts.values():
+        if val is False:
+            raise error.CompositionError("Six parts are expected in the counterpoint")
+
+    # is every part different?
+    for cp in parts:
+        if not ('cp' in cp.title):
+            continue
+        for other_cp in parts:
+            if cp is other_cp:
+                continue
+            if cp == other_cp:
+                raise error.CompositionError("The parts in the counterpoint must be totally different",cp,other_cp)
+
 
 def _third_rule(cf : stave.Stave, base_cf : stave.Stave):
     """
@@ -181,9 +201,25 @@ def _ninth_rule(s : stave.Stave):
 
 def _tenth_rule(s : stave.Stave):
     """Éviter les marches d'harmonie"""
-    for starting_bar in s.barIter():
-        for following_bar in s.barIter():
-            pass
+    #TODO on ne gère pas le cas d'une modulation
+    for start in range(s.barNumber):
+        for end in range(start,s.barNumber):
+
+            motif = []
+            for i in range(start, end+1):
+                for n in s.getBar(i):
+                    motif.append(n)
+
+            motif_bar_number = end - start + 1
+            try:
+                following = []
+                for i in range(end+1, motif_bar_number + end + 1):
+                    for n in s.getBar(i):
+                        following.append(n)
+            except IndexError:
+                break
+            if not tools.matchSequence(motif, following, s.scale):
+                raise error.CompositionError("Sequence should be avoided",motif, following)
 
 
 def _eleventh_rule(cp : stave.Stave, cd : stave.Stave):
@@ -219,6 +255,33 @@ def _twelfth_rule(s : stave.Stave):
             if note not in relative:
                 raise error.CompositionError("It is forbidden to modulate outside the relative key",bar)
 
+def _thirteenth_rule(s : stave.Stave):
+    """Lorsque la dominante du ton se trouve à la partie inférieure - et qu'elle a été précédée de l'accord du premier degré - il faut éviter de la combiner avec une sixte car cela donnerait le sentiment d'un accord de quarte et sixte, ce qui est défendu. Si elle permet de sous-entendre un autre accord, on peut l'employer"""
+
+    current_scale = s.scale
+    previous_chord = None
+
+    for bar in s.barIter():
+        notes = [ scalenote.NoteScale(n) for n in bar ]
+        n1, n2 = notes
+        # change scale if necessary 
+        if notes not in current_scale:
+            current_scale = current_scale.relative(scale.Mode.m_harmonic)
+        # generate chord
+        first = chord.Chord(1,current_scale)
+        # is it the first degree chord?
+        if notes in first:
+            previous_chord = notes
+            continue
+        if previous_chord is not None:
+            # is it the dominant in the bass and an interval of sixth?
+            low, high = n1,n2 if n1 < n2 else n2, n1
+            if low.isDominant and low.note.isInterval(6).With(high):
+                raise error.CompositionError("It is forbidden to use a tonic chord followed by a dominant at the bass and a sixth with the dominant",previous_chord, bar)
+
+            # clean-up
+            previous_chord = None
+
 
 def _fourteenth_rule(s : stave.Stave):
     """Pour la fausse relation de triton, la règle est la même qu'en harmonie : la fausse relation de triton est défendue."""
@@ -233,6 +296,7 @@ def _fifteenth_rule(s : stave.Stave):
     min = pitch.higherDegree()
     max = pitch.lowerDegree()
     for n in s:
+        n = n.pitch
         if n.intervalWith(min) > max.intervalWith(min):
             max = n
         if n.intervalWith(max) < min.interval(max):
@@ -337,6 +401,50 @@ def _twentysecond_rule(cp : stave.Stave, cf : stave.Stave):
         raise error.CompositionError("The before last interval must be a 6th major",before_last_bar)
     elif not cp_above and not cfn.isQualifiedInterval((3,"minor")):
         raise error.CompositionError("The before last interval must be a 3rd minor",before_last_bar)
+
+def _baron_1(s: stave.Stave):
+    """La première et la dernière mesure sont obligatoirement harmonisées par l'accord de tonique à l'état fondamental"""
+    chord = chord.Chord(1,s.scale)
+    for bar in (s.getBar(0), s.getBar(-1)):
+        if not chord.isInversion([*bar],0):
+            raise error.CompositionError("First and last bar must be at the root positionof the chord of the first degree",bar)
+
+def _baron_2(s: stave.Stave):
+    """On évitera de rester dans un ambitus trop restreint (comme une quarte, par exemple), d'effectuer des retours mélodiques sur la même note, ainsi que des répétitions mélodiques rappelant les marches harmoniques"""
+    # ambitus
+    min = max = s[0].pitch
+    for n in s:
+        p = n.pitch
+        if p.intervalWith(min) > max.intervalWith(min):
+            max = p
+        if p.intervalWith(min) < max.intervalWith(min):
+            min = p
+
+    error.warn(f"The ambitus of your counterpoint is {max.intervalWith(min)}. Do not stay in a too tiny ambitus (like a fourth)")
+       
+    # repetition of a same note
+    values = {}
+    for n in s:
+        p = n.pitch
+        nb = values.setdefault(p,0)
+        nb += 1
+        values[p] = nb
+
+    error.warn(f"Do not repeat too much the same notes.",values)
+
+    # sequence
+    _tenth_rule(s)
+
+def _baron_3(s: stave.Stave):
+    """On évitera, autant que possible, toute formule arpégée"""
+    try:
+        for i in range(len(s.notes)):
+            l = [ s.notes[j] for j in range(i,i+4) ]
+            if Chord.isFullChord(l,s.scale):
+                error.warn("You should avoid every arpeggio",l)
+    except IndexError:
+        # end of the list
+        return
 
 
 
