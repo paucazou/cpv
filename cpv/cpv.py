@@ -14,7 +14,7 @@ def get_rules(lib):
     in the dict
     """
     return {
-            int(elt[5]) : getattr(lib, elt)
+            int(elt[5:]) : getattr(lib, elt)
             for elt in dir(lib)
             if "rule_" in elt
             }
@@ -63,14 +63,22 @@ def cp_2_note_vs_note(file: str, not_followed_rules=[],only_one=False) -> bool:
     If only_one is set, the file must contain
     only one cantus firmus and one counterpoint
     """
+
+    # rule that checks that every part is present is disabled
+    # if only one counterpoint is expected
+    if only_one:
+        not_followed_rules.append(2)
+    
     lib = cp2_note_against_note
     rules =  get_rules(lib)
     rules = exclude_rules(rules,not_followed_rules)
 
+
     data = stave.Stave.fromFile(file)
     # rules application...
-    for rule in rules:
-        rule(data,only_one)
+    for i,rule in rules.items():
+        print(f"Checking rule {i}...")
+        rule(data)
 
     return True
 

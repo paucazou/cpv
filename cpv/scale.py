@@ -104,10 +104,12 @@ class Scale:
         return i == self.notes.index(bnote)  + 1
 
 for i, name in enumerate(("Tonic", "Supertonic","Mediant","Subdominant","Dominant","Submediant","Leading")):
-    def __function(self, note):
-        return self.isDegree(note, i)
+    def create_func(i):
+        def __function(self, note):
+            return self.isDegree(note, i+1)
+        return __function
 
-    setattr(Scale,f'is{name}',__function)
+    setattr(Scale,f'is{name}',create_func(i))
 
 
         

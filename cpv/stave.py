@@ -17,6 +17,7 @@ class Stave:
         self.title = name
         self.keynote = keynote
         self.mode = mode
+        self.scale = scale.Scale(keynote,mode)
 
     @staticmethod
     def fromString(string: str):
@@ -71,12 +72,12 @@ class Stave:
 
 
         values = values[2:]
-        list_of_staves = [Stave(rythm,breve_value,keynote,mode)]
+        list_of_staves = [Stave(rythm,breve_value,keynote=keynote,mode=mode)]
         current = list_of_staves[0]
         for val in values:
             if val[0] == '*':
                 if len(current._stave) != 0:
-                    list_of_staves.append(Stave(rythm,breve_value,keynote,mode))
+                    list_of_staves.append(Stave(rythm,breve_value,keynote=keynote,mode=mode))
                     current=list_of_staves[-1]
 
                 current.title = val[2:]
@@ -183,6 +184,14 @@ class Stave:
         with other, as in list.extend
         """
         self._stave.extend(other._stave)
+
+    def copy(self):
+        """Return a shallow copy of the stave"""
+        stave = Stave()
+        _stave_copy = self._stave.copy()
+        stave.__dict__ = self.__dict__.copy()
+        stave._stave = _stave_copy
+        return stave
 
     barNumber = property(_get_bar_number)
     lastFirstPos = property(_lastFirstPos)

@@ -5,6 +5,7 @@
 import functools
 import pitch
 import scale
+import util
 
 @functools.total_ordering
 class NoteScale:
@@ -15,7 +16,7 @@ class NoteScale:
         self.scale = scale
         self.note = note
 
-    def moveBy(self, i : int):
+    def moveBy(self, i : int): # TEST
         """Move the note by the number of intervals
         i. i can be negative to lower the pitch, or
         positive to find a higher note.
@@ -27,7 +28,7 @@ class NoteScale:
         except IndexError:
             raise ValueError(f"{self._note} not in {self.scale}")
 
-    def distanceWith(self, other) ->int:
+    def distanceWith(self, other) ->int: # TEST
         """Find the distance between self and other
         necessary to moveBy self to other
         and return it as a positive or a negative integer.
@@ -35,17 +36,21 @@ class NoteScale:
         If other is a higher pitch, the distance is positive,
         negative if other is lower
         """
+        assert other.scale == self.scale
+
         return other._pos - self._pos
 
-    def __eq__(self, other):
+    def __eq__(self, other): # TEST
         """True if other has the same note as other.
         Raises a ValueError if scales are different"""
         if self.scale != other.scale:
             raise ValueError("Scales are different")
         return self.note == other.note
 
-    def __lt__(self,other):
+    def __lt__(self,other): # TEST
         """True if self is lower than other"""
+        assert other.scale == self.scale
+
         return self._pos < other._pos
 
     def _set_pos(self, i):
@@ -55,8 +60,8 @@ class NoteScale:
             raise ValueError(f"{self._note} not in {self.scale}")
 
     def _set_note(self, note):
-        self._note = note
-        self._set_pos(self.scale.index(note))
+        self._note = util.to_pitch(note)
+        self._set_pos(self.scale.notes.index(note))
 
     def _get_pos(self):
         return self._pos
@@ -68,15 +73,18 @@ class NoteScale:
     pos = property(_get_pos)
 
     @staticmethod
-    def moveSequence(i : int, seq):
+    def moveSequence(i : int, seq): # TEST
         """Apply moveBy to every NoteScale in
-        seq and return a new sequence"""
-        return [elt.moveBy(i) for elt in seq]
+        seq """
+        for elt in seq:
+            elt.moveBy(i)
 
-for i, name in enumerate(("Tonic","Supertonic","Mediant","Subdominant","Dominant","Submediant","Leading")):
-    def __function(self):
-        return getattr(self.scale,f"is{name}")(self.note)
-    setattr(NoteScale,f"is_{name}",__function)
-    setattr(NoteScale,f"is{name}",property(f"is_{name}"))
+for i, name in enumerate(("Tonic","Supertonic","Mediant","Subdominant","Dominant","Submediant","Leading")): # TEST
+    def __create__function(name):
+        def __function(self):
+            return getattr(self.scale,f"is{name}")(self.note)
+        return __function
+    setattr(NoteScale,f"is_{name}",__create__function(name))
+    setattr(NoteScale,f"is{name}",property(getattr(NoteScale,f"is_{name}")))
 
 

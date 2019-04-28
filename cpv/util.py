@@ -16,3 +16,16 @@ def list_finder(l, res, fall_back=None, fun=lambda x: x):
     if fall_back is not None:
         return fall_back
     raise ValueError("No value matchs the result expected")
+
+def to_pitch(n):
+    """Transforms a note into a pitch
+    """
+    try:
+        return n.pitch
+    except AttributeError:
+        try:
+            return to_pitch(n.note)
+        except AttributeError:
+            return n
+
+    

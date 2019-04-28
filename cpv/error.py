@@ -14,6 +14,6 @@ class CompositionWarning(UserWarning):
 def warn(*args,**kwargs):
     def _fmt_msg(msg, *elts):
         return msg + f"At: {elts}"
-    ms = _fmt_msg(*args,**kwargs)
+    msg = _fmt_msg(*args,**kwargs)
     warnings.warn(msg,CompositionWarning)
 
