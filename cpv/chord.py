@@ -5,6 +5,7 @@
 import note
 import scale
 import scalenote
+import util
 
 class Chord:
     """A chord"""
@@ -15,7 +16,7 @@ class Chord:
         self.isSeventh = seventh
         self.__generate_notes()
 
-    def __contains__(self, note):
+    def __contains__(self, note): # TEST
         """True if note is in chord.
         note can be a Pitch, a Note or a NoteScale 
         or a tuple. In this case, return True
@@ -27,10 +28,17 @@ class Chord:
             else:
                 return self.__contains__(note[0])
 
-        except ValueError: # not iterable
-            note = self.__extract_note(note)
+        except (ValueError,TypeError): # not iterable
+            note = util.to_pitch(note)
 
         return note in self.notes
+
+    def __eq__(self,other):
+        """True if other is equal to self"""
+        return (self.degree == other.degree and
+                self.scale == other.scale and
+                self.isSeventh == other.isSeventh and
+                self.notes == other.notes)
 
     def __generate_notes(self):
         """Generates the notes which can figure in the chord"""
@@ -50,22 +58,22 @@ class Chord:
 
 
 
-    def isPosition(self, note, i:int):
+    def isPosition(self, note, i:int): # TEST
         """True if note is in position i
         in the chord.
         i can be 1, 3, 5 or 7
         """
         assert i in (1,3,5,7)
         try:
-            return i == findPosition(note) 
+            return i == self.findPosition(note) 
         except ValueError:
             return False
 
-    def findPosition(self, note) -> int:
+    def findPosition(self, note) -> int: # TEST
         """Find if the note is the root,
         the third, the fifth or the seventh
         raise ValueError if it can't be found"""
-        note = self.__extract_note(note)
+        note = util.to_pitch(note)
         try:
             index = self.notes.index(note)
         except ValueError:
@@ -77,14 +85,14 @@ class Chord:
 
         return {0:1, 1:3, 2:5, 3:7}[index]
 
-    def isInversion(self, chord, i) -> bool:
+    def isInversion(self, chord, i) -> bool: # TEST
         """True if chord has the inversion i"""
         try:
             return self.findInversion(chord) == i
         except ValueError:
             return False
 
-    def findInversion(self,chord) -> int:
+    def findInversion(self,chord) -> int: # TEST
         """Find the inversion of the chord.
         0 : root position
         1 : first inversion
@@ -93,7 +101,7 @@ class Chord:
         Raise ValueError if chord is not a
         self chord
         """
-        chord = [self.__extract_note(n) for n in chord]
+        chord = [util.to_pitch(n) for n in chord]
         chord.sort(key=lambda x : x.value.step)
 
         # check that every note is in the chord
@@ -102,18 +110,6 @@ class Chord:
 
         bass = self.findPosition(chord[0])
         return { 1:0, 3:1, 5:2, 7:3}[bass]
-
-
-
-    @staticmethod
-    def __extract_note(n):
-        """Transforms a Note or a NoteScale
-        into a simple pitch"""
-        if isinstance(n,note.Note):
-            return n.pitch
-        if isinstance(n,scalenote.NoteScale):
-            return n.note.pitch
-        return n
 
     @staticmethod
     def findChord(notes,scale, seventh=False,best=False):
@@ -125,7 +121,7 @@ class Chord:
         which matches more the chord
         """
         chords = [ Chord(i,scale,seventh) for i in range(1,8) ]
-        notes = [ Chord.__extract_note(n) for n in notes ]
+        notes = [ util.to_pitch(n) for n in notes ]
 
         returned = [ c for c in chords if notes in c ]
         if best:
@@ -143,17 +139,17 @@ class Chord:
         """
         return bool(Chord.findChord(notes,scale,seventh))
 
-    def isFullChord(self,notes,scale,seventh=False) -> bool:
+    def isFullChord(self,notes) -> bool: #TEST
         """Given a sequence of notes, True if notes
         contains at least a root, a third, a fifth
-        and optionally a seventh.
+        and optionally a seventh. (if isSeventh is True)
         """
         pos = [1,3,5]
-        if seventh:
+        if self.isSeventh:
             pos.append(7)
 
         required = {n:False for n in pos}
-        notes = [ Chord.__extract_note(n) for n in notes]
+        notes = [ util.to_pitch(n) for n in notes]
         try:
             for n in notes:
                 required[self.findPosition(n)] = True
@@ -165,7 +161,9 @@ class Chord:
 
 
 for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")):
-    def __function(self,note):
-        return self.isPosition(note,i)
-    setattr(Chord,f"is{name}",__function)
+    def __generate_func(i):
+        def __function(self,note):
+            return self.isPosition(note,i)
+        return __function
+    setattr(Chord,f"is{name}",__generate_func(i))
 

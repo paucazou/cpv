@@ -61,7 +61,7 @@ class NoteScale:
 
     def _set_note(self, note):
         self._note = util.to_pitch(note)
-        self._set_pos(self.scale.notes.index(note))
+        self._set_pos(self.scale.notes.index(self._note))
 
     def _get_pos(self):
         return self._pos

@@ -4,6 +4,7 @@
 
 import enum
 import pitch
+import util
 
 class Mode(enum.Enum):
     """Represents the mode of a scale"""
@@ -58,7 +59,7 @@ class Scale:
         # is iterable ?
         try:
             for note in arg:
-                if note not in self.notes:
+                if util.to_pitch(note) not in self.notes:
                     return False
             return True
         except TypeError:
