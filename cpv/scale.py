@@ -49,7 +49,7 @@ class Scale:
                 absolute_degree += 1
 
     def __repr__(self):
-        return f"Scale<{self.mode}>({self.keynote})"
+        return f"Scale<{self.mode.name}>({self.keynote})"
 
     def __eq__(self, other):
         return self.mode == other.mode and self.notes == other.notes

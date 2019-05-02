@@ -297,7 +297,6 @@ def rule_10(s : stave.Stave):
 
 @__cp_cf
 def rule_11(cp : stave.Stave, cd : stave.Stave):
-    # BUG
     """Les croisements sont tolérés, employés avec une grande réserve"""
     cp_high_part = None
 
@@ -308,17 +307,20 @@ def rule_11(cp : stave.Stave, cd : stave.Stave):
 
         cdn, cpn = cd_n[0], cp_n[0]
 
-        if cp_n.pos is None:
+        if cp_high_part is None:
             cp_high_part = cpn.pitch.value.semitone > cdn.pitch.value.semitone if cpn.pitch.value.semitone != cdn.pitch.value.semitone else None
         else:
             if cp_high_part is True:
                 if cdn.pitch.value.semitone > cpn.pitch.value.semitone:
-                    error.warn("The melodies intersect",cp_n,cd_n)
-                cp_high_part = False
+                    error.warn("The melodies intersect: cantus firmus is now over the counterpoint",cp_n,cd_n)
+                    cp_high_part = False
+            elif cp_high_part is False:
+                if cpn.pitch.value.semitone > cdn.pitch.value.semitone:
+                    error.warn("The melodies intersect: counterpoint is now over cantus firmus",cp_n,cd_n)
+                    cp_high_part = True
+
             else:
-                if cpn.pitch.value.semitone < cdn.pitch.value.semitone:
-                    error.warn("The melodies intersect",cp_n,cd_n)
-                cp_high_part = True
+                assert cp_high_part is not None
 
 @__counterpoint_only
 def rule_12(s : stave.Stave):
@@ -507,16 +509,20 @@ def rule_23(s: stave.Stave):
 def rule_24(s: stave.Stave):
     """On évitera de rester dans un ambitus trop restreint (comme une quarte, par exemple), d'effectuer des retours mélodiques sur la même note, ainsi que des répétitions mélodiques rappelant les marches harmoniques"""
     # ambitus
-    min = max = s[0].pitch
-    # BUG
+    min = max = None
     for n in s:
         p = n.pitch
-        if p.intervalWith(min) > max.intervalWith(min):
-            max = p
-        if p.intervalWith(min) < max.intervalWith(min):
+        if min is None:
+            min = max = p
+        elif p.value.step < min.value.step:
             min = p
+        elif p.value.step > max.value.step:
+            max = p
 
-    error.warn(f"The ambitus of your counterpoint is {max.intervalWith(min)}. Do not stay in a too tiny ambitus (like a fourth)",s)
+    ambitus = max.intervalWith(min)
+
+    if ambitus <= 4:
+        error.warn(f"The ambitus of your counterpoint is {max.intervalWith(min)}. Do not stay in a too tiny ambitus (like a fourth)",s)
        
     # repetition of a same note
     values = {}

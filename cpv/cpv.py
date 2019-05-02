@@ -3,6 +3,7 @@
 #Deus, in adjutorium meum intende
 
 """Main module"""
+from collections import OrderedDict
 import cp2_note_against_note
 import note
 import stave
@@ -13,11 +14,12 @@ def get_rules(lib):
     is an integer which becomes the key
     in the dict
     """
-    return {
+    rules = {
             int(elt[5:]) : getattr(lib, elt)
             for elt in dir(lib)
             if "rule_" in elt
             }
+    return OrderedDict(sorted(rules.items()))
 
 def exclude_rules(rules, not_followed_rules):
     """Exlude very rule which is

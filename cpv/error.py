@@ -5,7 +5,7 @@
 import warnings
 class CompositionError(Exception):
     def __init__(self,msg: str, *elts):
-        self.msg = msg + f"At: {elts}"
+        self.msg = msg + f" :: {elts}"
 
 class CompositionWarning(UserWarning):
     def __init__(self,msg: str):
@@ -13,7 +13,7 @@ class CompositionWarning(UserWarning):
 
 def warn(*args,**kwargs):
     def _fmt_msg(msg, *elts):
-        return msg + f"At: {elts}"
+        return msg + f" :: {elts}"
     msg = _fmt_msg(*args,**kwargs)
     warnings.warn(msg,CompositionWarning)
 
