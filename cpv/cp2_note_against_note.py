@@ -270,6 +270,9 @@ def rule_9(s : stave.Stave):
 
 @__mix_cp_cf
 def rule_10(s : stave.Stave):
+    return _Rule_10(s)
+
+def _Rule_10(s : stave.Stave):
     """Éviter les marches d'harmonie"""
     #TODO on ne gère pas le cas d'une modulation
     for start in range(s.barNumber):
@@ -289,7 +292,9 @@ def rule_10(s : stave.Stave):
             except IndexError:
                 break
             if tools.matchSequence(motif, following, s.scale):
-                if len(motif) == 2:
+                if len(motif) == 1:
+                    continue
+                if len(motif) <= 2:
                     error.warn("Sequence should be avoided",motif, following)
                 else:
                     raise error.CompositionError("Sequence should be avoided",motif, following)
@@ -535,7 +540,7 @@ def rule_24(s: stave.Stave):
     error.warn(f"Do not repeat too much the same notes.",values)
 
     # sequence
-    # TODO la règle dix est insuffisante: on parle ici de répétitions mélodiques, et non harmoniques
+    _Rule_10(s)
 
 @__counterpoint_only
 def rule_25(s: stave.Stave):
