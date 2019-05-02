@@ -16,6 +16,9 @@ class NoteScale:
         self.scale = scale
         self.note = note
 
+    def __repr__(self):
+        return f"NoteScale<{self.scale}>({self.note})"
+
     def moveBy(self, i : int): # TEST
         """Move the note by the number of intervals
         i. i can be negative to lower the pitch, or

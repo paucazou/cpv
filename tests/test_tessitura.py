@@ -14,6 +14,8 @@ def test_contains():
     assert(P.Bb5 not in soprano)
     assert(P.Bs3 in soprano)
     assert(P.B3 not in soprano)
+    assert((P.C5,P.B4) in soprano)
+    assert not ((P.C0,P.C5) in soprano)
 
 def test_is_condoned():
     assert(soprano.isCondoned(P.Bb5))

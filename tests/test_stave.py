@@ -63,6 +63,17 @@ def test_get_bar():
     bar2 = bar2.elts
     assert(len(bar2) == 1)
     assert(bar2[0] is s._stave[1])
+    assert s.getBar(-1)[0] == s.getBar(2)[0]
+
+def test_copy():
+    s = stave.Stave()
+    copy = s.copy()
+
+    assert s is not copy
+    assert s._stave is not copy._stave
+
+    s._stave.append('ok')
+    assert len(s._stave) != len(copy._stave)
 
 
 

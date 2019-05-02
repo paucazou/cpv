@@ -13,7 +13,7 @@ class Chord:
         """Creates the chord of the degree required"""
         self.degree = degree
         self.scale = scale
-        self.isSeventh = seventh
+        self.is_seventh = seventh
         self.__generate_notes()
 
     def __contains__(self, note): # TEST
@@ -37,7 +37,7 @@ class Chord:
         """True if other is equal to self"""
         return (self.degree == other.degree and
                 self.scale == other.scale and
-                self.isSeventh == other.isSeventh and
+                self.is_seventh == other.is_seventh and
                 self.notes == other.notes)
 
     def __generate_notes(self):
@@ -47,7 +47,7 @@ class Chord:
             degrees = []
             while d < len(self.scale.notes):
                 degrees += [d,d+2,d+4]
-                if self.isSeventh:
+                if self.is_seventh:
                     degrees.append(d+6)
                 d+=7
             return degrees
@@ -79,7 +79,7 @@ class Chord:
         except ValueError:
             raise ValueError("Note not found in chord")
 
-        j = 3 if self.isSeventh else 2
+        j = 3 if self.is_seventh else 2
         while index > j:
             index -= (j+1)
 
@@ -112,7 +112,7 @@ class Chord:
         return { 1:0, 3:1, 5:2, 7:3}[bass]
 
     @staticmethod
-    def findChord(notes,scale, seventh=False,best=False):
+    def findChord(notes,scale, seventh=False,best=False): # TEST
         """Given a sequence of notes,
         find the chord and return it.
         If more than one chord can be found,
@@ -126,14 +126,14 @@ class Chord:
         returned = [ c for c in chords if notes in c ]
         if best:
             for c in chords:
-                if c.isFullChord(notes, scales,seventh):
+                if c.isFullChord(notes):
                     return c
 
         return returned
 
 
     @staticmethod
-    def isChord(notes,scale,seventh=False) -> bool:
+    def isChord(notes,scale,seventh=False) -> bool: # TEST
         """Is the sequence of notes
         a chord?
         """
@@ -142,10 +142,10 @@ class Chord:
     def isFullChord(self,notes) -> bool: #TEST
         """Given a sequence of notes, True if notes
         contains at least a root, a third, a fifth
-        and optionally a seventh. (if isSeventh is True)
+        and optionally a seventh. (if is_seventh is True)
         """
         pos = [1,3,5]
-        if self.isSeventh:
+        if self.is_seventh:
             pos.append(7)
 
         required = {n:False for n in pos}
@@ -160,7 +160,7 @@ class Chord:
 
 
 
-for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")):
+for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")): # TEST
     def __generate_func(i):
         def __function(self,note):
             return self.isPosition(note,i)

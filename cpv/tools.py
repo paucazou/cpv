@@ -8,8 +8,7 @@ def matchSequence(motif, part, scale) -> bool:
     motif_ns = [ NS(scale,n.pitch) for n in motif]
     part_ns = [ NS(scale,n.pitch) for n in part]
 
-    distance = motif_ns[0].distanceWith(part_ns[0])
+    distance = part_ns[0].distanceWith(motif_ns[0])
     NS.moveSequence(distance, part_ns)
-    from IPython import embed;embed()
     return motif_ns == part_ns
 

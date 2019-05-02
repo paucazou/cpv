@@ -6,6 +6,7 @@ Contains a class to analyze motion types
 """
 import enum
 import pitch
+import util
 
 P = pitch.Pitch
 
@@ -19,18 +20,25 @@ class MotionType(enum.Flag):
     def match(self, *seq) -> bool:
         """True if seq, an iterable of four Pitch,
         has self motion"""
-        assert(len(seq) == 4)
         return self.motion(*seq) == self
     
     @classmethod
-    def motion(cls, *seq):
+    def motion(cls, *seq): # TEST
         """Find the motion of seq.
         seq is a sequence of four Pitch: the first two
         is the first harmonic interval, the second is the 
-        second interval.The first, the higher
+        second interval.The first, the higher.
+        It is possible to pass a sequence directly.
         """
-        assert(len(seq) == 4)
+        __sort = lambda x,y : (x, y) if x.value.step < y.value.step else (y,x)
+        if len(seq) != 4:
+            seq = seq[0]
+        assert len(seq) == 4
+
+        seq = [util.to_pitch(elt) for elt in seq]
         h1, l1, h2, l2 = seq
+        h1,l1 = __sort(h1,l1)
+        h2,l2 = __sort(h2,l2)
 
         if h1 == h2: # oblique or direct
             return cls.direct if l1 == l2 else cls.oblique

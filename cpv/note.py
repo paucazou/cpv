@@ -76,7 +76,7 @@ class Note:
         self.duration = duration
 
     def __repr__(self):
-        return f"Duration: {self.duration}{self.pitch.name}. Stave pos: {self.pos}"
+        return f"{self.pitch.name} {self.duration} {self.pos}"
 
     def _get_last_pos(self):
         """Return the last position

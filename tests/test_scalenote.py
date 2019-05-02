@@ -56,9 +56,14 @@ def test_lt():
 def test_moveSequence():
     def func(string):
         return [ NS(scale0,P[val]) for val in string.split() ]
-    seq = func("A4 B4 D5 C5 C4")
+    base = "A4 B4 D5 C5 C4"
+    seq = func(base)
     NS.moveSequence(1,seq)
     assert seq == func("B4 C5 E5 D5 D4")
+
+    seq = func(base)
+    NS.moveSequence(-1,seq)
+    assert seq == func("G4 A4 C5 B4 B3")
 
 def test_functions_chord():
     assert NS(scale0, P.C4).isTonic

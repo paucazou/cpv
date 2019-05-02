@@ -18,6 +18,7 @@ P = pitch.Pitch
 scale0 = scale.Scale(P.C0, scale.Mode.M)
 chord0 = Chord(1,scale0)
 chord07 = Chord(1,scale0,seventh=True)
+chord1 = Chord(6,scale0)
 
 generate_notes=lambda s : [P[val] for val in s.split()]
 
@@ -78,12 +79,22 @@ def test_find_inversion():
         func(outside,0)
 
 def test_find_chord():
-    def func(r,n,s,**kw):
-        assert Chord.findChord(n,s,**kw) == r
+    def func(r,n,**kw):
+        assert Chord.findChord(n,scale0,**kw) == r
+
+    func([chord0,chord1],generate_notes("C4 E4"))
+    func(chord07,generate_notes("C4 G4 E4 B3"),seventh=True,best=True)
 
 
 def test_is_chord():
-    pass
+    def func(n,b=True):
+        assert Chord.isChord(n,scale0) is b
+    def func7(n,b=True):
+        assert Chord.isChord(n,scale0,seventh=True) is b
+
+    func(generate_notes("C4 D4"),b=False)
+    func(generate_notes("C4 G5"))
+    func7(generate_notes("B3 C4"))
 
 def test_is_full_chord():
     def func7(n,b=True,c=chord07):
@@ -95,6 +106,12 @@ def test_is_full_chord():
     func7(generate_notes("C4 C3 E4 G4 B3"))
     func(generate_notes("C3 E4 G4 B3"),False)
     func(generate_notes("C3 E4"),False)
+
+def test_positions():
+    assert chord07.isRoot(P.C4)
+    assert chord07.isThird(P.E5)
+    assert chord07.isFifth(P.G1)
+    assert chord07.isSeventh(P.B3)
 
 
 

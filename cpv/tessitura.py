@@ -3,6 +3,7 @@
 #Deus, in adjutorium meum intende
 
 import pitch
+import util
 
 class Tessitura:
     """Represents a tessitura.
@@ -15,17 +16,35 @@ class Tessitura:
         self.max = max
         self.condoned = condoned
 
-    def __contains__(self, n: pitch.Pitch) -> bool:
-        """True if n is
+    def __contains__(self, arg) -> bool: #TEST
+        """True if arg is
         above min and beyond max
         condoned are not used here
+        arg may be an iterable
         """
-        return self.min.value.semitone <= n.value.semitone <= self.max.value.semitone
 
-    def isCondoned(self, n: pitch.Pitch) -> bool:
+        try:
+            for n in arg:
+                if n not in self:
+                    return False
+                return True
+        except TypeError:
+            n = util.to_pitch(arg)
+            return self.min.value.semitone <= n.value.semitone <= self.max.value.semitone
+
+    def isCondoned(self, n: pitch.Pitch) -> bool: # TEST
         """True if in the tessitura or
         in condoned notes"""
+        n = util.to_pitch(n)
         return self.__contains__(n) or n in self.condoned
+
+    def areCondoned(self, args) -> bool:
+        """Same as condoned, with
+        an iterable as argument"""
+        for elt in args:
+            if not elt in self.isCondoned(elt):
+                return False
+        return True
 
 
 p = pitch.Pitch

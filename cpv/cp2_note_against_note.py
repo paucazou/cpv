@@ -9,6 +9,7 @@ import chord
 import error
 import motion
 import note
+import pitch
 import scale
 import scalenote
 import stave
@@ -16,13 +17,13 @@ import tessitura
 import tools
 import util
 
-_semitone = lambda x : x.value.semitone
+_semitone = lambda x : util.to_pitch(x).value.semitone
 
 def get_matching_cf(s,data):
     """For a stave s, with a title
     like 'cp1', return the matching
     cantus firmus"""
-    return next((x for x in data if x.title == f'cf{s.title[-1]}'),
+    return next((x for x in data if x.title == f'{s.title[0]}cf'),
             next((y for y in data if y.title == "cantus firmus")))
 
 
@@ -58,6 +59,8 @@ def __cp_cf(func):
     """
     def __wrapper(data):
         for s in data:
+            if not ('cp' in s.title):
+                continue
             cf = get_matching_cf(s,data)
             func(s, cf)
     
@@ -116,12 +119,12 @@ def _first_rule(s : stave.Stave):
         if bar.elts[0].duration != bar.elts[1].duration != note.Duration.BREVE:
             raise error.CompositionError("The notes are not breves",bar)
 
-def rule_2(staves: list, c: stave.Stave):
+def rule_2(staves: list):
     """
     2 - Le chant donné servira trois fois de partie inférieure et trois de partie supérieure. Les trois parties combinées sur le chant donné devront être entièrement différentes - de même pour celles formées sur le chant donné.
     """
     #is every part present?
-    parts = {f"{n}cp":False for n in range(7)}
+    parts = {f"{n}cp":False for n in range(1,7)}
     for s in staves:
         parts[s.title] = True
     for val in parts.values():
@@ -129,10 +132,10 @@ def rule_2(staves: list, c: stave.Stave):
             raise error.CompositionError("Six parts are expected in the counterpoint")
 
     # is every part different?
-    for cp in parts:
-        if not ('cp' in cp.title):
+    for cp_name, cp in parts.items():
+        if not ('cp' in cp_name):
             continue
-        for other_cp in parts:
+        for other_cp in parts.values():
             if cp is other_cp:
                 continue
             if cp == other_cp:
@@ -145,23 +148,20 @@ def rule_3(cf : stave.Stave, base_cf : stave.Stave):
     3 - Le chant donné (ou plain-chant) peut être transposé toutes les fois qu'il ne dépassera pas l'étendue ordinaire, au grave ou à l'aigu, de la voix pour laquelle on le transposera.
     """
     # check the tessitura
+    T = tessitura
 
-    valid_tessitura = True
+    valid_tessitura = False
     for tess in (T.soprano,T.tenor,T.bass,T.alto):
-        valid_note = True
-        for n in cf:
-            if n not in tess:
-                valid_note = False
-
-        if not valid_note:
-            valid_tessitura = False
+        if cf in tess:
+            valid_tessitura = True
+            break
 
     if not valid_tessitura:
-        raise error.CompositionError("The cantus firmus transposed is too high or too low")
+        raise error.CompositionError("The cantus firmus transposed is too high or too low",cf)
     
     # check the transposition is correct
     def _semitone_sum(n,n2):
-        return n.pitch.semitone - n2.pitch.semitone
+        return n.pitch.value.semitone - n2.pitch.value.semitone
 
     for i, (b1, b2) in enumerate(zip(cf,base_cf)):
         if i + 1 == len(cf):
@@ -175,22 +175,22 @@ def rule_3(cf : stave.Stave, base_cf : stave.Stave):
 def rule_4(s: stave.Stave):
     """On doit commencer par une consonance parfaite (unisson, quinte ou douzième, octave ou quinzième) et finir par l'octave ou l'unisson
     """
-    def nb_error(poss, posi):
+    def nb_error(poss, posi,notes):
         if len(notes) != 2:
             raise error.CompositionError(f"Two notes are expected at the {poss} of the track",s.getBar(posi))
 
     # start
     notes = s.atFirstPos(0)
-    nb_error("start",0)
+    nb_error("start",0,notes)
 
     if not notes[0].pitch.isPerfectlyConsonantWith(notes[1].pitch):
         raise error.CompositionError("The first two notes are not fully consonant.",s.getBar(0))
 
     # end
     notes = s.atFirstPos(s.lastFirstPos)
-    nb_error("end",s.getBar(s.barNumber-1))
+    nb_error("end",s.getBar(s.barNumber-1),notes)
 
-    if not notes[0].pitch.isInterval(1,True).With(notes[1].pitch):
+    if not notes[0].pitch.isInterval(1,8,True).With(notes[1].pitch):
         raise error.CompositionError("The last interval must be an unison or an octave.",s.getBar(s.barNumber-1))
 
 @__mix_cp_cf
@@ -215,9 +215,9 @@ def rule_6(s : stave.Stave):
     previous = None
     for elt in s.barIter():
         note = elt[0]
-        if previous is not None and previous[0].isChromaticInflectionWith(note):
+        if previous is not None and previous[0].pitch.isChromaticInflectionWith(note.pitch):
             raise error.CompositionError("Chromatic inflection is forbidden",previous,bar)
-        previous = bar
+        previous = elt 
 
 @__mix_cp_cf
 def rule_7(s : stave.Stave):
@@ -225,14 +225,14 @@ def rule_7(s : stave.Stave):
     for bar in s.barIter():
         if len(bar) != 2:
             raise error.CompositionError("Two notes expected",bar)
-        f, s = bar[0].pitch, bar[1].pitch
-        if not f.isConsonantWith(s):
+        ft, sd = bar[0].pitch, bar[1].pitch
+        if not ft.isConsonantWith(sd):
             raise error.CompositionError("The notes must be consonant",bar)
 
 @__mix_cp_cf
 def rule_8(s : stave.Stave):
     """On ne doit pas entendre plus de trois tierces ou trois sixtes de suite"""
-    _6, _3 = 0
+    _6 = _3 = 0
     intervals = {3:0,6:0}
 
     for bar in s.barIter():
@@ -288,12 +288,16 @@ def rule_10(s : stave.Stave):
                         following.append(n)
             except IndexError:
                 break
-            if not tools.matchSequence(motif, following, s.scale):
-                raise error.CompositionError("Sequence should be avoided",motif, following)
+            if tools.matchSequence(motif, following, s.scale):
+                if len(motif) == 2:
+                    error.warn("Sequence should be avoided",motif, following)
+                else:
+                    raise error.CompositionError("Sequence should be avoided",motif, following)
 
 
 @__cp_cf
 def rule_11(cp : stave.Stave, cd : stave.Stave):
+    # BUG
     """Les croisements sont tolérés, employés avec une grande réserve"""
     cp_high_part = None
 
@@ -348,7 +352,7 @@ def rule_13(s : stave.Stave):
             continue
         if previous_chord is not None:
             # is it the dominant in the bass and an interval of sixth?
-            low, high = n1,n2 if n1 < n2 else n2, n1
+            low, high = n1,n2 if n1 < n2 else (n2, n1)
             if low.isDominant and low.note.isInterval(6).With(high):
                 raise error.CompositionError("It is forbidden to use a tonic chord followed by a dominant at the bass and a sixth with the dominant",previous_chord, bar)
 
@@ -368,26 +372,28 @@ def rule_14(s : stave.Stave):
 @__counterpoint_only
 def rule_15(s : stave.Stave):
     """Le contrepoint ne doit pas parcourir une étendue plus grande que la dixième et par exception la onzième."""
-    min = pitch.higherDegree()
-    max = pitch.lowerDegree()
+    min = max = None
     for n in s:
         n = n.pitch
+        if min == None:
+            min = max = n
+            continue
         if n.intervalWith(min) > max.intervalWith(min):
             max = n
-        if n.intervalWith(max) < min.interval(max):
+        if n.intervalWith(max) < min.intervalWith(max):
             min = n
 
     if max.intervalWith(min) == 11:
-        error.warn("The counterpoint can exceed the 11th by tolerance only.",*s.iterBar())
+        error.warn("The counterpoint can exceed the 11th by tolerance only.",*s.barIter())
     if max.intervalWith(min) > 11:
-        raise error.CompositionError("It is strictly forbidden to exceed the 11th.",*s.iterBar())
+        raise error.CompositionError("It is strictly forbidden to exceed the 11th.",*s.barIter())
 
 @__counterpoint_only
 def rule_16(s : stave.Stave):
     """Le mouvement conjoint est celui qui convient le mieux au style du Contrepoint rigoureux. Employer le mouvement disjoint très discrètement."""
     previous = None
     for bar in s.barIter():
-        if previous is not None and bar[0].intervalWith(previous[0]) != 2:
+        if previous is not None and bar[0].pitch.intervalWith(previous[0].pitch) > 2:
             error.warn("It is better to avoid disjunct motion",previous, bar)
         previous = bar
 
@@ -396,12 +402,12 @@ def rule_17(s : stave.Stave):
     """Les mouvements de quarte augmentée (triton), quinte dimininuée, de septième majeure et mineure sont défendus"""
     previous = None
     for bar in s.barIter():
-        if previous is not None and bar[0].isQualifiedInterval(
+        if previous is not None and bar[0].pitch.isQualifiedInterval(
                 (5,"diminished"),
                 (4,"augmented"),
                 (7,"minor"),
                 (7,"major")
-                ).With(previous[0]):
+                ).With(previous[0].pitch):
             raise error.CompositionError("Melodic motion can't be a 4th augmented, 5th diminished, 7th minor or major",previous, bar)
         previous = bar
 
@@ -416,14 +422,14 @@ def rule_18(s: stave.Stave):
 
     for bar in s.barIter():
         notes = [*bar]
-        notes.sort(key=lambda x : x.value.semitone)
+        notes.sort(key=lambda x : x.pitch.value.semitone)
         if previous_bar is not None:
-            movs[motion.MotionType.motion(previous_bar,*notes)] += 1
+            movs[motion.MotionType.motion(*previous_bar,*notes)] += 1
         previous_bar = [*notes]
 
 
-    error.warn(f"Number of contrary movements: {movs[motion.MotionType.direct]}; oblique movements: {movs[motion.MotionType.oblique]}; direct movements: {movs[motion.MotionType.direct]}")
-    error.warn("Prefer the contrary movement to the oblique, and the oblique to the direct")
+    error.warn(f"Number of contrary movements: {movs[motion.MotionType.contrary]}; oblique movements: {movs[motion.MotionType.oblique]}; direct movements: {movs[motion.MotionType.direct]}. ")
+    error.warn("Prefer the contrary movement to the oblique, and the oblique to the direct. ")
 
 @__mix_cp_cf
 def rule_19(s : stave.Stave):
@@ -436,7 +442,7 @@ def rule_19(s : stave.Stave):
             if interval == previous:
                 raise error.CompositionError("Two 5th or two 8ve in a row is forbidden",previous_bar, bar)
             # direct motion?
-            previous_notes = [*previous]
+            previous_notes = [*previous_bar]
             notes = [*bar]
             previous_notes.sort(key=_semitone)
             notes.sort(key=_semitone)
@@ -450,7 +456,7 @@ def rule_20(data, max_size = 20):
     """Prendre de préférence des chants donnés courts, en majeur et en mineur."""
     cd = next(x for x in data if x.title == "cantus firmus")
 
-    if len(s) > max_size:
+    if len(cd) > max_size:
         error.warn(f"Be careful to take shorts canti firmi. Recommanded size is {max_size}. This cantus firmus is {len(cd)}.",*s.barIter())
 
 @__mix_cp_cf
@@ -458,26 +464,30 @@ def rule_21(s : stave.Stave, ratio = 5/20):
     """Employer de préférence les consonances imparfaites"""
     bars = []
     for bar in s.barIter():
-        f, s = bar
-        if f.isPerfectlyConsonantWith(s):
+        ft, sd = [ util.to_pitch(n) for n in bar ]
+        if ft.isPerfectlyConsonantWith(sd):
             bars.append(bar)
 
-    if len(perfect) / len(s) > ratio:
+    if len(bars) / len(s) > ratio:
         error.warn("The number of perfect consonances is possibly higher than requested",*bars)
 
 @__cp_cf
 def rule_22(cp : stave.Stave, cf : stave.Stave):
     """À l'avant dernière mesure, on emploiera la sixte majeure lorsque le chant donné sera à la basse et la tierce mineure suivie de l'octave ou de l'unisson lorsqu'il sera à la partie supérieure"""
-    # is the cantus firmus at above or beyond?
+    # is the cantus firmus above or beyond?
+    cp_above = None
     for cpn, cfn in zip(cp.barIter(),cf.barIter()):
-        if cpn[0] != cfn[0]:
-            cp_above = cpn[0].value.step > cfn[0].value.step
+        cpn, cfn = [util.to_pitch(n[0]) for n in (cpn,cfn)]
+        if cpn != cfn:
+            cp_above = cpn.value.step > cfn.value.step
             break
+    assert cp_above is not None
     
     # check the before last one bar
-    cpn = cp.getBar(cp.barNumber-2)[0]
-    cfn = cf.getBar(cf.barNumber-2)[0]
-    cp.extend(cd)
+    cpn = util.to_pitch(cp.getBar(cp.barNumber-2)[0])
+    cfn = util.to_pitch(cf.getBar(cf.barNumber-2)[0])
+    cp = cp.copy()
+    cp.extend(cf)
     before_last_bar = cp.getBar(cp.barNumber-2)
 
     if cp_above and not cfn.isQualifiedInterval((6,"major")):
@@ -488,9 +498,9 @@ def rule_22(cp : stave.Stave, cf : stave.Stave):
 @__mix_cp_cf
 def rule_23(s: stave.Stave):
     """La première et la dernière mesure sont obligatoirement harmonisées par l'accord de tonique à l'état fondamental"""
-    chord = chord.Chord(1,s.scale)
+    c= chord.Chord(1,s.scale)
     for bar in (s.getBar(0), s.getBar(-1)):
-        if not chord.isInversion([*bar],0):
+        if not c.isInversion([*bar],0):
             raise error.CompositionError("First and last bar must be at the root positionof the chord of the first degree",bar)
 
 @__counterpoint_only
@@ -498,6 +508,7 @@ def rule_24(s: stave.Stave):
     """On évitera de rester dans un ambitus trop restreint (comme une quarte, par exemple), d'effectuer des retours mélodiques sur la même note, ainsi que des répétitions mélodiques rappelant les marches harmoniques"""
     # ambitus
     min = max = s[0].pitch
+    # BUG
     for n in s:
         p = n.pitch
         if p.intervalWith(min) > max.intervalWith(min):
@@ -505,7 +516,7 @@ def rule_24(s: stave.Stave):
         if p.intervalWith(min) < max.intervalWith(min):
             min = p
 
-    error.warn(f"The ambitus of your counterpoint is {max.intervalWith(min)}. Do not stay in a too tiny ambitus (like a fourth)")
+    error.warn(f"The ambitus of your counterpoint is {max.intervalWith(min)}. Do not stay in a too tiny ambitus (like a fourth)",s)
        
     # repetition of a same note
     values = {}
@@ -526,7 +537,8 @@ def rule_25(s: stave.Stave):
     try:
         for i in range(len(s.notes)):
             l = [ s.notes[j] for j in range(i,i+4) ]
-            if Chord.isFullChord(l,s.scale):
+            c = chord.Chord.findChord(l,s.scale,best=True)
+            if (not isinstance(c,list)) and c.isFullChord(l):
                 error.warn("You should avoid every arpeggio",l)
     except IndexError:
         # end of the list

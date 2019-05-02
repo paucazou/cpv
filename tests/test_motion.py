@@ -3,47 +3,29 @@
 #Deus, in adjutorium meum intende
 
 import sys
-import unittest.mock as mock
-sys.path.append('./cpv/')
-
+sys.path.append('./cpv')
 import motion
-mt = motion.MotionType
+import pitch
 
-class FakePitch:
-    def __init__(self,s : int):
-        self.value = mock.Mock()
-        self.value.semitone = s
+P = pitch.Pitch
+M = motion.MotionType
 
-    def __eq__(self,other):
-        return self.value.semitone == other.value.semitone
-
-C, D, E, F, G, A, B = [FakePitch(i*2) for i in range(7)]
+pitcher = lambda x : [ P[elt] for elt in x.split() ]
 
 def test_motion():
-    def func(a,b,c,d,result):
-        assert(mt.motion(a,b,c,d) == result)
+    def func(n,r):
+        assert motion.MotionType.motion(pitcher(n)) == r
 
-    func(C,A,C,A,mt.direct)
-    func(C,E,D,F,mt.direct)
-    func(F,B,C,A, mt.direct)
+    func("C4 C3 G3 E3",M.contrary)
+    func("G3 E3 C4 C3",M.contrary)
+    func("C4 G4 E4 G4",M.oblique)
+    func("C3 G3 C3 D3",M.oblique)
+    func("E3 G3 C3 E3",M.direct)
+    func("E3 G3 G3 B3",M.direct)
+    func("E3 G3 E3 G3",M.direct)
 
-    func(A,F,B,F, mt.oblique)
-    func(A,F,A,E, mt.oblique)
+    func("G3 E3 E3 G3",M.direct)
 
-    func(G,E, B,D, mt.contrary)
-    func(A,C, G,E, mt.contrary)
 
-def test_match():
-    def func(a,b,c,d, result):
-        assert(result.match(a,b,c,d))
-    func(C,A,C,A,mt.direct)
-    func(C,E,D,F,mt.direct)
-    func(F,B,C,A, mt.direct)
-
-    func(A,F,B,F, mt.oblique)
-    func(A,F,A,E, mt.oblique)
-
-    func(G,E, B,D, mt.contrary)
-    func(A,C, G,E, mt.contrary)
 
 

@@ -7,9 +7,25 @@ import note
 import pitch
 import scale
 
+
 class Stave:
     """Represents the stave
     """
+    class __bar:
+        def __init__(self,elts,pos,s):
+            self.elts = elts
+            self.pos = pos
+            self.stave = s
+
+        def __len__(self):
+            return len(self.elts)
+
+        def __getitem__(self,i):
+            return self.elts[i]
+        
+        def __repr__(self):
+            return f"Bar<{self.stave.title}:{self.pos}> {self.elts}"
+
     def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M):
         self._stave = []
         self.rythm = rythm
@@ -18,6 +34,9 @@ class Stave:
         self.keynote = keynote
         self.mode = mode
         self.scale = scale.Scale(keynote,mode)
+
+    def __repr__(self):
+        return f"Stave<{self.scale}>({self.title}) {self.rythm}/{self.breve_value} {self.notes}"
 
     @staticmethod
     def fromString(string: str):
@@ -112,7 +131,7 @@ class Stave:
         """
         return [ elt for elt in self._stave if elt.pos == i ]
 
-    def _lastFirstPos() -> float:
+    def _lastFirstPos(self) -> float:
         """Return the last starting position
         of a note in the stave.
         0 means either the first note is the last one,
@@ -153,26 +172,15 @@ class Stave:
         first one is 0
         raise IndexError if i >= barNumber
         """
-        class __bar:
-            def __init__(self,elts,pos,s):
-                self.elts = elts
-                self.pos = pos
-                self.stave = s
-
-            def __len__(self):
-                return len(self.elts)
-
-            def __getitem__(self,i):
-                return self.elts[i]
 
         if i < 0:
-            i = self.barNumber - i
+            i = self.barNumber + i
 
         if i >= self.barNumber:
             raise IndexError(f"Bar requested does not exist: {i}. Max is {self.barNumber}")
         first_pos = i*self.rythm
         last_pos = first_pos + self.rythm 
-        return __bar([ elt
+        return self.__bar([ elt
                 for elt in self._stave
                 if first_pos <= elt.pos < last_pos or first_pos < elt.last_pos < last_pos
                 ],
