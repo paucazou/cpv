@@ -82,7 +82,8 @@ def cp_2_note_vs_note(file: str, not_followed_rules=[],only_one=False) -> bool:
         rule(data)
 
     # clean up. If we don't, not_followed_rules will always keep the rules added
-    not_followed_rules.clear()
+    if isinstance(not_followed_rules,list):
+        not_followed_rules.clear()
 
     return True
 
