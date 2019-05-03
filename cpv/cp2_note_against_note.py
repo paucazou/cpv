@@ -84,7 +84,7 @@ def __cantus_firmus_only(func):
 
 
 
-def rule_1(parts: list):
+def oldRULE1(parts: list):
     """Wrapper of the first rule.
     Each part in parts is a Stave
     """
@@ -103,7 +103,8 @@ def rule_1(parts: list):
         _first_rule(s)
 
 
-def _first_rule(s : stave.Stave):
+@__mix_cp_cf
+def rule_1(s : stave.Stave):
     """
     s is the main stave
     1 - Le contrepoint se compose d'une partie en rondes combinée avec le Chant donné (en rondes)

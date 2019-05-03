@@ -25,10 +25,9 @@ def exclude_rules(rules, not_followed_rules):
     """Exlude very rule which is
     in not_followed_rules
     """
-    for rule in not_followed_rules:
-        del(rules[rule])
+    new_rules = OrderedDict([(i,r) for i, r in rules.items() if i not in not_followed_rules])
 
-    return rules
+    return new_rules
 
 
 
@@ -81,6 +80,9 @@ def cp_2_note_vs_note(file: str, not_followed_rules=[],only_one=False) -> bool:
     for i,rule in rules.items():
         print(f"Checking rule {i}...")
         rule(data)
+
+    # clean up. If we don't, not_followed_rules will always keep the rules added
+    not_followed_rules.clear()
 
     return True
 

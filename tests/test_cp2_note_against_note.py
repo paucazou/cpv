@@ -11,5 +11,4 @@ import stave
 
 def test_first_rule():
     stave_list= stave.Stave.fromFile("./tests/examples/1")
-    s = stave_list[0]
-    cp2_note_against_note._first_rule(s)
+    cp2_note_against_note.rule_1(stave_list)
