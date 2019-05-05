@@ -9,6 +9,7 @@ to compose a good cantus firmus"""
 import error
 import note
 import stave
+from scalenote import NoteScale as NS
 
 def rule_1(s: stave.Stave): # TEST
     """Length of about 8 - 16 notes"""
@@ -34,7 +35,13 @@ def rule_4(s: stave.Stave):
     """
     approach final tonic by step (usually re - do, sometimes ti - do
     """
-    pass
+    penultimate = NS(s.scale,s.notes[-2])
+    if not (penultimate.isSupertonic or penultimate.isLeading):
+            raise error.CompositionError("The penultimate note should be a re or a ti",penultimate)
+
+    last = NS(s.scale, s.notes[-1])
+    if abs(penultimate.distanceWith(last)) != 1:
+        raise error.CompositionError("The penultimate note should be at one step of the lst one",penultimate, last)
 
 def rule_5(s: stave.Stave):
     """
