@@ -10,6 +10,8 @@ sys.path.append('./cpv/')
 import cantus_firmus
 import error
 import note
+import scale
+import stave
 
 def test_rule_1():
     f = [ i for i in range(7) ]
@@ -35,4 +37,13 @@ def test_rule_2():
 
     no_errors = [FK(note.Duration.SEMIBREVE)] * 14
     cantus_firmus.rule_2(no_errors)
+
+def test_rule_3():
+    staves = stave.Stave.fromString("""4/4\nCM\n* first\nC4 4 0\nC3 4 4\n* second\nC5 4 0\nB2 4 4\n* last\nG4 4 0\nC3 4 4""")
+    cantus_firmus.rule_3(staves[0])
+
+    with pytest.raises(error.CompositionError):
+        cantus_firmus.rule_3(staves[1])
+    with pytest.raises(error.CompositionError):
+        cantus_firmus.rule_3(staves[2])
 

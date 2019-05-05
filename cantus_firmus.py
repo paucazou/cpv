@@ -15,7 +15,7 @@ def rule_1(s: stave.Stave): # TEST
     if not (8 <= len(s) <= 16):
         raise error.CompositionError("Length of the cantus firmus should be between 8 and 16.",s)
 
-def rule_2(s: stave.Stave):
+def rule_2(s: stave.Stave): # TEST
     """
     arhythmic (all whole notes; no long or short notes)
     """
@@ -27,7 +27,8 @@ def rule_3(s: stave.Stave):
     """
     begin and end on do
     """
-    pass
+    if not (s.scale.isTonic(s.notes[0].pitch) and s.scale.isTonic(s.notes[-1].pitch)):
+        raise error.CompositionError("The first and the last note must be a do",s[0],s[-1])
 
 def rule_4(s: stave.Stave):
     """
