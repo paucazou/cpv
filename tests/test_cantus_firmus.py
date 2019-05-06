@@ -65,6 +65,24 @@ def test_rule_4():
     raises_composition_error(lambda : cantus_firmus.rule_4(staves[2]))
     raises_composition_error(lambda : cantus_firmus.rule_4(staves[3]))
 
+def test_rule_7():
+    staves = stave.Stave.fromString("""4/4\nCM\n
+* correct
+C4 4 0
+D4 4 4
+E4 4 8
+D4 4 12
+C4 4 16
+* incorrect
+C4 4 0
+D4 4 4
+D4 4 8
+C4 4 12
+""")
+    cantus_firmus.rule_7(staves[0])
+    raises_composition_error(lambda : cantus_firmus.rule_7(staves[1]))
+
+
 
 
 

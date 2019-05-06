@@ -380,16 +380,9 @@ def rule_14(s : stave.Stave):
 @__counterpoint_only
 def rule_15(s : stave.Stave):
     """Le contrepoint ne doit pas parcourir une étendue plus grande que la dixième et par exception la onzième."""
-    min = max = None
-    for n in s:
-        n = n.pitch
-        if min == None:
-            min = max = n
-            continue
-        if n.intervalWith(min) > max.intervalWith(min):
-            max = n
-        if n.intervalWith(max) < min.intervalWith(max):
-            min = n
+    res = tools.min_max(s)
+    min = res.min
+    max = res.max
 
     if max.intervalWith(min) == 11:
         error.warn("The counterpoint can exceed the 11th by tolerance only.",*s.barIter())
