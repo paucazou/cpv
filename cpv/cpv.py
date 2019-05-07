@@ -5,6 +5,7 @@
 """Main module"""
 from collections import OrderedDict
 import cp2_note_against_note
+import cantus_firmus
 import note
 import stave
 
@@ -29,7 +30,13 @@ def exclude_rules(rules, not_followed_rules):
 
     return new_rules
 
-
+def cf(file : str, not_followed_rules=[]) -> bool:
+    """Takes a file with special syntax as main argument.
+    The second one is the list of rules no to be followed,
+    starting by 1
+    No title required.
+    """
+    return __rules_checker(file,not_followed_rules,cantus_firmus)
 
 
 def cp_2_note_vs_note(file: str, not_followed_rules=[],only_one=False) -> bool:
@@ -64,6 +71,7 @@ def cp_2_note_vs_note(file: str, not_followed_rules=[],only_one=False) -> bool:
     If only_one is set, the file must contain
     only one cantus firmus and one counterpoint
     """
+    not_followed_rules = list(not_followed_rules)
 
     # rule that checks that every part is present is disabled
     # if only one counterpoint is expected
@@ -71,20 +79,19 @@ def cp_2_note_vs_note(file: str, not_followed_rules=[],only_one=False) -> bool:
         not_followed_rules.append(2)
     
     lib = cp2_note_against_note
+    return __rules_checker(file,not_followed_rules,lib)
+
+
+def __rules_checker(file : str, not_followed_rules,lib) -> bool:
+    """Generic function"""
     rules =  get_rules(lib)
     rules = exclude_rules(rules,not_followed_rules)
-
 
     data = stave.Stave.fromFile(file)
     # rules application...
     for i,rule in rules.items():
         print(f"Checking rule {i}...")
         rule(data)
-
-    # clean up. If we don't, not_followed_rules will always keep the rules added
-    if isinstance(not_followed_rules,list):
-        not_followed_rules.clear()
-
     return True
 
 

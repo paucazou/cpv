@@ -13,12 +13,12 @@ class Note:
     class Duration(enum.Enum):
         """Represents the duration
         of the note"""
-        MAXIMA = 32
-        LONGA  = 16
-        BREVE  = 8
-        SEMIBREVE = 4
-        MINIM  = 2
-        CROTCHET = 1
+        MAXIMA = F(32)
+        LONGA  = F(16)
+        BREVE  = F(8)
+        SEMIBREVE = F(4)
+        MINIM  = F(2)
+        CROTCHET = F(1)
         QUAVER = F('1/2')
         SEMIQUAVER = F('1/4')
         DEMISEMIQUAVER = F('1/8')
