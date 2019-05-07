@@ -39,7 +39,7 @@ def test_rule_2():
     with pytest.raises(error.CompositionError):
         cantus_firmus.rule_2([errors])
 
-    no_errors = [FK(note.Duration.SEMIBREVE)] * 14
+    no_errors = [FK(note.Duration.SEMIBREVE.value)] * 14
     cantus_firmus.rule_2([no_errors])
 
 def test_rule_3():

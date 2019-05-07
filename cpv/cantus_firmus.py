@@ -29,9 +29,8 @@ def rule_2(s: stave.Stave): # TEST
     """
     arhythmic (all whole notes; no long or short notes)
     """
-    #from IPython import embed;embed()
     for n in s:
-        if n.duration != note.Duration.SEMIBREVE:
+        if n.duration != note.Duration.SEMIBREVE.value:
             raise error.CompositionError("Whole notes only are permitted",n)
 
 @__extract_data
