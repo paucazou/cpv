@@ -3,9 +3,11 @@
 #Deus, in adjutorium meum intende
 
 import enum
+import functools
 import collections
 import math
 
+@functools.total_ordering
 class pitch:
     def __init__(self,step,semitone):
         self.step = step
@@ -14,11 +16,19 @@ class pitch:
     def __repr__(self):
         return f'({self.step}, {self.semitone})'
 
+    def __lt__(self, other):
+        return self.semitone < other.semitone
+
+
+@functools.total_ordering
 @enum.unique
 class Pitch(enum.Enum):
     """Represents the pitch
     of a note
     Central C is C4"""
+
+    def __lt__(self,other):
+        return self.value < other.value
 
     def intervalWith(self, other, min=False):
         """Return the interval between self
@@ -74,6 +84,20 @@ class Pitch(enum.Enum):
     def isConsonantWith(self,other) -> bool:
         """True if other is consonant with self"""
         return self.isImperfectlyConsonantWith(other) or self.isPerfectlyConsonantWith(other)
+
+    def isMelodicConsonantWith(self,other) -> bool: # TEST
+        """True if self and other have a melodic consonance
+        """
+        return self.isQualifiedInterval(
+                (4,"perfect"),
+                (5,"perfect"),
+                (8,"perfect"),
+                (2,"minor"),
+                (2,"major"),
+                (3,"minor"),
+                (3,"major"),
+                (6,"minor"),
+                (6,"major")).With(other)
 
     def isInterval(self,*args):
         """This method must be used

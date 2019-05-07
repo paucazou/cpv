@@ -142,6 +142,24 @@ def test_find_frequency():
     func(p.C0, 16.35)
     func(p.Fs4, 369.99)
 
+def test_is_melodic_consonance_with():
+    P = p
+    def func(n1,n2,b=True):
+        assert n1.isMelodicConsonantWith(n2) is b
+
+    def funcf(n1,n2):
+        func(n1,n2,False)
+
+    func(P.C4,P.C5)
+    func(P.C4,P.G4)
+    func(P.C4,P.F4)
+    func(P.C4,P.D4)
+    func(P.C4,P.E4)
+    func(P.C4,P.A4)
+
+    funcf(P.C4,P.B4)
+    funcf(P.C4,P.Gb4)
+
 
 
 

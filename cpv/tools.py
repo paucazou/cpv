@@ -34,3 +34,12 @@ def min_max(s): # TEST
 
     return __min_max(min,max)
 
+
+def is_same_direction(n1,n2,n3) -> bool: # TEST
+    """
+    True if the melodic direction is the same
+    from n1 to n3
+    """
+    return n1 < n2 < n3 or n1 > n2 > n3
+
+

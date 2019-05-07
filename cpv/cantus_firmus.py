@@ -8,6 +8,7 @@ to compose a good cantus firmus"""
 
 import error
 import note
+import scale
 import stave
 import tools
 from scalenote import NoteScale as NS
@@ -59,7 +60,12 @@ def rule_5(s: stave.Stave):
     """
     all note-to-note progressions are melodic consonances
     """
-    pass
+    previous = None
+    for n in s.notes:
+        n = n.pitch
+        if previous is not None and (not previous.isMelodicConsonantWith(n)):
+            raise error.CompositionError("Melodic consonances only",previous,n)
+        previous = n
 
 @__extract_data
 def rule_6(s: stave.Stave):
@@ -91,7 +97,7 @@ def rule_8(s: stave.Stave):
     """
     clear logical connection and smooth shape from beginning to climax to ending
     """
-    pass
+    # WARNING This rule can be considered too vague to be implemented
 
 @__extract_data
 def rule_9(s: stave.Stave):
@@ -127,21 +133,27 @@ def rule_10(s: stave.Stave):
     """
     no repetition of "motives" or "licks"
     """
-    pass
+    from cp2_note_against_note import _Rule_10
+    _Rule_10(s)
 
 @__extract_data
 def rule_11(s: stave.Stave):
     """
     any large leaps (fourth or larger) are followed by step in opposite direction
     """
-    pass
+    previous = None
+    for i,n in enumerate(s):
+        p = n.pitch
+        if previous is not None and previous.intervalWith(p) > 4:
+            if i + 1 == len(s) or tools.is_same_direction(previous,p,s.notes[i+1].pitch):
+                raise error.CompositionError("A large leap must be followed by a step in another direction",previous,p,s.notes[i+1].pitch)
+
 
 @__extract_data
 def rule_12(s: stave.Stave):
     """
     no more than two leaps in a row; no consecutive leaps in the same direction
     """
-    # TODO
     previous = None
     leap_nb = 0
     leaps = []
@@ -152,6 +164,8 @@ def rule_12(s: stave.Stave):
             if previous.intervalWith(p) > 2:
                 leap_nb += 1
                 leaps.append((previous,p))
+                if len(leaps) == 2 and tools.is_same_direction(*leaps[0],p):
+                    raise error.CompositionError("No consecutive leaps in the same direction",leaps)
             else:
                 leap_nb = 0
                 leaps = []
@@ -167,11 +181,30 @@ def rule_13(s: stave.Stave):
     """
     the leading tone progresses to the tonic
     """
-    pass
+    for i,n in enumerate(s.notes):
+        ns = NS(s.scale,n)
+        if ns.isLeading and ((i == len(s) -1) or (not NS(s.scale,s.notes[i+1]).isTonic)):
+            raise error.CompositionError("The leading should progress to the tonic",ns)
+
 
 @__extract_data
 def rule_14(s: stave.Stave):
     """
-    in minor, the leading tone only appears in the penultimate bar; the raised submediant is only used when progressing to that leading tone
+    in minor, the leading tone only appears in the penultimate bar;
+    the raised submediant is only used when progressing to that leading tone
     """
-    pass
+    # minor?
+    if s.scale.mode not in (scale.Mode.m,scale.Mode.m_harmonic,scale.Mode.m_rising,scale.Mode.m_full):
+        return
+
+    # minor: the leading at the end
+    for i,n in enumerate(s.notes):
+        ns = NS(s.scale,n)
+        if ns.isLeading and i != len(s) -2:
+            raise error.CompositionError("In minor, the leading tone must be at the penultimate bar only",n)
+
+    # minor: the raised submediant used when progressing to leading
+    for i,n in enumerate(s.notes):
+        ns = NS(s.scale,n)
+        if ns.isRaisedSubmediant and ((i + 1 == len(s)) or not NS(s.notes[i+1]).isLeading):
+            raise error.CompositionError("Raised submediant should be used before leadingtone only",ns)
