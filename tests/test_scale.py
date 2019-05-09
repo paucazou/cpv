@@ -55,3 +55,37 @@ def test_is_degree():
     with pytest.raises(ValueError):
         func(cmajor, P.Cb4, 1)
 
+def test_is_leading():
+    def func(s, n, b=True):
+        assert s.isLeading(n) is b
+
+    func(S.Scale(P.C4,S.Mode.M),P.B3)
+    func(S.Scale(P.C4,S.Mode.m_harmonic),P.B3)
+    func(S.Scale(P.C4,S.Mode.m_rising),P.B3)
+    func(S.Scale(P.C4,S.Mode.m_full),P.B3)
+
+    func(S.Scale(P.C4,S.Mode.m),P.B3,False)
+    func(S.Scale(P.C4,S.Mode.m_full),P.Bb3,False)
+
+def test_is_subtonic():
+    def func(s, n, b=True):
+        assert s.isSubtonic(n) is b
+
+    func(S.Scale(P.C4,S.Mode.m),P.Bb3)
+    func(S.Scale(P.C4,S.Mode.m_full),P.Bb3)
+
+    func(S.Scale(P.C4,S.Mode.m_harmonic),P.B3,False)
+    func(S.Scale(P.C4,S.Mode.m_rising),P.B3,False)
+    func(S.Scale(P.C4,S.Mode.M),P.B3,False)
+
+def test_is_raised_submediant():
+    def func(s, n, b=True):
+        assert s.isRaisedSubmediant(n) is b
+
+    func(S.Scale(P.C4,S.Mode.m_rising),P.A3)
+    func(S.Scale(P.C4,S.Mode.m_full),P.A3)
+
+    func(S.Scale(P.C4,S.Mode.m),P.A3,False)
+    func(S.Scale(P.C4,S.Mode.m_harmonic),P.A3,False)
+    func(S.Scale(P.C4,S.Mode.M),P.A3,False)
+

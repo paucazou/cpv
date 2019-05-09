@@ -82,7 +82,7 @@ class NoteScale:
         for elt in seq:
             elt.moveBy(i)
 
-for i, name in enumerate(("Tonic","Supertonic","Mediant","Subdominant","Dominant","Submediant","Leading")): # TEST
+for i, name in enumerate(("Tonic","Supertonic","Mediant","Subdominant","Dominant","Submediant","Leading","Subtonic","RaisedSubmediant")): # TEST
     def __create__function(name):
         def __function(self):
             return getattr(self.scale,f"is{name}")(self.note)
