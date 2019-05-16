@@ -89,3 +89,14 @@ def test_is_raised_submediant():
     func(S.Scale(P.C4,S.Mode.m_harmonic),P.A3,False)
     func(S.Scale(P.C4,S.Mode.M),P.A3,False)
 
+def test_from_string():
+
+    def func(s, k, m):
+        assert S.Scale.fromString(s) == S.Scale(k,m)
+
+    func("CM",P.C0,S.Mode.M)
+    func("Cm",P.C0,S.Mode.m_full)
+
+    with pytest.raises(ValueError):
+        func("Cg",P.C0,S.Mode.m)
+

@@ -70,6 +70,20 @@ class Scale:
             # it should be a simple note
             return arg in self.notes
 
+    @staticmethod
+    def fromString(s : str): # TEST
+        """Takes a string with following
+        format: pitch + accidental (if any) + mode
+        """
+        keynote_s = s[:-1]
+        mode_s = s[-1]
+        if mode_s not in "Mm":
+            raise ValueError(f"""Impossible to parse string "{s}". Unknown mode: {mode_s}""")
+
+        mode = Mode.M if mode_s == "M" else Mode.m_full
+        keynote = pitch.Pitch[keynote_s + '0']
+        return Scale(keynote,mode)
+
     def relative(self,minor=Mode.m):
         """Return the relative key. If self
         is major, return minor; if self is major,

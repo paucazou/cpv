@@ -160,6 +160,16 @@ def test_is_melodic_consonance_with():
     funcf(P.C4,P.B4)
     funcf(P.C4,P.Gb4)
 
+def test_accidental():
+    def func(p, v):
+        assert p._get_accidental() == v
+
+    func(p.C5,"")
+    func(p.Gb3,"b")
+    func(p.Ds4,"s")
+    func(p.Bss3,"ss")
+    func(p.Abb2,'bb')
+
 
 
 

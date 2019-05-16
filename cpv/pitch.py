@@ -194,7 +194,19 @@ class Pitch(enum.Enum):
         semitones = self.value.semitone - Pitch.A4.value.semitone
         return A4 * (2** (semitones/12))
 
+    def _get_accidental(self): # TEST
+        """Return the accidental of the pitch
+        as a string.
+        "" : natural
+        "b" : flat
+        "bb": double flat
+        "s" : sharp
+        "ss": double sharp
+        """
+        return self.name[1:-1]
+
     frequency = property(findFrequency)
+    accidental = property(_get_accidental)
 
 
     
