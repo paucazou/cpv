@@ -200,7 +200,8 @@ def rule_5(s : stave.Stave):
 
     for elt in s.barIter():
 
-        if elt.pos == 0 or elt.pos == s.lastFirstPos:
+        #if elt.pos == 0 or elt.pos == s.lastFirstPos:
+        if elt.pos in (0, s.barNumber-1):
             # first and last interval can be unisons.
             continue
 
