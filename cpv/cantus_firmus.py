@@ -194,7 +194,7 @@ def rule_14(s: stave.Stave):
     the raised submediant is only used when progressing to that leading tone
     """
     # minor?
-    if s.scale.mode not in (scale.Mode.m,scale.Mode.m_harmonic,scale.Mode.m_rising,scale.Mode.m_full):
+    if s.scale.mode not in (scale.Mode.m,scale.Mode.m_full,scale.Mode.m_rising,scale.Mode.m_full):
         return
 
     # minor: the leading at the end

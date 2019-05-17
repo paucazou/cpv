@@ -332,7 +332,7 @@ def rule_11(cp : stave.Stave, cd : stave.Stave):
 def rule_12(s : stave.Stave):
     """On ne doit moduler qu'aux tons relatifs"""
     sc = scale.Scale(s.keynote,s.mode)
-    relative = sc.relative(scale.Mode.m_harmonic)
+    relative = sc.relative(scale.Mode.m_full)
     for bar in s.barIter():
         note = bar[0]
         if note.pitch not in sc:
@@ -351,7 +351,7 @@ def rule_13(s : stave.Stave):
         n1, n2 = notes
         # change scale if necessary 
         if notes not in current_scale:
-            current_scale = current_scale.relative(scale.Mode.m_harmonic)
+            current_scale = current_scale.relative(scale.Mode.m_full)
         # generate chord
         first = chord.Chord(1,current_scale)
         # is it the first degree chord?
