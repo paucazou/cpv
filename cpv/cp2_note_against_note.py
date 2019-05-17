@@ -552,3 +552,20 @@ def rule_25(s: stave.Stave):
         return
 
 
+@__mix_cp_cf
+def rule_26(s : stave.Stave):
+    """La première et la dernière mesure sont obligatoirement harmonisées par l'accord de tonique à l'état fondamental"""
+    tonic = chord.Chord(1,s.scale)
+    for measure in (s.getBar(0), s.getBar(-1)):
+        is_error = False
+        try:
+            if not tonic.isInversion([*measure],0):
+                is_error = True
+        except ValueError:
+            is_error = True
+
+        if is_error:
+            raise error.CompositionError(f"In {s.title}, the first bar or the last bar is not the tonic chord at root position",measure)
+
+        
+
