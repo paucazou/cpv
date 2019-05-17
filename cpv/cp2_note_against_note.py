@@ -294,12 +294,13 @@ def _Rule_10(s : stave.Stave):
             except IndexError:
                 break
             if tools.matchSequence(motif, following, s.scale):
+                msg = f"Sequence in {s.title}. It should be avoided"
                 if len(motif) == 1:
                     continue
                 if len(motif) <= 2:
-                    error.warn("Sequence should be avoided",motif, following)
+                    error.warn(msg,motif, following)
                 else:
-                    raise error.CompositionError("Sequence should be avoided",motif, following)
+                    raise error.CompositionError(msg,motif, following)
 
 
 @__cp_cf
@@ -439,7 +440,7 @@ def rule_19(s : stave.Stave):
     # 2 5th/8ve in a row
     previous = None
     for bar in s.barIter():
-        interval = bar[0].pitch.intervalWith(bar[1].pitch)
+        interval = bar[0].pitch.intervalWith(bar[1].pitch,True)
         if previous is not None and interval in (8,5):
             if interval == previous:
                 raise error.CompositionError("Two 5th or two 8ve in a row is forbidden",previous_bar, bar)
