@@ -28,6 +28,7 @@ def import_msx(file : str) -> str:
     # get rhythm
     # TODO
     rhythm = 4 ##### TEMPORARY ######
+    append("4/4")
     # get keynote
     for s in root.iter("Text"):
         style = s.find('style')
