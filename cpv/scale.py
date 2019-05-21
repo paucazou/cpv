@@ -16,12 +16,21 @@ class Mode(enum.Enum):
 
     # other modes
     Ionian      = M
-    Dorian      = [] # D
-    Phrygian    = [] # E
-    Lydian      = [] # F
-    Mixolydian  = [] # G
+    Dorian      = util.push_to_end(Ionian) # D
+    Phrygian    = util.push_to_end(Dorian) # E
+    Lydian      = util.push_to_end(Phrygian) # F
+    Mixolydian  = util.push_to_end(Lydian) # G
     Aeolian     = m
-    Locrian     = [] # B
+    Locrian     = util.push_to_end(m) # B
+
+    # other names of the same modes
+    C = Ionian
+    D = Dorian
+    E = Phrygian
+    F = Lydian
+    G = Mixolydian
+    A = Aeolian
+    B = Locrian
 
 class Scale:
     """Represents a scale"""
