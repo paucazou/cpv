@@ -218,7 +218,7 @@ def rule_6(s : stave.Stave):
     for elt in s.barIter():
         note = elt[0]
         if previous is not None and previous[0].pitch.isChromaticInflectionWith(note.pitch):
-            raise error.CompositionError("Chromatic inflection is forbidden",previous,bar)
+            raise error.CompositionError("Chromatic inflection is forbidden",previous,elt)
         previous = elt 
 
 @__mix_cp_cf
@@ -276,7 +276,6 @@ def rule_10(s : stave.Stave):
 
 def _Rule_10(s : stave.Stave):
     """Éviter les marches d'harmonie"""
-    #TODO on ne gère pas le cas d'une modulation
     for start in range(s.barNumber):
         for end in range(start,s.barNumber):
 
@@ -293,14 +292,18 @@ def _Rule_10(s : stave.Stave):
                         following.append(n)
             except IndexError:
                 break
-            if tools.matchSequence(motif, following, s.scale):
-                msg = f"Sequence in {s.title}. It should be avoided"
-                if len(motif) == 1:
-                    continue
-                if len(motif) <= 2:
-                    error.warn(msg,motif, following)
-                else:
-                    raise error.CompositionError(msg,motif, following)
+            try:
+                if tools.matchSequence(motif, following, s.scale):
+                    msg = f"Sequence in {s.title}. It should be avoided"
+                    if len(motif) == 1:
+                        continue
+                    if len(motif) <= 2:
+                        error.warn(msg,motif, following)
+                    else:
+                        raise error.CompositionError(msg,motif, following)
+            except ValueError:
+                # It should be that the relative one is encountered, so no sequence here
+                continue
 
 
 @__cp_cf
@@ -344,16 +347,18 @@ def rule_12(s : stave.Stave):
 @__mix_cp_cf
 def rule_13(s : stave.Stave):
     """Lorsque la dominante du ton se trouve à la partie inférieure - et qu'elle a été précédée de l'accord du premier degré - il faut éviter de la combiner avec une sixte car cela donnerait le sentiment d'un accord de quarte et sixte, ce qui est défendu. Si elle permet de sous-entendre un autre accord, on peut l'employer"""
-
+    """There is maybe a problem here: if the main scale is major, every switch to the relative minor will install it as the main scale and the program will never consider that the swith is finished since not pitch of the major is outside of the minor. Maybe we should consider that we return to the major scale each measure.
+    WARNING"""
     current_scale = s.scale
     previous_chord = None
 
     for bar in s.barIter():
+        # change scale if necessary 
+        if bar[0].pitch not in current_scale or bar[1].pitch not in current_scale:
+            current_scale = current_scale.relative(scale.Mode.m_full)
+
         notes = [ scalenote.NoteScale(current_scale,n) for n in bar ]
         n1, n2 = notes
-        # change scale if necessary 
-        if notes not in current_scale:
-            current_scale = current_scale.relative(scale.Mode.m_full)
         # generate chord
         first = chord.Chord(1,current_scale)
         # is it the first degree chord?
@@ -363,7 +368,7 @@ def rule_13(s : stave.Stave):
         if previous_chord is not None:
             # is it the dominant in the bass and an interval of sixth?
             low, high = n1,n2 if n1 < n2 else (n2, n1)
-            if low.isDominant and low.note.isInterval(6).With(high):
+            if low.isDominant and low.note.isInterval(6).With(high.note):
                 raise error.CompositionError("It is forbidden to use a tonic chord followed by a dominant at the bass and a sixth with the dominant",previous_chord, bar)
 
             # clean-up

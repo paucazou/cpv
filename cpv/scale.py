@@ -117,7 +117,7 @@ class Scale:
             raise ValueError(f"{note} not in scale { self }")
 
         if self.mode == Mode.m_full:
-            for scale in self.__minor__scales:
+            for scale in self.__minor__scales.values():
                 try:
                     return scale.isDegree(note,i)
                 except ValueError:
