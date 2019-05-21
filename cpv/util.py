@@ -28,4 +28,12 @@ def to_pitch(n):
         except AttributeError:
             return n
 
+def push_to_end(l: list) -> list: # TEST
+    """Takes a list and return a new list
+    with the first elemtn of l at the end
+    l must contain at least one element
+    """
+    assert len(l) > 0
+    return l[1:] + [l[0]]
+
     

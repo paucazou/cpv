@@ -14,6 +14,15 @@ class Mode(enum.Enum):
     m_rising    = [2,1,2,2,2,2,1]
     m_full      = 1
 
+    # other modes
+    Ionian      = M
+    Dorian      = [] # D
+    Phrygian    = [] # E
+    Lydian      = [] # F
+    Mixolydian  = [] # G
+    Aeolian     = m
+    Locrian     = [] # B
+
 class Scale:
     """Represents a scale"""
     def __init__(self, keynote : pitch.Pitch, mode: Mode):

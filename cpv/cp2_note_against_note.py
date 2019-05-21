@@ -551,7 +551,7 @@ def rule_25(s: stave.Stave):
             l = [ s.notes[j] for j in range(i,i+4) ]
             c = chord.Chord.findChord(l,s.scale,best=True)
             if (not isinstance(c,list)) and c.isFullChord(l):
-                error.warn("You should avoid every arpeggio",l)
+                error.warn(f"You should avoid every arpeggio. In {s.title}: ",l)
     except IndexError:
         # end of the list
         return
