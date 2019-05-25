@@ -197,7 +197,6 @@ def rule_4(s: stave.Stave):
 @__mix_cp_cf
 def rule_5(s : stave.Stave):
     """L'unisson est défendu dans le courant du contrepoint"""
-    print(s)
 
     for elt in s.barIter():
 
