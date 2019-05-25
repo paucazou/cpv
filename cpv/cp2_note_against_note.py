@@ -197,6 +197,7 @@ def rule_4(s: stave.Stave):
 @__mix_cp_cf
 def rule_5(s : stave.Stave):
     """L'unisson est défendu dans le courant du contrepoint"""
+    print(s)
 
     for elt in s.barIter():
 
@@ -209,7 +210,7 @@ def rule_5(s : stave.Stave):
             raise error.CompositionError("Two notes are expected.",elt)
 
         if elt[0].pitch == elt[1].pitch:
-            raise error.CompositionError("Unison is forbidden insided the couterpoint",elt)
+            raise error.CompositionError("Unison is forbidden inside the couterpoint",elt)
 
 @__counterpoint_only
 def rule_6(s : stave.Stave):
@@ -509,7 +510,7 @@ def rule_23(s: stave.Stave):
     c= chord.Chord(1,s.scale)
     for bar in (s.getBar(0), s.getBar(-1)):
         if not c.isInversion([*bar],0):
-            raise error.CompositionError("First and last bar must be at the root positionof the chord of the first degree",bar)
+            raise error.CompositionError("First and last bar must be at the root position of the chord of the first degree",bar)
 
 @__counterpoint_only
 def rule_24(s: stave.Stave):

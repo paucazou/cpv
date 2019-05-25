@@ -13,14 +13,20 @@ import scale
 
 
 Chord = chord.Chord
+mChord = chord._minor__chord
 P = pitch.Pitch
 
 scale0 = scale.Scale(P.C0, scale.Mode.M)
+scale1 = scale.Scale(P.C0, scale.Mode.m_full)
 chord0 = Chord(1,scale0)
 chord07 = Chord(1,scale0,seventh=True)
 chord1 = Chord(6,scale0)
 
 generate_notes=lambda s : [P[val] for val in s.split()]
+
+def test_new():
+    assert isinstance(Chord(1,scale1),mChord)
+
 
 def test_contains():
     assert chord0.__contains__(P.C4)

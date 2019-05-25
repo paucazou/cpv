@@ -9,12 +9,21 @@ import util
 
 class Chord:
     """A chord"""
+
+    def __new__(cls,degree,scale_,seventh=False):
+        """Return a __minor_chord if necessary"""
+
+        if scale_.mode is scale.Mode.m_full:
+            return object.__new__(_minor__chord)
+
+        return object.__new__(cls)
+    
     def __init__(self, degree, scale, seventh=False):
         """Creates the chord of the degree required"""
         self.degree = degree
         self.scale = scale
         self.is_seventh = seventh
-        self.__generate_notes()
+        self._generate_notes()
 
     def __contains__(self, note): # TEST
         """True if note is in chord.
@@ -40,7 +49,10 @@ class Chord:
                 self.is_seventh == other.is_seventh and
                 self.notes == other.notes)
 
-    def __generate_notes(self):
+    def __repr__(self):
+        return f"Chord<{self.degree}|{self.scale}>"
+
+    def _generate_notes(self):
         """Generates the notes which can figure in the chord"""
         def _generate_degrees():
             d = self.degree -1
@@ -166,4 +178,52 @@ for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")): # TEST
             return self.isPosition(note,i)
         return __function
     setattr(Chord,f"is{name}",__generate_func(i))
+
+
+class _minor__chord(Chord):
+
+    def __init__(self,degree,scale_,seventh=False):
+
+        keynote = scale_.keynote
+        base = scale.Scale(keynote,scale.Mode.m)
+        harmonic = scale.Scale(keynote,scale.Mode.m_harmonic)
+        rising = scale.Scale(keynote,scale.Mode.m_rising)
+        self._minor_chords = {
+                "base"      :   Chord(degree,base,seventh),
+                "harmonic"  :   Chord(degree,harmonic,seventh),
+                "rising"    :   Chord(degree,rising,seventh)
+                }
+
+        super().__init__(degree,scale_,seventh)
+
+    def _generate_notes(self):
+        self.notes = list(set([*self._minor_chords['base'].notes,
+                              *self._minor_chords['harmonic'].notes,
+                              *self._minor_chords['rising'].notes]))
+        self.notes.sort(key=lambda x : x.value.semitone)
+
+# bools method # TEST
+for method in "isPosition isInversion isFullChord".split():
+    def __generate__func(method):
+        def __method(self,*a,**kw):
+            for c in self._minor_chords.values():
+                if getattr(c,method)(*a,**kw) is True:
+                    return True
+            return False
+        return __method
+    setattr(_minor__chord,method,__generate__func(method))
+
+# ValueError raised methods # TEST
+for method in "findPosition findInversion".split():
+    def __generate_func(method):
+        def __method(self,*a,**kw):
+            for c in self._minor_chords.values():
+                try:
+                    return getattr(c, method)(*a,**kw)
+                except ValueError:
+                    continue
+        return __method
+    setattr(_minor__chord,method,__generate_func(method))
+
+
 
