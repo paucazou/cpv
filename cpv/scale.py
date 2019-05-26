@@ -10,6 +10,7 @@ class Mode(enum.Enum):
     """Represents the mode of a scale"""
     M           = [2,2,1,2,2,2,1]
     m           = [2,1,2,2,1,2,2]
+    m_melodic   = m
     m_harmonic  = [2,1,2,2,1,3,1]
     m_rising    = [2,1,2,2,2,2,1]
     m_full      = 1
@@ -93,13 +94,28 @@ class Scale:
         """Takes a string with following
         format: pitch + accidental (if any) + mode
         """
-        keynote_s = s[:-1]
-        mode_s = s[-1]
-        if mode_s not in "Mm":
-            raise ValueError(f"""Impossible to parse string "{s}". Unknown mode: {mode_s}""")
-
-        mode = Mode.M if mode_s == "M" else Mode.m_full
-        keynote = pitch.Pitch[keynote_s + '0']
+        # get the keynote
+        i = 1
+        keynote_s = s[0]
+        if keynote_s.islower():
+            raise SyntaxError(f"Note must be in uppercase: {keynote_s}")
+        while s[i] in "sb":
+            keynote_s += s[i]
+            i+=1
+        try:
+            keynote = pitch.Pitch[keynote_s + '0']
+        except KeyError:
+            raise SyntaxError(f"Unknown keynote: {keynote_s}")
+            
+        # get the mode
+        mode_s = s[i:]
+        if mode_s == "m": # special treatment for minor
+            mode_s = "m_full"
+        try:
+            mode = Mode[mode_s]
+        except KeyError:
+            raise SyntaxError(f"Unknown mode: {mode_s}")
+        # get the scale
         return Scale(keynote,mode)
 
     def relative(self,minor=Mode.m):

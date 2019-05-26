@@ -97,6 +97,6 @@ def test_from_string():
     func("CM",P.C0,S.Mode.M)
     func("Cm",P.C0,S.Mode.m_full)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(SyntaxError):
         func("Cg",P.C0,S.Mode.m)
 
