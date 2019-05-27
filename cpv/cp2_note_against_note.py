@@ -548,7 +548,7 @@ def rule_25(s: stave.Stave):
     """On évitera, autant que possible, toute formule arpégée"""
     try:
         for i in range(len(s.notes)):
-            l = [ s.notes[j] for j in range(i,i+4) ]
+            l = [ s.notes[j] for j in range(i,i+3) ]
             c = chord.Chord.findChord(l,s.scale,best=True)
             if (not isinstance(c,list)) and c.isFullChord(l):
                 error.warn(f"You should avoid every arpeggio. In {s.title}: ",l)
