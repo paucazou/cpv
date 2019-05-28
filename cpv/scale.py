@@ -59,6 +59,12 @@ class Scale:
             self.__minor__scales = {'base':base,
                                     'harmonic':harmonic,
                                     'rising':rising}
+            self.base = base
+            self.harmonic = harmonic
+            self.rising = rising
+            self.minor_scales = {Mode.m:base,
+                                Mode.m_harmonic:harmonic,
+                                Mode.m_rising:rising}
             return
 
         for note in list(pitch.Pitch):
@@ -88,6 +94,19 @@ class Scale:
         except TypeError:
             # it should be a simple note
             return arg in self.notes
+
+    def positionOf(self, note):
+        """Return the position in the scale of note"""
+        note = util.to_pitch(note)
+
+        if note not in self:
+            raise ValueError(f"Note {note} not in scale {self}")
+
+        if self.mode == Mode.m_full:
+            for sub_scale in self.__minor__scales.values():
+                if note in sub_scale:
+                    return sub_scale.positionOf(note)
+        return self.notes.index(note)
 
     @staticmethod
     def fromString(s : str): # TEST

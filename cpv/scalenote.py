@@ -10,6 +10,11 @@ import util
 @functools.total_ordering
 class NoteScale:
     """Defines a note in a scale"""
+    def __new__(cls, scale_, note : pitch.Pitch):
+        if scale_.mode == scale.Mode.m_full:
+            return object.__new__(_minor__note_scale)
+        return object.__new__(cls)
+
     def __init__(self, scale, note : pitch.Pitch):
         """Raises a ValueError if note
         is not in scale"""
@@ -56,15 +61,12 @@ class NoteScale:
 
         return self._pos < other._pos
 
-    def _set_pos(self, i):
-        try:
-            self._pos = self.scale.notes.index(self._note)
-        except IndexError:
-            raise ValueError(f"{self._note} not in {self.scale}")
+    def _set_pos(self):
+        self._pos = self.scale.positionOf(self._note)
 
     def _set_note(self, note):
         self._note = util.to_pitch(note)
-        self._set_pos(self.scale.notes.index(self._note))
+        self._set_pos()
 
     def _get_pos(self):
         return self._pos
@@ -90,4 +92,27 @@ for i, name in enumerate(("Tonic","Supertonic","Mediant","Subdominant","Dominant
     setattr(NoteScale,f"is_{name}",__create__function(name))
     setattr(NoteScale,f"is{name}",property(getattr(NoteScale,f"is_{name}")))
 
+
+class _minor__note_scale(NoteScale):
+    def moveBy(self, i : int, mode=scale.Mode.m):
+        """Move the not by i. If the new note is the 6th or 7th degree,
+        use mode to select the note
+        if the current note is in this mode
+        If not, find the note following this order:
+            - melodic,
+            - harmonic,
+            - rising
+        """
+        # select the correct scale
+        def __selector(n):
+            scale = self.scale
+            for s in scale.minor_scales[mode], scale.base, scale.harmonic, scale.rising:
+                if self.note in s:
+                    return s
+            else:
+                assert False and "Note not found"
+        scale_selected = __selector(self.note)
+
+        # find note
+        self.note = scale_selected.notes[self.pos+i]
 

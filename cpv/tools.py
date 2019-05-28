@@ -10,9 +10,10 @@ def matchSequence(motif, part, scale) -> bool:
     motif_ns = [ NS(scale,n.pitch) for n in motif]
     part_ns = [ NS(scale,n.pitch) for n in part]
 
+
     distance = part_ns[0].distanceWith(motif_ns[0])
     NS.moveSequence(distance, part_ns)
-    return motif_ns == part_ns
+    return [n.pos for n in motif_ns] == [n.pos for n in part_ns]
 
 def min_max(s): # TEST
     """Return the highest and the lowest

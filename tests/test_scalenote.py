@@ -17,6 +17,10 @@ Mode = scale.Mode
 
 scale0 = scale.Scale(P.C0,Mode.M)
 scale1 = scale.Scale(P.A0,Mode.m)
+scale2 = scale.Scale(P.A0,Mode.m_full)
+
+def test_new():
+    assert isinstance(NS(scale2, P.A4), scalenote._minor__note_scale)
 
 def test_moveBy():
     ns = NS(scale0,P.D4)
