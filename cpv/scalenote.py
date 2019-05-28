@@ -94,7 +94,7 @@ for i, name in enumerate(("Tonic","Supertonic","Mediant","Subdominant","Dominant
 
 
 class _minor__note_scale(NoteScale):
-    def moveBy(self, i : int, mode=scale.Mode.m):
+    def moveBy(self, i : int, mode=scale.Mode.m): # TEST
         """Move the not by i. If the new note is the 6th or 7th degree,
         use mode to select the note
         if the current note is in this mode

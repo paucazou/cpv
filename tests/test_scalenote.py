@@ -71,3 +71,20 @@ def test_moveSequence():
 
 def test_functions_chord():
     assert NS(scale0, P.C4).isTonic
+
+def test_moveBy_minor():
+
+    def func(n,i,n2,m=Mode.m):
+        ns = NS(scale2, n)
+        ns.moveBy(i,m)
+        assert ns.note == n2
+
+    func(P.C4,1,P.D4)
+    func(P.Gs4,1,P.A4)
+    func(P.Gs4,2,P.B4)
+    func(P.Fs4,1,P.Gs4)
+    func(P.G4,1,P.A4)
+    func(P.A3,-1,P.G3)
+    func(P.A3,-1,P.Gs3,Mode.m_harmonic)
+    func(P.A3,-2,P.Fs3,Mode.m_rising)
+
