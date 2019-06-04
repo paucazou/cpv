@@ -26,14 +26,20 @@ class Stave:
         def __repr__(self):
             return f"Bar<{self.stave.title}:{self.pos}> {self.elts}"
 
-    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M):
+    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M, nscale=None):
+        """If nscale is set, keynote and mode are discarded"""
         self._stave = []
         self.rythm = rythm
         self.breve_value = breve_value
         self.title = name
-        self.keynote = keynote
-        self.mode = mode
-        self.scale = scale.Scale(keynote,mode)
+        if nscale is None:
+            self.keynote = keynote
+            self.mode = mode
+            self.scale = scale.Scale(keynote,mode)
+        else:
+            self.scale = nscale
+            self.keynote = nscale.keynote
+            self.mode = nscale.mode
 
     def __repr__(self):
         return f"Stave<{self.scale}>({self.title}) {self.rythm}/{self.breve_value} {self.notes}"
@@ -75,28 +81,16 @@ class Stave:
         except ValueError:
             raise SyntaxError(f"Rythm and breve value can't be set: {values[0]}")
 
-        # keytone
-        try:
-            string = values[1]
-            keynote_s = string[:-1]
-            mode_s = string[-1]
-            # mode
-            assert(mode_s in 'Mm')
-            mode = scale.Mode.M if mode_s == 'M' else scale.Mode.m_full
-            # keynote
-            keynote = pitch.Pitch[keynote_s + '0']
-
-        except (AssertionError, KeyError):
-            raise SyntaxError(f"Keytone can't be set: {string}")
-
+        # scale 
+        nscale = scale.Scale.fromString(values[1])
 
         values = values[2:]
-        list_of_staves = [Stave(rythm,breve_value,keynote=keynote,mode=mode)]
+        list_of_staves = [Stave(rythm,breve_value,nscale=nscale)]
         current = list_of_staves[0]
         for val in values:
             if val[0] == '*':
                 if len(current._stave) != 0:
-                    list_of_staves.append(Stave(rythm,breve_value,keynote=keynote,mode=mode))
+                    list_of_staves.append(Stave(rythm,breve_value,nscale=nscale))
                     current=list_of_staves[-1]
 
                 current.title = val[2:]
