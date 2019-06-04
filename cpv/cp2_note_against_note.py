@@ -235,13 +235,12 @@ def rule_7(s : stave.Stave):
 def rule_8(s : stave.Stave):
     """On ne doit pas entendre plus de trois tierces ou trois sixtes de suite"""
     _6 = _3 = 0
-    intervals = {3:0,6:0}
 
     for bar in s.barIter():
         if len(bar) != 2:
             raise error.CompositionError("Two notes expected",bar)
         f, s = bar[0].pitch, bar[1].pitch
-        int_ = f.intervalWith(s)
+        int_ = f.intervalWith(s,True)
         if int_ == 3:
             _3 += 1
             _6 = 0
@@ -367,7 +366,7 @@ def rule_13(s : stave.Stave):
             continue
         if previous_chord is not None:
             # is it the dominant in the bass and an interval of sixth?
-            low, high = n1,n2 if n1 < n2 else (n2, n1)
+            low, high = (n1,n2) if n1 < n2 else (n2, n1)
             if low.isDominant and low.note.isInterval(6).With(high.note):
                 raise error.CompositionError("It is forbidden to use a tonic chord followed by a dominant at the bass and a sixth with the dominant",previous_chord, bar)
 
