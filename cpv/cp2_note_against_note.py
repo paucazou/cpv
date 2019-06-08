@@ -377,11 +377,27 @@ def rule_13(s : stave.Stave):
 @__mix_cp_cf
 def rule_14(s : stave.Stave):
     """Pour la fausse relation de triton, la règle est la même qu'en harmonie : la fausse relation de triton est défendue."""
-    for bar in s.barIter():
+    get_pitches = lambda b :sorted([util.to_pitch(x) for x in b],key=lambda x:x.value.semitone)
+
+    old_high = None
+    for i,bar in enumerate(s.barIter()):
         if len(bar) != 2:
             raise error.CompositionError("Two notes expected",bar)
-        if abs(bar[0].pitch.semitoneWith(bar[1].pitch) == 6):
-            raise error.CompositionError("Tritone is forbidden",bar)
+        
+        bass, high= get_pitches(bar)
+
+        # check with last bar
+        if old_high is not None and bass.isQualifiedInterval((4,'augmented')).With(old_high):
+            raise error.CompositionError("False relation is forbidden",bar)
+        # check with next bar
+        if i+1 < s.barNumber:
+            next_bass, next_high = get_pitches(s.getBar(i+1))
+            if bass.isQualifiedInterval((4,'augmented')).With(next_high):
+                raise error.CompositionError("False relation is forbidden",bar)
+        # prepare next iteration
+        old_high = high
+
+
 
 @__counterpoint_only
 def rule_15(s : stave.Stave):
