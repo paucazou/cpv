@@ -39,6 +39,12 @@ class Pitch(enum.Enum):
             result -= 7
         return result
 
+    def abstractIntervalWith(self, other):
+        """Convenient method equal to
+        intervalWith(other,True)
+        """
+        return self.intervalWith(other,True)
+
     def qualifiedIntervalWith(self, other):
         """Return a namedtuple containing
         the interval and the quality of this interval.

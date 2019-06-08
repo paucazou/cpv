@@ -1,0 +1,136 @@
+Règles mélodiques
+Deux notes
+Interdit:
+	- augmentés
+	- diminués
+	- septièmes, neuvièmes et +
+Tolérance:
+	- septième majeure
+	- en mineur, une descente vers la sensible suivie suivie de la tonique en intervalle augmenté à la basse et au soprano (si ligne expressive pour cette dernière)(do-sol#-la)
+	- en mineur, une montée vers la sensible sans augmenter le sixième degré: fa-sol#-la. Pour les parties intermédiaires
+
+Permis:
+	- intervalle chromatique (sans gaucherie)
+	- secondes (maj et min)
+	- tierces (maj et min)
+	- quarte juste
+	- quinte juste
+	- sixte mineure
+	- octave
+	- une note peut rester à sa place
+
+Trois notes
+Interdit:
+	- neuvièmes en trois notes (ex: do-si-ré) (sauf avec octave)
+	- septièmes en trois notes (ex: ré sol do) (sauf avec saut de sixte mineure)
+
+
+Permis
+	- neuvièmes en trois notes via un saut d'octave (do - do -ré, surtout si do derrière) vers le haut (plus dur vers le bas)
+	- septièmes en trois notes avec sixte mineure, surtout suivie d'un retour: mi do ré (do)
+
+Attention:
+	- tritons en trois notes. Il faut que l'impression de triton disparaisse.
+
+La sensible doit monter sur la tonique (en théorie)
+
+Mouvements harmoniques
+Interdits:
+	- les 4 parties montent ou descendent en même temps
+	- octaves consécutives (entre deux parties)
+	- quintes justes consécutives
+	- quinte diminuée suivie d'une quinte juste
+	- octaves par mouvement direct (une exception)
+	- quintes par mouvement direct (une exception)
+	- unisson direct
+
+Tolérances
+	- quinte juste suivie d'une quinte diminuée si ce n'est pas entre extrêmes
+	- quinte par mouvemnet direct si la partie inférieure procède par mouvement conjoint aboutissant à I, V ou IV (interdit entre BS)
+	- quinte par mouvement direct si une des notes appartient à l'accord précédent.
+
+Autorisé
+	- deux quintes diminuées de suite
+
+Exception
+	- octave consécutive par mouvement contraire lorsqu'un chant donné termine par un saut V->I et que la basse doit faire de même
+	- octaves par mouvement direct si la partie supérieure procède par mouvement conjoint
+	- quintes par mouvement direct si la partie supérieure procède par mouvement conjoint
+
+Réalisation de l'accord
+à l'état fondamental
+Interdictions
+	- doublure de la sensible
+	- fausse relation de triton entre parties extrèmes (fa au soprano suivi de si à la basse, ou l'inverse 
+À éviter
+	- unissons sur les temps faibles (sauf début de première mesure, à la rigueur, et pour finir)
+	- unisson CT
+Autorisations
+	- doublure de la tierce (effet moins brillant)
+	- on peut supprimer la quinte, notamment à la fin d'un morceau. On triple alors la fondamentale (moins bien: doubler tierce et fondamentale)
+	- unissons parfois obligatoires: si la basse monte haut, si le sopranon descend bas, ou par mouvement très disjoint (saut d'octave)
+Conseils
+	- doublure des degrés I,IV,V
+
+à l'état de premier renversement
+Interdiction
+	- doubler le 7ème degré, même à la basse
+À éviter
+	- doublure de la basse (donc la 3ce de l'accord fondamental) (trois exceptions)
+Conseils
+	- doubler la tierce ou la sixte (càd la 5te ou la fondamentale de l'accord fondamental)
+Exceptions
+	- on peut doubler la basse si chaque doublure se fait par mouvement conjoint et contraire. 
+	- on peut doubler la basse s'il s'agit des degrés I,IV,V
+	- on peut doubler la basse si elle résulte d'un changement de position de l'accord.
+
+à l'état de second renversement
+Règle générale: la quarte doit être préparée et sauvée:
+	- préparée : une des notes au moins de la quarte devait être présente dans l'accord précédent, prolongée par syncope sur l'accord de 6/4
+	- sauvée : soit :
+		- la basse reste en place à l'accord suivant
+		- la note supérieure doit descendre à l'accord suivant par un mouvement conjoint ou reste à sa place (mais pas monter)
+
+Exceptions:
+	- La préparation d'un accord de 6/4 de la dominante n'est pas nécessaire.
+
+Marches d'harmonie
+Obligation
+	- Reproduire exactement le même dessin dans toutes les parties
+Permissions:
+	- il est permis de doubler la sensible pour reproduire le motif harmonique.
+	- les motifs mélodiques interdits (tels qu'un triton) sont autorisés pour respecter la marche d'harmonie.
+Interdictions
+	- Il est interdit de sortir une voix de sa tessiture propre.
+
+Modulation
+	- La fausse relation chromatique est interdite (sauf avec accent net de la basse)
+	- tout changement chromatique doit se faire dans la même partie
+	- la note qui doit être chromatiquement changée ne devra être doublé ni dans le premier accord, ni dans le second (celui du premier ton et celui du deuxième) (ex: fa-fa# dans une modulation do-sol: ni le fa, ni le fa# ne doit être doublé)
+	- on peut admettre une doublure de la note chromatiquement changée (ou sur le point de l'être) si on y aboutit par un mouvement contraire
+	- il est interdit de faire une quinte directe entre parties extrêmes par modulation et mouvement chromatique (une des deux notes semble ne pas bouger, mais son altération la fait descendre ou monter)
+	- certains mouvements mélodiques sont autorisés.
+	- une sensible déterminant modulation doit aller à la tonique (ou rester sur place);
+	- une sous-dominante doit aller vers le 3ème degré
+
+Septièmes
+Obligations
+	- Préparer la septième: càd que la note dissonante doit être présente dans l'accord précédent à la même voix et la même octave.
+	- La sensible doit monter sur la tonique
+	- la septième doit descendre sur le degré précédent (fa vers mi en ut)
+
+Exceptions
+	- La septième de dominante n'a pas besoin d'être préparée (mais c'est recommandable)
+
+Septième de dominante
+	- Éviter toute octave directe sur la note de résolution de la dissonance (très important)
+	- Éviter d'arriver par mouvement direct sur une 2de, une septième ou un neuvième
+	- Le mouvement direct sur la dissonance est toléré dans le cas du chromatisme d'une des parties
+	- il est permis de faire suivre une quinte juste d'une diminuée, sauf entre parties extrêmes
+	- quinte diminuée > juste, avec l'accord de sixte surtout. (pas avec quarte et sixte)
+	- il est possible de faire monter la septième sur V, pour éviter de doubler la basse, dans un enchaînement 7+ > +6
+	- on ne double ni la sensible, ni la septième, sauf si ces notes restent en place dans l'accord suivant.
+	- on ne peut supprimer que la quinte
+	- on peut tolérer des doublures mauvaises en cas de changements de position de l'accord, surtout avec des notes rapides, et la suppression de la sensible
+	- dans le second renversement, la quarte devrait être préparée (Koechlin autorise la non-préparation)
+	- troisième renversement: éviter octave et quinte directes
