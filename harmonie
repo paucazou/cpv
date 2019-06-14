@@ -134,3 +134,30 @@ Septième de dominante
 	- on peut tolérer des doublures mauvaises en cas de changements de position de l'accord, surtout avec des notes rapides, et la suppression de la sensible
 	- dans le second renversement, la quarte devrait être préparée (Koechlin autorise la non-préparation)
 	- troisième renversement: éviter octave et quinte directes
+
+	- il est possible de supprimer la fondamentale. On obtient donc un accord si-ré-fa qui n'est pas un accord de septième degré.
+	- doublures de la septième de dominante sans fondamentale:
+		* si-ré-fa : on double la tierce (ré) car doubler la sensible est interdit. On peut doubler la quinte diminuée (fa) si elle est préparée
+		* ré-fa-si : on double la tierce, ou la basse, si par mouvements conjoints et contraires, ou si doublure à la partie supérieure. Pas de règle pour les autres cas: moins fiables.
+		* fa-si-ré : on double la sixte (ré).
+	- dans la septième sans fondamentale, la septième peut monter (fa-sol par exemple) ou bien descendre à la tonique (fa-do par ex.)
+	
+	- anciens traités : la résolution d'un accord de 7e doit se faire par un accord dont la fondamentale est à la quinte de celle de la septième. Koechlin n'en tient pas compte. (peu clair. relire la page 84)
+
+	- la septième doit être préparée par une note d'une durée au moins égale à la dissonance et résolue en descendant au degré conjoint (donc fa - fa - mi) à moins qu'elle ne soit une 7e de dominante
+	- Lorsque, dans la réalisation de l'accord de septième, la dissonance est une seconde (exemple: la-do-mi-fa#) on doit préparer la note inférieure et non la note supérieure (toujours la dissonance, en fait: ici, on prépare le mi,càd la 7e)
+	- si c'est un intervalle de neuvième, de la famille des accords de 7e, on prépare la note inférieure; si c'est un accord de 9e, on préparera la 9e.
+	- il est possible de faire des résolutions exceptionnelles par enharmonie.
+
+	- septième de sensible : équivalente à la neuvième de dominante; acceptable sans préparation.
+	- 7e de sensible: le la doit toujours être en dessous du si.
+	- septième de sensible : trois mouvements obligés de résolution:
+		* 7e descend d'un degré (la->sol)
+		* 5te (diminuée) -> descend d'un degré (fa -> mi)
+		* sensible -> monte vers la tonique (si->do)
+	- septième de sensible : résolutions exceptionnelles peuvent admettre de laisser la 7e ou la 5te ou la sensible en place.
+	- 1er renversement de la 7e de sensible: la quinte (fa) peut monter pour ne pas doubler la basse de l'accord de sixte
+	- 2d renversement de la 7e de sensible: voir les exemples p. 96.
+	- 3ème renversement: usité seulement pour la septième diminuée.
+	- la neuvième de dominante ne doit pas être abordée par mouvement direct.
+
