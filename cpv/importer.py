@@ -75,6 +75,8 @@ def import_msx(file : str) -> str:
                         if n.value.semitone == pitch_:
                             append(f"{n.name} {rhythm} {current_pos}")
                             break
+                    else:
+                        raise ValueError(f"The scale mentioned doesn't seem to match the scale used. Did you really choose {main_scale}?");
                 else:
                     # foreign note
                     accidentals = {"":"natural","b":"flat","s":"sharp","ss":"double sharp","bb":"double flat"}
