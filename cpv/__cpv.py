@@ -6,10 +6,11 @@
 from collections import OrderedDict
 import cp2_note_against_note
 import cantus_firmus
+import dupre_improvisation_ex_3
 import note
 import stave
 
-functions = "cf cp_2_note_vs_note".split()
+functions = "cf cp_2_note_vs_note dupre_improvisation_3".split()
 
 def __get_rules(lib):
     """Takes a module and return a dict
@@ -82,6 +83,17 @@ def cp_2_note_vs_note(string: str, not_followed_rules=[],only_one=False) -> bool
     
     lib = cp2_note_against_note
     return __rules_checker(string,not_followed_rules,lib)
+
+def dupre_improvisation_3(string : str, not_followed_rules=[]) -> bool:
+    """This function checks that the rules created by Dupré for the third exercise
+    of improvisation are followed.
+    It requires a string with the usual syntax with three parts
+    named: Soprano, Center, Bass (case sensitive).
+    """
+    not_followed_rules = list(not_followed_rules)
+    lib = dupre_improvisation_ex_3
+    return __rules_checker(string,not_followed_rules,lib)
+
 
 
 def __rules_checker(string : str, not_followed_rules,lib) -> bool:

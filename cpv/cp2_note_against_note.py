@@ -117,7 +117,7 @@ def rule_1(s : stave.Stave):
             raise error.CompositionError("Number of breve should be two",bar)
 
         # check that each note is a breve
-        if bar.elts[0].duration != bar.elts[1].duration != note.Duration.BREVE:
+        if bar.elts[0].duration != bar.elts[1].duration and bar.elts[0].duration != note.Duration.SEMIBREVE:
             raise error.CompositionError("The notes are not breves",bar)
 
 def rule_2(staves: list):

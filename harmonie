@@ -68,7 +68,7 @@ Interdictions
 Autorisations
 	- doublure de la tierce (effet moins brillant)
 	- on peut supprimer la quinte, notamment à la fin d'un morceau. On triple alors la fondamentale (moins bien: doubler tierce et fondamentale)
-	- unissons parfois obligatoires: si la basse monte haut, si le sopranon descend bas, ou par mouvement très disjoint (saut d'octave)
+	- unissons parfois obligatoires: si la basse monte haut, si le soprano descend bas, ou par mouvement très disjoint (saut d'octave)
 Conseils
 	- doublure des degrés I,IV,V
 
@@ -160,4 +160,81 @@ Septième de dominante
 	- 2d renversement de la 7e de sensible: voir les exemples p. 96.
 	- 3ème renversement: usité seulement pour la septième diminuée.
 	- la neuvième de dominante ne doit pas être abordée par mouvement direct.
+	- neuvième de dominante: 9e et 7e descendent sur le degré conjoint; la sensible monte à la tonique
+	- la neuvième mineure peut se résoudre sur l'accord majeur de tonique; la neuvième majeure peut en certains cas se résoudre sur l'accord mineur de tonique.
+	- la 9e majeure doit se trouver au-dessus de la sensible et au-dessus de la fondamentale, jamais à distance de seconde
+	- 9e: on ne supprime ni sensible, ni 7e
+	- 9e: éviter l'octave retardée
+	- 9e: il ne faut pas doubler la résolution de la dissonnance par un mouvement direct.
+
+RETARDS
+
+	- la durée de la préparation du retard doit être au moins égale à la durée du retard
+	- en 3/4 on peut tolérer une noire liée à une blanche (voir p. 123 l'exemple) Il vaut mieux l'éviter.
+	- il est interdit d'écrire le retard en même temps que la note retardée, même si cette note n'est pas à la même voix.
+	- on tolère cette simultanéité à distance de 9e et sur la basse (il faut que ces deux conditions soient remplies pour que ce soit acceptable)
+	- on peut aussi la tolérer à distance de 9esur une partie intermédiaire si la 9e est majeure
+	- on le tolérera sur une 9e de dominante mineure
+	- il sera toujours interdit sur le 3ème degré du mineur (c'est une exception)
+	- l'accord ne change pas à cause du retard
+	- on doit éviter l'octave directe sur la note de résolution du retard. Exception: saut d'octave à la basse
+	- un retard peut se résoudre sur un autre accord
+	- le retard est censé descendre, sauf lorsque le retard est la sensible, qui monte ensuite sur la tonique. Il est aussi possible d'avoir le retard ascendant de la tierce.
+	- Il est possible d'écrire des retards simultanés (deux ou plus retards)
+
+ALTÉRATIONS
+Altérations ascendantes de la quinte
+	- la quinte altérée doit être résolue en montant d'un demi-ton diatonique. Elle peut aussi rester en place, ou descendre chromatiquement d'un demi-ton.
+Altérations descendantes de la quinte
+- en général, la sixte augmentée conclut sur la dominante, parfois la tonique.
+
+PÉDALES
+- au début et à la fin, il faut un accord dont fasse partie la note pédale
+- dans le cas d'une pédale qui n'est pas à la basse, on évitera les rencontres à un demi-ton d'écart.
+- il est interdit de former unisson avec la pédale en y arrivant par demi-ton ou ton entier. On pourra cependant descendre de la pédale par demi-ton ou ton entier.
+- si la basse forme pédale, la partie juste au-dessus doit constituer la basse
+
+NOTES ÉTRANGÈRES
+Notes de passage
+- elles ne doivent pas être plus longue que les notes sur lesquelles elles s'appuient
+- en principe, pas sur le premier temps d'une mesure.
+- l'accord peut changer au moment où se produit la note de passage
+- il peut y en avoir plus d'une à la fois
+Broderies
+- on peut broder une broderie
+- on peut mettre la broderie à un demi-ton chromatique (rare)
+Appogiature
+
+- Notes de passage et broderies ne doivent pas donner lieu à 8ves out 5tes consécutives (voir 151)
+- Dans le cas de quintes/octaves séparées par notes de passage/broderies:
+	- 5tes/8ves sur attaque de l'accord: les notes de passage ne comptent pas (il peut donc y avoir 5/8 consécutives
+	- si sur temps faible, on pourra les tolérer
+	- les quintes entre notes de passages sont acceptables sur temps faible, et c'est mieux aussi sur temps fort (sauf si séparées de la quinte précédente par plus d'une mesure, ou accord intermédiaire)
+- 5/8 par mouvements directs: règles habituelles. Octaves directes par broderies souvent creuses, surtout sur IIIè degré. À éviter totalement sur sensible.
+
+- si l'appogiature arrive par mouvement conjoint et qu'elle est plus que la note précédente, elle n'est pas une note de passage, mais bien une appogiature
+
+- notes de passage se produisant dans une seule partie et sans attaquer une note réelle de l'accord au moment de la note de passage (exemple p. 153): il est interdit de faire aboutir la note de passage sur un unisson, même par ton entier. Mais il est permis de s'éloigner d'un unisson par notes de passage, même si ce n'est pas forcément bon en montant d'un demi-ton : douteux surtout sur la sensible et le IIIème degré, surtout dans un mouvement lent.
+- notes de passages rencontrant notes rélles à distance de 7/9: admissibles en général sur la tonique, la dominante, la sous-dominante. Interdit sur la sensible.
+- il faut éviter de doubler (surtout par mouvement direct) la note vers laquelle tend la note de passage ou la note brodée (sauf si cela se produit sur la basse à distance de 9è)
+- les notes de passage / broderies chromatiques sont autorisées.
+- elles ne doivent pas aboutir à l'unisson.
+ÉCHAPPÉE
+- l'échappée peut être une note de l'accord ou non
+- il faut éviter de doubler la note qui précède l'échappée, surtout sur III et VII. I et V peuvent être doublées sans inconvénient.
+- les quintes produites par échappées ne comptent pas
+- l'octave par échappée est à éviter
+APPOGIATURES
+- la note de passage se distingue de l'appogiature par mouvement conjoint par le fait que l'appogiature peut être plus longue que la note précédente
+- la résolution régulière de l'appogiature est toujours par mouvement conjoint
+- il existe aussi des appogiatures ascendantes
+- mêmes règles que pour les retards
+- on admet l'appogiature a distance de 9è sur une partie intermédiaire, sur les degrés I, IV et V (à faire rarement); éviter l'appogiature du 3ème degré avec la note réelle, surtout la sensible.
+- il est possible de faire des appogiatures à toutes les voix
+- les quintes directes formées par appogiature ne comptent pas
+BRODERIES DISJOINTES
+- elles sont possibles. on peut aussi avoir des broderies de l'appogiature
+ANTICIPATIONS
+- une ou plusieurs notes de l'accord peuvent se faire entendre avant cet accord
+- pour la résolution de la tonique: éviter la rencontre de seconde; on peut se permettre la neuvième.
 

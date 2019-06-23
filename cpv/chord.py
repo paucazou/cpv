@@ -6,6 +6,7 @@ import note
 import scale
 import scalenote
 import util
+# TODO add the ninth if necessary
 
 class Chord:
     """A chord"""

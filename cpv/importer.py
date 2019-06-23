@@ -5,11 +5,15 @@
 import xml.etree.ElementTree as ET
 import pitch
 import scale
+import __from_ms
 
 def import_msx(file : str) -> str:
     """Import file and 
     return a string matching with readable file
     used by cpv
+    """
+    return __from_ms.Importer(file=file).run()
+
     """
     with open(file,'r') as f:
         content = f.read()
@@ -19,6 +23,37 @@ def import_msx(file : str) -> str:
 
     def append(elt):
         __Result.result += elt + '\n'
+
+    def manage_chord():
+        pitch_ = measure.find("Chord").find("Note").find("pitch").text
+        pitch_ = int(pitch_)
+        pitch_ = pitch_ - 12
+
+        accidental = measure.find("Chord").find("Note").find("Accidental")
+
+
+        if accidental is None:
+            for n in main_scale.notes:
+                if n.value.semitone == pitch_:
+                    append(f"{n.name} {rhythm} {current_pos}")
+                    break
+            else:
+                raise ValueError(f"The scale mentioned doesn't seem to match the scale used. Did you really choose {main_scale}?");
+        else:
+            # foreign note
+            accidentals = {"":"natural","b":"flat","s":"sharp","ss":"double sharp","bb":"double flat"}
+            accidentals_ = {v:k for k,v in accidentals.items()}
+            acc = accidentals_[accidental.find("subtype").text]
+            for p in pitch.Pitch:
+                if pitch_ == p.value.semitone and p.accidental == acc:
+                    append(f"{p.name} {rhythm} {current_pos}")
+                    break
+            else:
+                raise ValueError("Pitch not found")
+
+        current_pos += rhythm
+
+
 
     tree = ET.parse(file)
     root = tree.getroot()
@@ -63,36 +98,11 @@ def import_msx(file : str) -> str:
                 current_pos += rhythm
 
             if measure.find("Chord"):
-                pitch_ = measure.find("Chord").find("Note").find("pitch").text
-                pitch_ = int(pitch_)
-                pitch_ = pitch_ - 12
-
-                accidental = measure.find("Chord").find("Note").find("Accidental")
-
-
-                if accidental is None:
-                    for n in main_scale.notes:
-                        if n.value.semitone == pitch_:
-                            append(f"{n.name} {rhythm} {current_pos}")
-                            break
-                    else:
-                        raise ValueError(f"The scale mentioned doesn't seem to match the scale used. Did you really choose {main_scale}?");
-                else:
-                    # foreign note
-                    accidentals = {"":"natural","b":"flat","s":"sharp","ss":"double sharp","bb":"double flat"}
-                    accidentals_ = {v:k for k,v in accidentals.items()}
-                    acc = accidentals_[accidental.find("subtype").text]
-                    for p in pitch.Pitch:
-                        if pitch_ == p.value.semitone and p.accidental == acc:
-                            append(f"{p.name} {rhythm} {current_pos}")
-                            break
-                    else:
-                        raise ValueError("Pitch not found")
-
-                current_pos += rhythm
-
+                for c in measure.findall('Chord'):
+                    manage_chord(c)
 
     return __Result.result
                 
 
+"""
 
