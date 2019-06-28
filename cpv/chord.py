@@ -3,12 +3,13 @@
 #Deus, in adjutorium meum intende
 
 import note
+import pitch
 import scale
 import scalenote
 import util
 # TODO add the ninth if necessary
 
-class Chord:
+class AbstractChord:
     """A chord"""
 
     def __new__(cls,degree,scale_,seventh=False):
@@ -51,7 +52,7 @@ class Chord:
                 self.notes == other.notes)
 
     def __repr__(self):
-        return f"Chord<{self.degree}|{self.scale}>"
+        return f"AbstractChord<{self.degree}|{self.scale}>"
 
     def _generate_notes(self):
         """Generates the notes which can figure in the chord"""
@@ -105,6 +106,35 @@ class Chord:
         except ValueError:
             return False
 
+    def _qualify(self):
+        """Qualify the chord. The chord following the
+        quality of the intervals:
+        -5th: perfect, augmented, diminished
+        -3rd: major/minor
+        This information is returned as a tuple of string
+        """
+        #TODO doesn't work well for non triads chords
+        root = self.notes[0]
+        third = self.notes[1]
+        fifth = self.notes[2]
+        q1 = root.qualifiedIntervalWith(third).quality
+        q2 = root.qualifiedIntervalWith(fifth).quality
+        return q1, q2
+
+
+    def isQuality(self,*args):
+        """True if every *args match
+        the quality of the chord
+        """
+        _quality = self.quality
+        for a in args:
+            if a not in _quality:
+                return False
+        return True
+
+    quality = property(_qualify)  # TEST
+
+
     def findInversion(self,chord) -> int: # TEST
         """Find the inversion of the chord.
         0 : root position
@@ -133,7 +163,7 @@ class Chord:
         If best is set, return the chord
         which matches more the chord
         """
-        chords = [ Chord(i,scale,seventh) for i in range(1,8) ]
+        chords = [ AbstractChord(i,scale,seventh) for i in range(1,8) ]
         notes = [ util.to_pitch(n) for n in notes ]
 
         returned = [ c for c in chords if notes in c ]
@@ -150,7 +180,7 @@ class Chord:
         """Is the sequence of notes
         a chord?
         """
-        return bool(Chord.findChord(notes,scale,seventh))
+        return bool(AbstractChord.findChord(notes,scale,seventh))
 
     def isFullChord(self,notes) -> bool: #TEST
         """Given a sequence of notes, True if notes
@@ -171,6 +201,16 @@ class Chord:
 
         return not (False in required.values())
 
+    def getAbstractPitchAtPosition(i : int) -> pitch.Pitch:
+        """Return the pitch at position i.
+        i must be one of the degrees in the chord:
+        1, 3, 5, 7, 9 (when possible)
+        """
+        assert i in (1,3,5,7,9)
+        #TODO improve check
+        # TODO doesn't work in minor
+        return self.notes[i]
+
 
 
 for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")): # TEST
@@ -178,10 +218,10 @@ for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")): # TEST
         def __function(self,note):
             return self.isPosition(note,i)
         return __function
-    setattr(Chord,f"is{name}",__generate_func(i))
+    setattr(AbstractChord,f"is{name}",__generate_func(i))
 
 
-class _minor__chord(Chord):
+class _minor__chord(AbstractChord):
 
     def __init__(self,degree,scale_,seventh=False):
 
@@ -190,9 +230,9 @@ class _minor__chord(Chord):
         harmonic = scale.Scale(keynote,scale.Mode.m_harmonic)
         rising = scale.Scale(keynote,scale.Mode.m_rising)
         self._minor_chords = {
-                "base"      :   Chord(degree,base,seventh),
-                "harmonic"  :   Chord(degree,harmonic,seventh),
-                "rising"    :   Chord(degree,rising,seventh)
+                "base"      :   AbstractChord(degree,base,seventh),
+                "harmonic"  :   AbstractChord(degree,harmonic,seventh),
+                "rising"    :   AbstractChord(degree,rising,seventh)
                 }
 
         super().__init__(degree,scale_,seventh)
@@ -202,6 +242,16 @@ class _minor__chord(Chord):
                               *self._minor_chords['harmonic'].notes,
                               *self._minor_chords['rising'].notes]))
         self.notes.sort(key=lambda x : x.value.semitone)
+
+    def _qualify(self):
+        """Return the quality of the chord.
+        If the chord has two possible states,
+        return the two possibilities
+        """
+        results = [ ]
+        for _m_c in self._minor_chords.values():
+            results.extend(_m_c.quality)
+        return tuple(set(results))
 
 # bools method # TEST
 for method in "isPosition isInversion isFullChord".split():
@@ -225,6 +275,12 @@ for method in "findPosition findInversion".split():
                     continue
         return __method
     setattr(_minor__chord,method,__generate_func(method))
+
+# !!!! WARNING !!!!
+# DEPRECATED
+# for legacy purpose only
+Chord = AbstractChord
+# !!!! WARNING !!!!
 
 
 

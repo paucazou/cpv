@@ -13,6 +13,7 @@ import scale
 
 
 Chord = chord.Chord
+AbstractChord = chord.Chord
 mChord = chord._minor__chord
 P = pitch.Pitch
 
@@ -21,6 +22,8 @@ scale1 = scale.Scale(P.C0, scale.Mode.m_full)
 chord0 = Chord(1,scale0)
 chord07 = Chord(1,scale0,seventh=True)
 chord1 = Chord(6,scale0)
+chord2 = AbstractChord(3,scale0)
+chord3 = AbstractChord(7,scale0)
 
 generate_notes=lambda s : [P[val] for val in s.split()]
 
@@ -118,6 +121,17 @@ def test_positions():
     assert chord07.isThird(P.E5)
     assert chord07.isFifth(P.G1)
     assert chord07.isSeventh(P.B3)
+
+def test_quality():
+    assert chord0.quality == ("major","perfect")
+    assert chord1.quality == ("minor","perfect")
+    assert chord3.quality == ("minor","diminished")
+
+def test_is_quality():
+    assert chord0.isQuality("major")
+    assert chord0.isQuality("perfect")
+    assert chord0.isQuality("perfect","major")
+
 
 
 
