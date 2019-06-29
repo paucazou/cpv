@@ -121,12 +121,24 @@ def rule_9(s1, s2):
         if (s1_high and p2 > p1) or (not s1_high and p1 > p2):
             raise error.CompositionError(f"Intersection is forbidden",n1,n2)
 
-def rule_10(s):
+def rule_10(data):
     """Éviter l'accord diminué à l'état direct"""
-    """Sens: 
-            - état fondamental
-            - par mouvement direct
-            - sans préparation/résolution
-            - comme accord complet à trois notes, au lieu d'être un accord de dominante inachevé, ne contenant que si-ré
-            """
-    pass
+    scale_ = data[0].scale
+    previous = None
+    for j,notes in enumerate(zip(*data)):
+        c = chord.Chord.findChord(notes,scale_,True)
+        if isinstance(c,chord.Chord) and c.isQuality("diminished"):
+            for i,n in enumerate(notes):
+                np = util.to_pitch(n)
+                if c.findPosition(np) == 5:
+                    err = error.CompositionError(f"Diminished chord must be prepared and resolved",n)
+                    #check previous pos 
+                    if np != previous[i]:
+                        raise err
+                    # check next pos
+                    if (j + 1) == len(data[0]):
+                        raise err
+                    following_note = data[i][j+1]
+                    following_pitch = util.to_pitch(following_note)
+                    if np.semitone - following_pitch.semitone != 1:
+                        raise err
