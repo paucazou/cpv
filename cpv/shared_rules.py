@@ -20,7 +20,7 @@ def no_more_than(s : stave.Stave, x:int) -> bool:
         else:
             nb = 0
         if nb >= x:
-            raise error.CompositionError(f"It is forbidden to use the same note more than {x} times if a row",n)
+            raise error.CompositionError(f"It is forbidden to use the same note more than {x} times if a row",n,s.findBarOf(n))
         previous = n
 
     return True
@@ -37,7 +37,7 @@ def no_consecutive(interval : int, s1 : stave.Stave, s2 : stave.Stave) -> bool:
             nb = 0
 
         if nb >= 2:
-            raise error.CompositionError(f"It is forbidden to have two {interval} in a row",n1,n2);
+            raise error.CompositionError(f"It is forbidden to have two {interval} in a row",n1,n2,s1.findBarOf(n1));
 
     return True
 
