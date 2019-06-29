@@ -181,6 +181,16 @@ class Stave:
                 i,
                 self)
 
+    def findBarOf(self, n : note.Note): # TEST
+        """Assuming that n is in the stave,
+        return the bar where n can be found
+        """
+        for b in self.barIter():
+            if n in b:
+                return b
+        assert False and f"{n} not in stave"
+
+
     def extend(self,other):
         """Extend self
         with other, as in list.extend

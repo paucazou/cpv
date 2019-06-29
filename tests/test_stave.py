@@ -75,5 +75,28 @@ def test_copy():
     s._stave.append('ok')
     assert len(s._stave) != len(copy._stave)
 
+def test_find_bar_of():
+    s = stave.Stave()
+    s._stave =  notes = [
+            N(0,4),
+            N(4,4),
+            N(8,4),
+            ]
+    def func(i):
+        res = s.findBarOf(notes[i])
+        assert res.elts == [notes[i]]
+        assert res.pos == i 
+
+    func(0)
+    func(1)
+    func(2)
+
+    with pytest.raises(AssertionError):
+        s.findBarOf(N(14,2))
+
+
+
+
+
 
 
