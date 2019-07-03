@@ -132,13 +132,25 @@ def test_is_quality():
     assert chord0.isQuality("perfect")
     assert chord0.isQuality("perfect","major")
 
+# actual chord
+
+AC = chord.ActualChord
+ac0 = AC(chord0,[P.C4, P.E4, P.G4, P.C5])
+ac1 = AC(chord0,[P.C4, P.E4, P.G4, P.E5])
 
 
+def test_find_position():
+    def func(i, pos):
+        assert ac0.findPosition(i) == pos
 
+    func(0,1)
+    func(1,3)
+    func(2,5)
+    func(3,1)
 
+def test_highest_note():
+    assert ac0.highestNote == P.C5
 
-
-
-
-
-
+def test_is_highest_note_root():
+    assert ac0.isHighestRoot is True
+    assert ac1.isHighestRoot is False

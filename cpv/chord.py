@@ -283,4 +283,37 @@ Chord = AbstractChord
 # !!!! WARNING !!!!
 
 
+class ActualChord:
+    """An ActualChord is a chord which is realised
+    in the sheet score.
+    Notes are sorted by pitch. The lower is 0.
+    """
+    def __init__(self,abstract: AbstractChord,notes):
+        """notes can be a Note, a Pitch, a NoteScale"""
+        assert notes in abstract
 
+        self.abstract = abstract
+        self.notes = sorted(notes,key=lambda x : util.to_pitch(x).value.semitone)
+        self.inversion = abstract.findInversion(notes)
+
+    def __getitem__(self,i):
+        """Return note at i position
+        if it exists
+        """
+        return self.notes[i]
+
+    def _highest_note(self): # TEST
+        """Return highest pitched note"""
+        return self.__getitem__(-1)
+
+    def findPosition(self,i): # TEST
+        """Find the position of the note i.
+        """
+        return self.abstract.findPosition(self.notes[i])
+
+    def _is_highest_root(self)->bool: # TEST
+        """True if highest note is the root"""
+        return self.findPosition(-1) == 1
+
+    highestNote = property(_highest_note)
+    isHighestRoot = property(_is_highest_root)
