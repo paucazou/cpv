@@ -105,9 +105,30 @@ def rule_7(data):
 
         pnotes = nsnotes
 
-def rule_8(s):
+def rule_8(data):
     """N'user de la quarte et sixte que pour les cadences"""
-    pass
+
+    def check_degree(notes, degree):
+        c = chord.Chord.findChord(notes,scale_)
+        try:
+            c = [_c for _c in c if _c.degree == degree][0]
+        except IndexError:
+            raise error.CompositionError(f"{degree}th degree was expected after 2nd inversion chord",notes)
+
+        if not c.isInversion(0,notes):
+            raise error.CompositionError(f"After 2nd inversion root, the {degree}th must be at root position",notes)
+
+
+    for i, notes in enumerate(zip(*data)):
+        c = chord.Chord.findChord(notes,scale_,True)
+        if isinstance(c,chord.Chord) and c.isInversion(notes,2):
+            if c.degree != 1:
+                raise error.CompositionError(f"The 2nd inversion chord must be of the 1st degree only",notes)
+
+            # check the Vth degree
+            check_degree(zip(*data)[i+1],5)
+            # check the 1st degree
+            check_degree(zip(*data)[i+2],1)
 
 @dispatcher.two_voices
 def rule_9(s1, s2):
