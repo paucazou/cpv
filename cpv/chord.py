@@ -289,12 +289,15 @@ class ActualChord:
     Notes are sorted by pitch. The lower is 0.
     """
     def __init__(self,abstract: AbstractChord,notes):
-        """notes can be a Note, a Pitch, a NoteScale"""
+        """notes can be a Note, a Pitch, a NoteScale
+        positions.
+        If a chord changes its positions, make two different chords"""
         assert notes in abstract
 
         self.abstract = abstract
         self.notes = sorted(notes,key=lambda x : util.to_pitch(x).value.semitone)
         self.inversion = abstract.findInversion(notes)
+
 
     def __getitem__(self,i):
         """Return note at i position
