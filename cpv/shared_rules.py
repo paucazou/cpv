@@ -14,14 +14,14 @@ def no_more_than(s : stave.Stave, x:int) -> bool:
     nb = 0
     previous = None
     for i, n in enumerate(s.notes):
-        n = util.to_pitch(n)
-        if i != 0 and n == previous:
+        pn = util.to_pitch(n)
+        if i != 0 and pn == previous:
             nb += 1
         else:
             nb = 0
         if nb >= x:
             raise error.CompositionError(f"It is forbidden to use the same note more than {x} times if a row",n,s.findBarOf(n))
-        previous = n
+        previous = pn
 
     return True
 
