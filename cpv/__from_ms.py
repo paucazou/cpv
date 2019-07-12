@@ -15,6 +15,7 @@ class Importer:
     def __init__(self,**kw):
         self.file = kw['file']
         self.result = ""
+        self.ties = {}
 
     def run(self):
         with open(self.file,'r') as f:
@@ -53,8 +54,8 @@ class Importer:
     def manage_chord(self,c,measure):
         #duration
         duration_ = c.find("durationType").text
-        duration_ = self.durations[duration_]
-        duration_ = int(duration_)
+        sduration_ = str(self.durations[duration_])
+        duration_ = int(sduration_)
         # pitch
         pitch_ = c.find("Note").find("pitch").text
         pitch_ = int(pitch_)
@@ -63,10 +64,24 @@ class Importer:
         accidental = c.find("Note").find("Accidental")
 
 
+        tie = c.find('Note').find('Tie')
+        if tie is not None:
+            self.ties[tie.get('id')] = sduration_
+            sduration_ = "TIE_" + tie.get('id')
+
+        end_spanner = c.find('Note').find('endSpanner')
+        if end_spanner is not None:
+            old_duration_ = self.ties.pop(end_spanner.get('id'))
+            sduration_ = int(old_duration_) + int(sduration_)
+            self.result = self.result.replace('TIE_' + end_spanner.get('id'),str(sduration_))
+            self.current_pos += duration_
+            return
+
+
         if accidental is None:
             for n in self.main_scale.notes:
                 if n.value.semitone == pitch_:
-                    self.append(f"{n.name} {duration_} {self.current_pos}")
+                    self.append(f"{n.name} {sduration_} {self.current_pos}")
                     break
             else:
                 raise ValueError(f"The scale mentioned doesn't seem to match the scale used. Did you really choose {main_scale}?");
@@ -77,12 +92,13 @@ class Importer:
             acc = accidentals_[accidental.find("subtype").text]
             for p in pitch.Pitch:
                 if pitch_ == p.value.semitone and p.accidental == acc:
-                    self.append(f"{p.name} {duration_} {self.current_pos}")
+                    self.append(f"{p.name} {sduration_} {self.current_pos}")
                     break
             else:
                 raise ValueError("Pitch not found")
 
         self.current_pos += duration_
+
 
     def manage_bars(self):
         breaks = []
