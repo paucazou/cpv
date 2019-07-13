@@ -100,7 +100,7 @@ def rule_7(data):
                         problem = True
 
                     if problem:
-                        raise error.CompositionError(f"The leading should go to the tonic, except in the 5th to 6th movement",notes)
+                        error.warn(f"The leading should go to the tonic, except in the 5th to 6th movement. If this is the cantus firmus, please do not take care of this warning.",notes)
 
 
         pnotes = nsnotes
@@ -115,7 +115,7 @@ def rule_8(data):
         except IndexError:
             raise error.CompositionError(f"{degree}th degree was expected after 2nd inversion chord",notes)
 
-        if not c.isInversion(0,notes):
+        if not c.isInversion(notes,0):
             raise error.CompositionError(f"After 2nd inversion root, the {degree}th must be at root position",notes)
 
 
