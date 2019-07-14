@@ -87,7 +87,7 @@ def rule_7(data):
         nsnotes = [NS(scale_,n) for n in notes]
         if pnotes is not None:
             for voice, n in enumerate(pnotes):
-                if n.isLeading and not nsnotes[voice].isTonic:
+                if n != nsnotes[voice] and n.isLeading and not nsnotes[voice].isTonic:
                     # check the previous chord
                     pchords = chord.Chord.findChord(pnotes,scale_)
                     problem = False
