@@ -49,7 +49,9 @@ class Importer:
         self.main_scale = scale.Scale.fromString(str_keynote)
 
     def manage_rest(self, r):
-        self.current_pos += self.rhythm
+        values = {"half":2}
+        duration = r.find("durationType").text
+        self.current_pos += values[duration]
 
     def manage_chord(self,c,measure):
         #duration

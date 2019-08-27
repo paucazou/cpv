@@ -130,7 +130,7 @@ def rule_2(staves: list):
         parts[s.title] = True
     for val in parts.values():
         if val is False:
-            raise error.CompositionError("Six parts are expected in the counterpoint")
+            error.warn("Six parts are expected in the counterpoint")
 
     # is every part different?
     for cp_name, cp in parts.items():
@@ -140,7 +140,7 @@ def rule_2(staves: list):
             if cp is other_cp:
                 continue
             if cp == other_cp:
-                raise error.CompositionError("The parts in the counterpoint must be totally different",cp,other_cp)
+                error.warn("The parts in the counterpoint must be totally different",cp,other_cp)
 
 
 @__cantus_firmus_only

@@ -140,6 +140,12 @@ class Pitch(enum.Enum):
                 return self.qualifiedIntervalWith(other) in args
 
         return __is_qual_interval()
+    
+    def isTritoneWith(self, other) -> bool:
+        """True if self has an interval of
+        a fourth augmented"""
+        return self.isQualifiedInterval((4,"augmented")).With(other)
+
 
     def isChromaticInflectionWith(self, other):
         """True if a melodic motion between self and other

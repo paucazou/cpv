@@ -125,6 +125,12 @@ class Stave:
         """
         return [ elt for elt in self._stave if elt.pos == i ]
 
+    def getNoteAtPos(self,i:float):
+        """Return a note or a list of notes at pos i."""
+        l = [x for x in self.notes if x.isAtPos(i)]
+        return l[0] if len(l) == 1 else l
+
+
     def _lastFirstPos(self) -> float:
         """Return the last starting position
         of a note in the stave.
@@ -137,6 +143,11 @@ class Stave:
                 last = elt.pos
         
         return last
+
+    def _last_pos(self):
+        """Return the last position of a note
+        in the stave"""
+        return self.notes[-1].last_pos
 
     def barIter(self):
         """Yields each bar after the other"""
@@ -205,6 +216,96 @@ class Stave:
         stave._stave = _stave_copy
         return stave
 
+    def isCambiata(self, n: note.Note,upbeat=True):
+        """True if n is a cambiata
+        Is a cambiata a note that:
+            - is upbeat
+            - comes from and goes to the same note
+            - has a major or minor second distance with this note
+
+        Raise ValueError if n is not in self
+        """
+        if n not in self:
+            raise ValueError(f"{n} not in {self}")
+        if upbeat and not self.isUpBeat(n):
+            return False
+
+        idx = self.notes.index(n)
+        try:
+            previous = self.notes[idx-1]
+            next = self.notes[idx+1]
+        except IndexError:
+            return False
+        if previous.pitch != next.pitch:
+            return False
+        return previous.pitch.isInterval(2).With(n.pitch)
+
+    def isPassingTone(self, n: note.Note,upbeat=True):
+        """True if n is a passing tone
+        Is a passing tone a note that:
+            - is upbeat and upbeat is set
+            - comes from one note to another note in the same motion
+            - is separated by a minor or a major second from and to these notes
+        Raise ValueError if n is not in self
+        """
+        if n not in self:
+            raise ValueError(f"{n} not in {self}")
+        if upbeat and not self.isUpBeat(n):
+            return False
+        idx = self.notes.index(n)
+        try:
+            previous = self.notes[idx-1]
+            next = self.notes[idx+1]
+        except IndexError:
+            return False
+        ppitch, npitch = previous.pitch, next.pitch
+        cpitch = n.pitch
+
+        if ppitch == npitch:
+            return False
+
+        if (cpitch > ppitch and cpitch > npitch) or (cpitch < ppitch and cpitch < npitch):
+            return True
+        return ppitch.isInterval(2).With(cpitch) and npitch.isInterval(2).With(cpitch)
+
+    def isUpBeat(self, n: note.Note):
+        """True if n is upbeat.
+        n must be in self.
+        """
+        assert self.breve_value == 4 and "Other breve value not set"
+
+        if n not in self:
+            raise ValueError(f"{n} not in {self}")
+        return n.pos % self.rythm != 0
+
+    def isDownBeat(self, n: note.Note):
+        """Contrary of isUpBeat"""
+        return not self.isUpBeat(n)
+
+    def isConjunct(self,n : note.Note):
+        """True if we go to n thanks to a conjunct movement
+        False if n is the first note
+        """
+        assert n in self
+        idx = self.notes.index(n)
+        return n != self.notes[0] and self.notes[idx-1].pitch.isInterval(2).With(n)
+
+    def isCambiataOrPassing(self, n : note.Note,upbeat=True):
+        """True n is a cambiata or a passing tone"""
+        return self.isCambiata(n,upbeat) or self.isPassingTone(n,upbeat)
+
+    def arePassingTones(self, *args,**kw):
+        """True if every element of args is a passing tone"""
+        for elt in args:
+            if self.isPassingTone(elt,**kw) is False:
+                return False
+        return True
+
+
+
+
+
     barNumber = property(_get_bar_number)
     lastFirstPos = property(_lastFirstPos)
     notes = property(fget=_get_notes,fset=_set_notes)
+    lastPos = property(_last_pos)

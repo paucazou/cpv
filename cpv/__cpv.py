@@ -5,12 +5,13 @@
 """Main module"""
 from collections import OrderedDict
 import cp2_note_against_note
+import cp2_note_against_two_notes
 import cantus_firmus
 import dupre_improvisation_ex_3
 import note
 import stave
 
-functions = "cf cp_2_note_vs_note dupre_improvisation_3".split()
+functions = "cf cp_2_1_1 cp_2_1_2 dupre_improvisation_3".split()
 
 def __get_rules(lib):
     """Takes a module and return a dict
@@ -42,7 +43,9 @@ def cf(string : str, not_followed_rules=[]) -> bool:
     return __rules_checker(string,not_followed_rules,cantus_firmus)
 
 
-def cp_2_note_vs_note(string: str, not_followed_rules=[],only_one=False) -> bool:
+# for counterpoints, functions should be called:
+# cp_{number of voices}_1_{nb of notes for one note of cantus firmus}
+def cp_2_1_1(string: str, not_followed_rules=[],only_one=False) -> bool:
     """This function takes a string with a special
     syntax as main argument. The second argument
     is a list of ints of rules to forget, starting by 1
@@ -84,6 +87,25 @@ def cp_2_note_vs_note(string: str, not_followed_rules=[],only_one=False) -> bool
     lib = cp2_note_against_note
     return __rules_checker(string,not_followed_rules,lib)
 
+def cp_2_1_2(string: str, not_followed_rules=[],only_one=False) -> False:
+    """
+    Similar to cp_2_note_vs_note, but with the counterpoint with two notes
+    for one whole
+    """
+    not_followed_rules = list(not_followed_rules)
+    if 2 in not_followed_rules:
+        not_followed_rules += [22,23,24,26] + [i for i in range(210,222)]
+    not_followed_rules = __unfollow_linked_rules(not_followed_rules,14,15)
+    not_followed_rules = __unfollow_linked_rules(not_followed_rules,17,18)
+
+    # rule that checks that every part is present is disabled
+    # if only one counterpoint is expected
+    if only_one:
+        not_followed_rules.append(22)
+    
+    lib = cp2_note_against_two_notes
+    return __rules_checker(string,not_followed_rules,lib)
+
 def dupre_improvisation_3(string : str, not_followed_rules=[]) -> bool:
     """This function checks that the rules created by Dupré for the third exercise
     of improvisation are followed.
@@ -107,6 +129,15 @@ def __rules_checker(string : str, not_followed_rules,lib) -> bool:
         print(f"Checking rule {i}...")
         rule(data)
     return True
+
+def __unfollow_linked_rules(rule_list,*rules):
+    """If one of the rule in rules is found in rule_list,
+    rule_list is added every other rules in rules.
+    Return rule_list"""
+    for i in rule_list:
+        if i in rules:
+            rule_list.extend(rules)
+            return list(set(rule_list))
 
 
 
