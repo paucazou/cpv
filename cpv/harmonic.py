@@ -72,7 +72,9 @@ def calculate_motion_types(s1, s2):
 
     for (na,n1), (nb, n2) in util.pairwise(tools.iter_melodies(s1,s2,alone=False)):
         nap, nbp, n1p, n2p = [util.to_pitch(x) for x in (na, nb, n1, n2)]
-        movs[motion.MotionType.motion(nap,nbp,n1p,n2p)] += 1
+        movs[motion.MotionType.motion(nap,n1p,nbp,n2p)] += 1
+
+    return movs
 
 def forbid_false_relation_tritone(s1,s2,allow_in_minor=False):
     """

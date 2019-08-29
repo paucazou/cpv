@@ -133,7 +133,7 @@ def relative_modulation(s : stave.Stave):
     sc = scale.Scale(s.keynote,s.mode)
     relative = sc.relative(scale.Mode.m_full)
     for n in s:
-        if n.pitch not in sc or n.pitch not in relative:
+        if n.pitch not in sc and n.pitch not in relative:
             error.warn("It is forbidden to modulate outside the relative key",n)
 
 def rythmic_pattern(s : stave.Stave, pattern : str):

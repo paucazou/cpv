@@ -139,5 +139,7 @@ def __unfollow_linked_rules(rule_list,*rules):
             rule_list.extend(rules)
             return list(set(rule_list))
 
+    return rule_list
+
 
 

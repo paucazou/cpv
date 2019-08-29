@@ -288,7 +288,7 @@ class Stave:
         """
         assert n in self
         idx = self.notes.index(n)
-        return n != self.notes[0] and self.notes[idx-1].pitch.isInterval(2).With(n)
+        return n != self.notes[0] and self.notes[idx-1].pitch.isInterval(2).With(n.pitch)
 
     def isCambiataOrPassing(self, n : note.Note,upbeat=True):
         """True n is a cambiata or a passing tone"""

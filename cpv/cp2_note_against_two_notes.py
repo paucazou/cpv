@@ -8,6 +8,8 @@ import cp2_note_against_note as cp2
 import dispatcher
 import harmonic
 import melodic
+import motion
+import stave
 import tools
 import util
 
@@ -53,20 +55,21 @@ def rule_4(cp,cf):
         if n2p.isConsonantWith(nbp):
             continue
         #is it a cambiata or a passing tone?
-        is_pt_or_c = cp.isCambiata(n2) or cp.isPassingTone(n2)
+        is_pt_or_c = cp.isCambiata(n2,False) or cp.isPassingTone(n2,False)
         #is it a conjunct movement?
         is_conjunct = cp.isConjunct(n2)
         #is it a contray motion?
         first = [n1p,nap]
         second = [n2p,nbp]
-        first.sort(key=lambda x : x.pitchi,reverse=True)
-        second.sort(key=lambda x : x.pitch,reverse=True)
-        is_contrary = motion.MotionType.motion(*first,*second)
+        first.sort(key=lambda x : x,reverse=True)
+        second.sort(key=lambda x : x,reverse=True)
+        is_contrary = motion.MotionType.motion(*first,*second) == motion.MotionType.contrary
 
         warn(f"""The downbeat is dissonant. It must be:
-        - be a cambiata or passing tone: {is_pt_or_c}
+        - a cambiata or passing tone: {is_pt_or_c}
         - come from a conjunct motion: {is_conjunct}
-        - come from a contrary motion: {is_contrary}""",cp.title,n2)
+        - come from a contrary motion: {is_contrary}
+        """,cp.title,n2)
 
 @dispatcher.cp_cf
 def rule_5(cp, cf):
@@ -97,7 +100,7 @@ def rule_7(cp, cf):
         if n2p.isQualifiedInterval((5,"diminished"),(4,"augmented"),(4,"perfect")).With(nbp) and n1p.isConsonantWith(nap):
             warn(f"It is forbidden to have a cambiata having an interval of 5th diminished, 4th perfect or augmented that return to a consonant pitch", cp.title,n2)
 
-        else if n2p.isInterval(2,7,True).With(nbp) and n1p.isConsonantWith(nap):
+        elif n2p.isInterval(2,7,True).With(nbp) and n1p.isConsonantWith(nap):
             warn(f"If the cambiata forms a seventh or a second with the other voice, it can return to the consonant note by tolerance only",cp.title,n2)
 
 @dispatcher.cp_cf
@@ -105,7 +108,7 @@ def rule_8(cp, cf):
     """L'unisson est toléré au temps faible"""
     for n1, n2 in tools.iter_melodies(cp,cf,alone=False):
         if n1.pitch == n2.pitch:
-            if n1 in (cp[-1],cp[1]):
+            if n1 in (cp[-1],cp[0]):
                 # it is the last or the first, which can be an unison
                 continue
             if cp.isUpBeat(n1):
@@ -116,7 +119,7 @@ def rule_8(cp, cf):
 @dispatcher.counterpoint_only
 def rule_9(cp):
     """La répétition des blanches est interdite"""
-    melodic.no_more_than(cp,0)
+    melodic.no_more_than(cp,1)
 
 def rule_10(data):
     """On peut faire deux accords par mesure"""
@@ -126,7 +129,7 @@ def rule_11(data):
     """Le mouvement de sixte mineure est permis"""
     warn("6th minor movement is allowed")
 
-@dispatcher.cf_cf
+@dispatcher.cp_cf
 def rule_12(cp, cf):
     """Il est défendu de donner l'impression de l'accord de quarte et sixte au temps fort. On pourra le faire - avec une grande réserve - au temps faible pour conserver un mouvement mélodique élégant, ou pour sauver des quintes ou des octaves"""
     for n1, n2 in tools.iter_melodies(cp,cf,all=True):
@@ -240,6 +243,15 @@ def rule_26(cp):
     """rule 6 of cp2_note_against_note"""
     melodic.forbid_chromatism(cp)
 
+@dispatcher.counterpoint_only
+def rule_27(s : stave.Stave):
+    """rule_24 of cp2_note_against_note"""
+    #cp2.rule_24(s)
+
+def rule_28(data):
+    """rule_25 of cp2_note_against_note"""
+    cp2.rule_25(data)
+
 @dispatcher.cp_cf
 def rule_210(cp, cf):
     """Rule 10 of cp2_note_against_note"""
@@ -278,7 +290,8 @@ def rule_217(cp):
 @dispatcher.cp_cf
 def rule_218(cp, cf):
     """Rule 18 of cp2_note_against_note"""
-    harmonic.calculate_motion_types(cp,cf)
+    print(cp.title)
+    print(harmonic.calculate_motion_types(cp,cf))
 
 @dispatcher.cp_cf
 def rule_219(cp, cf):
