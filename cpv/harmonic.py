@@ -41,7 +41,7 @@ def intersection(s1, s2):
 def forbid_consecutive_interval(s1, s2, interval):
     """Warn if two intervals of the same type are consecutive
     Interval must be qualified"""
-    for (na,n1), (nb, n2) in zip(util.pairwise(s1), util.pairwise(s2)):
+    for (na,n1), (nb, n2) in util.pairwise(tools.iter_melodies(s1,s2,all=True)):
         nap, nbp, n1p, n2p = [util.to_pitch(x) for x in (na, nb, n1, n2)]
         if nap.isQualifiedInterval(interval).With(n1p) and nbp.isQualifiedInterval(interval).With(n2p):
             error.warn(f"Two {interval} in a row are forbidden",na,nb,n1,n2,f"in {s1.title} and {s2.title}")

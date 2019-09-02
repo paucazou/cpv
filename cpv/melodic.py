@@ -90,11 +90,12 @@ def max_interval(s : stave.Stave, maximum, tolerance=[]):
     tolerance is the intervals tolerated only.
     User is warned of that thing
     """
+    tolerance += [maximum]
     res = tools.min_max(s)
     min = res.min
     max = res.max
     if max.intervalWith(min) in tolerance:
-        error.warn(f"The melody can exceed {tolerance} by tolerance only", s)
+        error.warn(f"The melody can be equal to {tolerance} by tolerance only", s)
     if max.intervalWith(min) > maximum:
         error.warn(f"The melody can not exceed {maximum} gap",s)
 
