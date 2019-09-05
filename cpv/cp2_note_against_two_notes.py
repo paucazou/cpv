@@ -197,7 +197,7 @@ def rule_19(cp, cf):
     for (n1, na), (n2, nb) in util.pairwise(tools.iter_melodies(cp,cf,alone=False)):
         n1p, nap, n2p, nbp = [util.to_pitch(x) for x in (n1,na, n2, nb)]
         if not n1p.isConsonantWith(nap) and not n2p.isConsonantWith(nbp) and not cp.isCambiata(n1,upbeat=False):
-            warn(f"If there is two dissonant pitches in a row, the first one must be a cambiata",cp.title,n1p,nap)
+            warn(f"If there is two dissonant pitches in a row, the first one must be a cambiata",cp.title,n1,na)
 
 @dispatcher.cp_cf
 def rule_20(cp, cf):
@@ -270,7 +270,7 @@ def rule_212(cp):
 @dispatcher.cp_cf
 def rule_214(cp,cf):
     """Rule 14 of cp2_note_against_note"""
-    harmonic.forbid_false_relation_tritone(cp,cf)
+    harmonic.forbid_false_relation_tritone(cp,cf,True)
 
 @dispatcher.counterpoint_only
 def rule_215(cp):

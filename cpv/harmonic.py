@@ -7,6 +7,7 @@ import error
 import motion
 import pitch
 import re
+import scale
 import tools
 import util
 
@@ -82,19 +83,22 @@ def forbid_false_relation_tritone(s1,s2,allow_in_minor=False):
     """
     msg = f"False relation of tritone is forbidden. In {s1.title} and {s2.title}"
     def __fun(n1, n2):
-        n1p, n2 = [util.to_pitch(x) for x in (n1,n2)]
+        n1p, n2p = [util.to_pitch(x) for x in (n1,n2)]
         def __is_VI_VII_minor():
             if allow_in_minor is not True:
                 return False
             if s1.scale.mode == scale.Mode.m_rising:
                 _scale = s1.scale.mode
             elif s1.scale.mode == scale.Mode.m_full:
-                _scale = s1.scale.mode.minor_scales[scale.Mode.m_rising]
+                _scale = s1.scale.minor_scales[scale.Mode.m_rising]
             elif s1.scale.mode == scale.Mode.M:
                 _scale = s1.scale.mode.relative(scale.Mode.m_rising)
             else:
                 return False 
-            return _scale.isDegree(n1,6) or _scale.isDegree(n1,7) or _scale.isDegree(n2,6) or _scale.isDegree(n2,7)
+            try:
+                return _scale.isDegree(n1p,6) or _scale.isDegree(n1p,7) or _scale.isDegree(n2p,6) or _scale.isDegree(n2p,7)
+            except ValueError:
+                return False
 
         if n1p.isTritoneWith(n2p) and not __is_VI_VII_minor():
             error.warn(msg,n1,n2)

@@ -40,14 +40,14 @@ def allowed_intervals(s : stave.Stave, *intervals):
     """
     for n1, n2 in util.pairwise(s):
         if not n1.pitch.isQualifiedInterval(*intervals).With(n2.pitch):
-            error.warn(f"Interval forbidden: {n1.qualifiedIntervalWith(n2)}",n1,n2)
+            error.warn(f"Interval forbidden: {n1.qualifiedIntervalWith(n2)}",n1,n2,s.title)
 
 def forbidden_intervals(s : stave.Stave, *intervals):
     """Same as allowed_intervals, but for forbidden
     ones"""
     for n1, n2 in util.pairwise(s):
         if n1.pitch.isQualifiedInterval(*intervals).With(n2.pitch):
-            error.warn(f"Following intervals are forbidden: {intervals}.",n1, n2)
+            error.warn(f"Following intervals are forbidden: {intervals}.",n1, n2,s.title)
 
 def allow_under_major_sixth(s : stave.Stave):
     """Wrapper of allowed_intervals.
