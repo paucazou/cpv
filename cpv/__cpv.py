@@ -8,10 +8,11 @@ import cp2_note_against_note
 import cp2_note_against_two_notes
 import cantus_firmus
 import dupre_improvisation_ex_3
+import harmony
 import note
 import stave
 
-functions = "cf cp_2_1_1 cp_2_1_2 dupre_improvisation_3".split()
+functions = "cf cp_2_1_1 cp_2_1_2 dupre_improvisation_3 harmony_koechlin".split()
 
 def __get_rules(lib):
     """Takes a module and return a dict
@@ -115,6 +116,14 @@ def dupre_improvisation_3(string : str, not_followed_rules=[]) -> bool:
     not_followed_rules = list(not_followed_rules)
     lib = dupre_improvisation_ex_3
     return __rules_checker(string,not_followed_rules,lib)
+
+def harmony_koechlin(string : str, not_followed_rules=[]) -> bool:
+    """This function checks that the rules followed by Charles Koechlin are followed.
+    It requires a string with the usual syntax with four pats:
+    Soprano, Alto, Tenor, Bass (case sensitive)."""
+    not_followed_rules = list(not_followed_rules)
+    lib = harmony
+    return __rules_checker(string, not_followed_rules,lib)
 
 
 

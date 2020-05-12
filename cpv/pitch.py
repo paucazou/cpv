@@ -95,6 +95,7 @@ class Pitch(enum.Enum):
         """True if self and other have a melodic consonance
         """
         return self.isQualifiedInterval(
+                (1,"perfect"),
                 (4,"perfect"),
                 (5,"perfect"),
                 (8,"perfect"),

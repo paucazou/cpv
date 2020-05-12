@@ -10,6 +10,8 @@ import scale
 class Importer:
     durations = {'whole':4,
                 'half'  :2,
+                'quarter':1,
+                'eighth':'0.5',
                 }
 
     def __init__(self,**kw):
@@ -36,8 +38,10 @@ class Importer:
         self.result += chars + "\n"
 
     def get_rhythm(self):
-        self.rhythm = 4 ##### TEMPORARY ######
-        self.append("4/4")
+        timesig = self.root.find('Score').find('Staff').find('Measure').find('TimeSig')
+        self.numerator = timesig.find('sigN').text
+        self.denominator = timesig.find('sigD').text
+        self.append(f"{self.numerator}/{self.denominator}")
 
     def get_keynote(self):
         for s in self.root.iter("Text"):
@@ -57,7 +61,7 @@ class Importer:
         #duration
         duration_ = c.find("durationType").text
         sduration_ = str(self.durations[duration_])
-        duration_ = int(sduration_)
+        duration_ = float(sduration_)
         # pitch
         pitch_ = c.find("Note").find("pitch").text
         pitch_ = int(pitch_)
@@ -104,17 +108,26 @@ class Importer:
 
     def manage_bars(self):
         breaks = []
-        for staff in self.staffs:
+        parts = self.root.find("Score").findall("Part")
+        if parts:
+            part_names = [elt.find("trackName").text for elt in parts]
+        else:
+            part_names = [None] * len(self.staffs)
+
+        for name, staff in zip(part_names, self.staffs):
             next_one=True
             for i, measure in enumerate(staff):
                 if measure.tag != "Measure":
                     continue
                 if next_one:
                     # title
-                    if measure.find('StaffText') is None:
-                        raise SyntaxError("A title lacks")
+                    if not name:
+                        if measure.find('StaffText') is None:
+                            raise SyntaxError("A title lacks")
+                        name = measure.find('StaffText').find('text').text
+                    
 
-                    self.append("* " + measure.find('StaffText').find('text').text)
+                    self.append(f"* {name}")
                     next_one = False
                     # pos
                     self.current_pos = 0

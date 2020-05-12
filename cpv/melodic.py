@@ -40,7 +40,7 @@ def allowed_intervals(s : stave.Stave, *intervals):
     """
     for n1, n2 in util.pairwise(s):
         if not n1.pitch.isQualifiedInterval(*intervals).With(n2.pitch):
-            error.warn(f"Interval forbidden: {n1.qualifiedIntervalWith(n2)}",n1,n2,s.title)
+            error.warn(f"Interval forbidden: {n1.pitch.qualifiedIntervalWith(n2.pitch)}",n1,n2,s.title)
 
 def forbidden_intervals(s : stave.Stave, *intervals):
     """Same as allowed_intervals, but for forbidden
@@ -61,6 +61,7 @@ def allow_under_minor_sixth(s : stave.Stave,*intervals):
     Only major, minor and perfect
     """
     allowed_intervals(s,*intervals,
+            (1,"perfect"),
             (2,"minor"),
             (2,"major"),
             (3,"minor"),
