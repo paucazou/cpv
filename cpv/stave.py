@@ -2,10 +2,13 @@
 # -*-coding:Utf-8 -*
 #Deus, in adjutorium meum intende
 
+import collections
 import math
 import note
 import pitch
 import scale
+
+Modulation = collections.namedtuple('Modulation',"key scale pos".split())
 
 
 class Stave:
@@ -26,13 +29,20 @@ class Stave:
         def __repr__(self):
             return f"Bar<{self.stave.title}:{self.pos}> {self.elts}"
 
-    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M, nscale=None):
-        """If nscale is set, keynote and mode are discarded"""
+    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M, nscale=None,modulations=None):
+        """If nscale is set, keynote and mode are discarded
+        If modulations is set, nscale is also discarded.
+        """
         self._stave = []
         self.rythm = rythm
         self.breve_value = breve_value
         self.title = name
-        if nscale is None:
+        if modulations is not None:
+            self.modulations = modulations
+            first = modulations[0]
+            self.keynote = first.key
+            self.scale = first.scale
+        elif nscale is None:
             self.keynote = keynote
             self.mode = mode
             self.scale = scale.Scale(keynote,mode)
@@ -300,6 +310,15 @@ class Stave:
             if self.isPassingTone(elt,**kw) is False:
                 return False
         return True
+
+    def scaleAt(self,pos):
+        """Get scale at pos"""
+        try:
+            for m in self.modulations:
+                if pos >= m.pos:
+                    return m.scale
+        except AttributeError:
+            return self.scale
 
 
 

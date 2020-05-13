@@ -5,6 +5,8 @@
 from error import warn
 import dispatcher
 import melodic
+import motion
+import tools
 import util
 
 @dispatcher.one_voice
@@ -24,7 +26,7 @@ def rule_2(voice):
     for notes in util.nwise(voice,3):
         np1,np2,np3 = util.to_pitch(notes)
         if np1.semitoneWith(np3) == 6:
-            if (np1 < np2 < np3) or (np1 > np2 > np3):
+            if tools.is_same_direction(np1,np2,np3):
                 warn(f"Tritone in 3 notes are forbidden, except when the middle note is lower or greater than the 2 other notes",notes,voice.title)
 
 @dispatcher.one_voice
@@ -47,5 +49,35 @@ def rule_4(voice):
         if np1.semitoneWith(np4) == 6:
             warn(f"Tritone in 4 notes must be checked",notes,voice.title)
 
+@dispatcher.one_voice
+def rule_5(voice):
+    """La sensible doit monter sur la tonique"""
+    for n1, n2 in util.pairwise(voice):
+        sc1 = voice.scaleAt(n1.pos)
+        sc2 = voice.scaleAt(n2.pos)
+
+        if sc1 == sc2 and sc1.isLeading(n1.pitch) and (not sc2.isTonic(n2.pitch)):
+            warn(f"The sensible should go to the tonic.",n1,n2,voice.title)
+
+
+def rule_6(data):
+    """Les voix ne doivent pas toutes effectuer le même mouvement"""
+    for group1, group2 in util.pairwise(tools.iter_melodies(*data)):
+        assert len(group1) == len(group2) and "Error : pauses not handled"
+        is_same_mov =  True
+        for i in range(len(group1)):
+            for j in range(i+1,len(group1)):
+                notes1 = sorted(util.to_pitch([group1[i],group1[j]]),key=lambda x : x.value.semitone)
+                notes2 = sorted(util.to_pitch([group2[i],group2[j]]),key=lambda x : x.value.semitone)
+                if motion.MotionType.motion(*notes1,*notes2) is not motion.MotionType.direct or (notes1 == notes2):
+                    is_same_mov = False
+                    break
+            if is_same_mov is False:
+                break
+
+        if is_same_mov:
+            warn(f"All the voices shouldn't be in the same direction.",group1,group2)
+
+                
 
 
