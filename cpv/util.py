@@ -2,6 +2,7 @@
 # -*-coding:Utf-8 -*
 #Deus, in adjutorium meum intende
 import itertools
+import collections
 
 def list_finder(l, res, fall_back=None, fun=lambda x: x):
     """Find elements into the list l
@@ -20,7 +21,11 @@ def list_finder(l, res, fall_back=None, fun=lambda x: x):
 
 def to_pitch(n):
     """Transforms a note into a pitch
+    If it's an iterable, return an iterable
+    of pitches in the same order.
     """
+    if isinstance(n,collections.abc.Iterable):
+        return (to_pitch(elt) for elt in n)
     try:
         return n.pitch
     except AttributeError:
@@ -42,4 +47,41 @@ def pairwise(iterable):
     a, b = itertools.tee(iterable)
     next(b, None)
     return zip(a, b)
+
+def nwise(iterable, n):
+    """Same as pairwise but with n elements
+    >>> for elt in nwise(range(10),3):
+    ...     a,b,c = elt
+    ...     print(a,b,c)
+    ... 
+    0 1 2
+    1 2 3
+    2 3 4
+    3 4 5
+    4 5 6
+    5 6 7
+    6 7 8
+    7 8 9
+    >>> for elt in nwise(range(15),4):
+    ...     print(*elt)
+    ... 
+    0 1 2 3
+    1 2 3 4
+    2 3 4 5
+    3 4 5 6
+    4 5 6 7
+    5 6 7 8
+    6 7 8 9
+    7 8 9 10
+    8 9 10 11
+    9 10 11 12
+    10 11 12 13
+    11 12 13 14
+    """
+    # https://stackoverflow.com/questions/54280228/how-to-iterate-n-wise-over-an-iterator-efficiently
+    deq = collections.deque((),n)
+    for elt in iterable:
+        deq.append(elt)
+        if len(deq) == n:
+            yield deq
     
