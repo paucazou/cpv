@@ -13,8 +13,8 @@ M = motion.MotionType
 pitcher = lambda x : [ P[elt] for elt in x.split() ]
 
 def test_motion():
-    def func(n,r):
-        assert motion.MotionType.motion(pitcher(n)) == r
+    def func(n,r,**kw):
+        assert motion.MotionType.motion(pitcher(n),**kw) == r
 
     func("C4 C3 G3 E3",M.contrary)
     func("G3 E3 C4 C3",M.contrary)
@@ -22,9 +22,12 @@ def test_motion():
     func("C3 G3 C3 D3",M.oblique)
     func("E3 G3 C3 E3",M.direct)
     func("E3 G3 G3 B3",M.direct)
-    func("E3 G3 E3 G3",M.direct)
+    func("E3 G3 E3 G3",M.no)
 
-    func("G3 E3 E3 G3",M.direct)
+    func("G3 E3 E3 G3",M.contrary,nosort=True)
+    func("G3 E3 E3 G3",M.no)
+    func("G3 E3 E3 G3",M.no,nosort=False)
+
 
 
 
