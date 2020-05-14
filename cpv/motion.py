@@ -13,6 +13,7 @@ P = pitch.Pitch
 class MotionType(enum.Flag):
     """Enumeration of different
     motion types"""
+    no = 0
     direct = 1
     contrary = 2
     oblique = 3
@@ -40,10 +41,10 @@ class MotionType(enum.Flag):
         h1,l1 = __sort(h1,l1)
         h2,l2 = __sort(h2,l2)
 
-        if h1 == h2: # oblique or direct
-            return cls.direct if l1 == l2 else cls.oblique
-        if l1 == l2: # oblique or direct
-            return cls.direct if h1 == h2 else cls.oblique
+        if h1 == h2 and l1 == l2: # no movement
+            return cls.no
+        if h1 == h2 or l1 == l2: # oblique
+            return cls.oblique
 
         if (h1.value.semitone > h2.value.semitone and l1.value.semitone > l2.value.semitone) or (h1.value.semitone < h2.value.semitone and l1.value.semitone < l2.value.semitone):
             return cls.direct
