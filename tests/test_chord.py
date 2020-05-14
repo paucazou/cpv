@@ -94,6 +94,18 @@ def test_find_chord():
     func([chord0,chord1],generate_notes("C4 E4"))
     func(chord07,generate_notes("C4 G4 E4 B3"),seventh=True,best=True)
 
+def test_find_best_chord():
+    def func(r,n):
+        assert Chord.findBestChord(n,scale0) == r
+    func(chord07,generate_notes("C4 E4 G4 C5"))
+    func(chord07,generate_notes("C4 E4 G4 B4"))
+    func(chord07,generate_notes("C4 E4 B4 C5"))
+    func(chord07,generate_notes("C4 E4 B4 E5"))
+    func(chord07,generate_notes("C4 E4 C5 C6"))
+    func(chord07,generate_notes("C4 E4 C5 E5"))
+
+
+
 
 def test_is_chord():
     def func(n,b=True):

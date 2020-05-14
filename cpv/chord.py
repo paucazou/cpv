@@ -6,6 +6,7 @@ import note
 import pitch
 import scale
 import scalenote
+import tools
 import util
 # TODO add the ninth if necessary
 
@@ -174,6 +175,38 @@ class AbstractChord:
 
         return returned
 
+    @staticmethod
+    def findBestChord(notes,scale):
+        """Similar to findChord(seventh=True,best=True), but the way to select
+        the best chord is different.
+        """
+        def __purify(notes,chords,func):
+            for i,elt in enumerate(chords):
+                if func(notes,elt):
+                    del(chords[i])
+
+            return len(chords)<1
+
+        chords = AbstractChord.findChord(notes,scale,seventh=True,best=True)
+        if isinstance(chords,AbstractChord):
+            return chords
+
+        # is root absent?
+        if __purify(notes,chords,lambda n,elt : not elt.hasRoot(n)):
+            return chords[0]
+
+        # which note is doubled?
+        """Le but de cette section serait de regarder quelles notes sont doublées:
+        si c'est la fondamentale, la tierce, la quinte, etc. Seraient privilégiés
+        les accords dont les doublures sont la fondamentale ou la quinte. Cela dit,
+        les résultats sont les mêmes que pour la section suivante.
+        À voir en fonction des résultats in vivo"""
+
+        # What is the best degree possible (only two different notes, or even one)
+        best_degrees = (1, 5, 4, 2, 6, 7, 3)
+        chords.sort(key=lambda c : best_degrees.index(c.degree))
+        return chords[0]
+
 
     @staticmethod
     def isChord(notes,scale,seventh=False) -> bool: # TEST
@@ -219,6 +252,16 @@ for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")): # TEST
             return self.isPosition(note,i)
         return __function
     setattr(AbstractChord,f"is{name}",__generate_func(i))
+
+for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")):
+    def __generate_func(i):
+        def __function(self,notes):
+            for n in notes:
+                if self.isPosition(n,i):
+                    return True
+                return False
+        return __function
+    setattr(AbstractChord,f"has{name}",__generate_func(i))
 
 
 class _minor__chord(AbstractChord):
@@ -320,3 +363,34 @@ class ActualChord:
 
     highestNote = property(_highest_note)
     isHighestRoot = property(_is_highest_root)
+
+class RealizedChord:
+    """Chord realized in the score, but different positions are allowed
+    """
+    @staticmethod
+    def chordify(data):
+        """Takes a bunch of staves (data) and finds the chords
+        inside. Return a list of RealizedChord"""
+        chords = []
+        for notes in tools.iter_melodies(*data):
+            start = max([n.pos for n in notes])
+            end = min([n.last_pos for n in notes])
+
+            sc = data[0].scaleAt(start)
+            c = AbstractChord.findBestChord(notes,sc,seventh=True,best=True)
+            assert not isinstance(c,list)
+            if chords and chords[-1].abstract == c:
+                chords[-1].end = end
+            else:
+                chords.append(RealizedChord(c, start, end, data))
+        return chords
+
+    def __init__(self, a_chord, start,end,staves):
+        self.abstract = a_chord
+        self.start = start
+        self.end = end
+        self.staves = staves
+
+    def __repr__(self):
+        return f"RealizedChord<{self.abstract}>{self.start}:{self.end}"
+        

@@ -57,7 +57,7 @@ def rule_5(voice):
         sc2 = voice.scaleAt(n2.pos)
 
         if sc1 == sc2 and sc1.isLeading(n1.pitch) and (not sc2.isTonic(n2.pitch)):
-            warn(f"The sensible should go to the tonic.",n1,n2,voice.title)
+            warn(f"The leading tone should go to the tonic.",n1,n2,voice.title)
 
 
 def rule_6(data):
@@ -69,7 +69,7 @@ def rule_6(data):
             for j in range(i+1,len(group1)):
                 notes1 = sorted(util.to_pitch([group1[i],group1[j]]),key=lambda x : x.value.semitone)
                 notes2 = sorted(util.to_pitch([group2[i],group2[j]]),key=lambda x : x.value.semitone)
-                if motion.MotionType.motion(*notes1,*notes2) is not motion.MotionType.direct or (notes1 == notes2):
+                if motion.MotionType.motion(*notes1,*notes2) is not motion.MotionType.direct:
                     is_same_mov = False
                     break
             if is_same_mov is False:
@@ -77,6 +77,23 @@ def rule_6(data):
 
         if is_same_mov:
             warn(f"All the voices shouldn't be in the same direction.",group1,group2)
+
+def rule_7(data):
+    """Il est interdit de doubler la sensible"""
+    for notes in tools.iter_melodies(*data):
+        # get scale
+        pos = max([n.pos for n in notes])
+        sc = data[0].scaleAt(pos)
+
+        pitches = util.to_pitch(notes)
+        if len([p for p in pitches if sc.isLeading(p)]) > 1:
+            warn(f"The leading tone can not be doubled",*notes)
+
+def rule_8(data):
+    """Les tierces dans le grave sont lourdes et à éviter.
+    Here, we choose to warn if the third is under F3"""
+    pass
+
 
                 
 
