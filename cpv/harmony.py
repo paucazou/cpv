@@ -6,6 +6,7 @@ from error import warn
 import dispatcher
 import melodic
 import motion
+import pitch
 import tools
 import util
 
@@ -89,10 +90,14 @@ def rule_7(data):
         if len([p for p in pitches if sc.isLeading(p)]) > 1:
             warn(f"The leading tone can not be doubled",*notes)
 
-def rule_8(data):
+@dispatcher.two_voices
+def rule_8(s1,s2,min=pitch.Pitch.F3):
     """Les tierces dans le grave sont lourdes et à éviter.
     Here, we choose to warn if the third is under F3"""
-    pass
+    for n1, n2 in tools.iter_melodies(s1,s2):
+        np1,np2 = util.to_pitch((n1,n2))
+        if np1.isInterval(3).With(np2) and (np1 < min and np2 < min):
+            warn(f"Low thirds should be avoided",n1,n2,s1.title,s2.title)
 
 
                 

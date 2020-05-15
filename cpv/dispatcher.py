@@ -6,6 +6,7 @@ contains
 functions intended to be used
 as decorators of rules
 """
+import itertools
 import tools
 
 def one_voice(func):
@@ -20,10 +21,8 @@ def two_voices(func):
     Each voice is linked with every other one
     """
     def __wrapper(data):
-        for s in data:
-            for s2 in data:
-                if s is not s2:
-                    func(s,s2)
+        for s1,s2 in itertools.combinations(data,2):
+            func(s1,s2)
     return __wrapper
 
 def counterpoint_only(func):

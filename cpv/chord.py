@@ -180,19 +180,18 @@ class AbstractChord:
         """Similar to findChord(seventh=True,best=True), but the way to select
         the best chord is different.
         """
-        def __purify(notes,chords,func):
-            for i,elt in enumerate(chords):
-                if func(notes,elt):
-                    del(chords[i])
-
-            return len(chords)<1
-
         chords = AbstractChord.findChord(notes,scale,seventh=True,best=True)
         if isinstance(chords,AbstractChord):
             return chords
+        if len(chords) == 1:
+            return chords[0]
 
         # is root absent?
-        if __purify(notes,chords,lambda n,elt : not elt.hasRoot(n)):
+        nchords = chords[:]
+        chords = [ elt for elt in chords if elt.hasRoot(notes) ]
+        if len(chords) == 0:
+            from IPython import embed;embed()
+        if len(chords) == 1:
             return chords[0]
 
         # which note is doubled?
@@ -259,7 +258,7 @@ for i, name in zip((1,3,5,7),("Root","Third","Fifth","Seventh")):
             for n in notes:
                 if self.isPosition(n,i):
                     return True
-                return False
+            return False
         return __function
     setattr(AbstractChord,f"has{name}",__generate_func(i))
 
@@ -377,7 +376,7 @@ class RealizedChord:
             end = min([n.last_pos for n in notes])
 
             sc = data[0].scaleAt(start)
-            c = AbstractChord.findBestChord(notes,sc,seventh=True,best=True)
+            c = AbstractChord.findBestChord(notes,sc)
             assert not isinstance(c,list)
             if chords and chords[-1].abstract == c:
                 chords[-1].end = end
@@ -393,4 +392,8 @@ class RealizedChord:
 
     def __repr__(self):
         return f"RealizedChord<{self.abstract}>{self.start}:{self.end}"
+
+    """ajouter une fonction qui demande s'il y a tel intervalle entre deux voix, de préférence avec un double appel, et à combien de distance
+    RealizedChord.has(5,'perfect').Between(1,4).distance('whole')
+    """
         
