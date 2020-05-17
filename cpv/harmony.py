@@ -163,6 +163,34 @@ def rule_12(data):
                         warn(f"Perfect fifth followed by a diminished 5th is {tolerance} between {titles[0]} and {titles[1]}.", r.first,r.second)
 
 
+def rule_13(data):
+    """Deux quintes diminuées peuvent être enchaînées."""
+    return True
+
+def rule_14(data):
+    """Les octaves et quintes par mouvement direct ne sont autorisées que si la voix supérieure procède par mouvement conjoint.
+        La quinte directe est tolérable si la voix inférieure procède par mouvement conjoint, à condition que l’une des voix soit le ténor ou le contralto et que la voix inférieure aboutisse à un des bons degrés (I – IV – V) de la gamme.
+    La quinte directe est tolérable si l’une des notes de la quinte appartient à l’accord précédent, même par mouvement disjoint, à condition qu’elle ait une bonne sonorité.
+    À l’intérieur d’un même accord, on tolère des quintes et des octaves directes, y compris par mouvement direct et disjoint.
+    """
+    pass
+
+@dispatcher.two_voices
+def rule_15(s1,s2):
+    """L'unisson est interdit"""
+    for n1, n2 in tools.iter_melodies(s1,s2):
+        p1,p2 = [util.to_pitch(n) for n in (n1,n2)]
+        if p1 == p2:
+            warn(f"Unisons are forbidden",n1,n2,s1.title,s2.title)
+@dispatcher.two_voices
+def rule_16(s1,s2):
+    """Les croisements sont interdits"""
+    is_s1_higher = s1.notes[0].pitch > s2.notes[0].pitch
+    for n1, n2 in tools.iter_melodies(s1,s2):
+        p1,p2 = [util.to_pitch(n) for n in (n1,n2)]
+        if (is_s1_higher and p2 > p1) or (not is_s1_higher and p1 > p2):
+            warn(f"Intersection is forbidden",n1,n2,s1.title,s2.title)
+    
 
 
 
