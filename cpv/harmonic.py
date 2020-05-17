@@ -69,7 +69,8 @@ def calculate_motion_types(s1, s2):
     and oblique"""
     movs = { motion.MotionType.direct : 0,
             motion.MotionType.contrary : 0,
-            motion.MotionType.oblique : 0}
+            motion.MotionType.oblique : 0,
+            motion.MotionType.no:0}
 
     for (na,n1), (nb, n2) in util.pairwise(tools.iter_melodies(s1,s2,alone=False)):
         nap, nbp, n1p, n2p = [util.to_pitch(x) for x in (na, nb, n1, n2)]
@@ -116,6 +117,8 @@ def distance_between_intervals(s1,s2,interval):
             self.distance = last_pos - first_pos
             self.first = first
             self.second = second
+            self.start = first_pos
+            self.end = last_pos
 
     for first, second in by_two_intervals(s1,s2,interval):
         # yield pos

@@ -3,7 +3,9 @@
 #Deus, in adjutorium meum intende
 
 from error import warn
+import chord
 import dispatcher
+import harmonic
 import melodic
 import motion
 import pitch
@@ -98,6 +100,70 @@ def rule_8(s1,s2,min=pitch.Pitch.F3):
         np1,np2 = util.to_pitch((n1,n2))
         if np1.isInterval(3).With(np2) and (np1 < min and np2 < min):
             warn(f"Low thirds should be avoided",n1,n2,s1.title,s2.title)
+
+
+@dispatcher.voice_and_following
+def rule_9(s1,s2):
+    """
+    1. Le soprano et le contralto ne doivent pas être éloignés de la voix inférieure d’un intervalle supérieur à l’octave.
+    2. Le ténor et la basse ne doivent pas être éloignés d’un intervalle supérieur à la douzième.
+    3. Il est possible d’excéder l’intervalle maximal dans le cas d’un saut d’octave, de préférence suivi d’un mouvement mélodique inverse.
+    """
+    titles = (s1.title,s2.title)
+    max = 12 if titles == ("Tenor","Bass") else 8
+
+    for n1, n2 in tools.iter_melodies(s1,s2):
+        np1,np2 = util.to_pitch((n1,n2))
+        if np1.intervalWith(np2) > max:
+            warn(f"Max interval between {s1.title} and {s2.title} is {max}, except if there's a melodic octave, or other thing of that kind followed by a melodic contrary movement. Is that the case?",n1,n2,*titles)
+
+@dispatcher.two_voices
+def rule_10(s1,s2):
+    """Le mouvement contraire est préférable à l’oblique, lui-même préférable au direct."""
+    titles = (s1.title,s2.title)
+    movs = harmonic.calculate_motion_types(s1,s2)
+    warn(f"""Between {s1.title} and {s2.title}:
+    contrary motions: {movs[motion.MotionType.contrary]}
+    direct motions: {movs[motion.MotionType.direct]}
+    oblique motions: {movs[motion.MotionType.oblique]}
+    no motion: {movs[motion.MotionType.no]}
+    """
+    )
+
+def rule_11(data):
+    """Les octaves et quintes consécutives sont interdites entre deux accords, à moins que ces deux intervalles ne soient séparés par l’équivalent d’une ronde (ou d’une mesure si on n'est pas en 4/4).
+    """
+    chords = chord.RealizedChord.chordify(data)
+    distance_max = data[0].breve_value
+    def func(interval):
+        for c1,c2 in util.pairwise(chords):
+            res = c1.hasParallelIntervalWith(c2,interval)
+            for titles, results in res.items():
+                for r in results:
+                    if r.distance < distance_max:
+                        warn(f"Parallel {interval} found between {titles[0]} and {titles[1]}.",c1,c2)
+
+    func((8,"perfect"))
+    func((5,"perfect"))
+
+def rule_12(data):
+    """La quinte juste suivie d’une quinte diminuée est tolérée si ce n’est pas entre parties extrêmes.
+    """
+    chords = chord.RealizedChord.chordify(data)
+    extreme_titles = [data[0].title,data[-1].title]
+    distance_max = data[0].breve_value
+    for c1, c2 in util.pairwise(chords):
+        res = c1.hasParallelIntervalWith(c2,5)
+        for titles, results in res.items():
+            tolerance = "tolerated" if titles != extreme_titles else "forbidden"
+            for r in results:
+                if r.distance < distance_max:
+                    # is it a perfect 5th followed by a diminished 5th?
+                    if r.first[0].pitch.isQualifiedInterval((5,'perfect')).With(r.first[1].pitch) and r.second[0].pitch.isQualifiedInterval((5,'diminished')).With(r.second[0].pitch):
+                        warn(f"Perfect fifth followed by a diminished 5th is {tolerance} between {titles[0]} and {titles[1]}.", r.first,r.second)
+
+
+
 
 
                 

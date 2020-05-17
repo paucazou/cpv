@@ -8,6 +8,7 @@ as decorators of rules
 """
 import itertools
 import tools
+import util
 
 def one_voice(func):
     """Apply func to one voice at a time"""
@@ -24,6 +25,16 @@ def two_voices(func):
         for s1,s2 in itertools.combinations(data,2):
             func(s1,s2)
     return __wrapper
+
+def voice_and_following(func):
+    """Apply func to two voices at a time:
+    a voice and the following one
+    """
+    def __wrapper(data):
+        for voices in util.pairwise(data):
+            func(*voices)
+    return __wrapper
+
 
 def counterpoint_only(func):
     """Extracts only the counterpoints

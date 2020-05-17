@@ -2,6 +2,9 @@
 # -*-coding:Utf-8 -*
 #Deus, in adjutorium meum intende
 
+import itertools
+import harmonic
+import motion
 import note
 import pitch
 import scale
@@ -190,7 +193,7 @@ class AbstractChord:
         nchords = chords[:]
         chords = [ elt for elt in chords if elt.hasRoot(notes) ]
         if len(chords) == 0:
-            from IPython import embed;embed()
+            return chords[0]
         if len(chords) == 1:
             return chords[0]
 
@@ -393,7 +396,31 @@ class RealizedChord:
     def __repr__(self):
         return f"RealizedChord<{self.abstract}>{self.start}:{self.end}"
 
-    """ajouter une fonction qui demande s'il y a tel intervalle entre deux voix, de préférence avec un double appel, et à combien de distance
-    RealizedChord.has(5,'perfect').Between(1,4).distance('whole')
-    """
+    def hasParallelIntervalWith(self,following,interval):
+        """
+        Return parallel interval with following in every voice,
+        with the distance between them.
+        """
+        all_staves_results = {(s1.title,s2.title) : harmonic.distance_between_intervals(s1,s2,interval)
+                for s1,s2 in itertools.combinations(self.staves,2)}
+
+        returned = {}
+        for title, intervalspair in all_staves_results.items():
+            intervalspair_selected = []
+            for itvl in intervalspair:
+                pos1 = min(itvl.first,key=lambda x : x.last_pos).last_pos
+                pos2 = max(itvl.second,key=lambda x: x.pos).pos
+                # are the intervals different?
+                if motion.MotionType.motion(*itvl.first,*itvl.second) == motion.MotionType.no:
+                    continue
+                if pos1 > self.start and pos2 < following.end:
+                    # check that the intervals are in two different chords
+                    if itvl.first in self.abstract and itvl.second in following.abstract:
+                        intervalspair_selected.append(itvl)
+            returned[title] = intervalspair_selected
+
+        return returned
+
+
+
         
