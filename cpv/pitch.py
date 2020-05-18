@@ -33,7 +33,7 @@ class Pitch(enum.Enum):
     def intervalWith(self, other, min=False):
         """Return the interval between self
         and other. If min is True, then it will
-        return the matching interval under 8"""
+        return the matching interval under 9"""
         result = abs(self.value.step - other.value.step) + 1
         while result >= 9 and min:
             result -= 7

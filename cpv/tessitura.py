@@ -2,6 +2,7 @@
 # -*-coding:Utf-8 -*
 #Deus, in adjutorium meum intende
 
+import error
 import pitch
 import util
 
@@ -45,6 +46,21 @@ class Tessitura:
             if not elt in self.isCondoned(elt):
                 return False
         return True
+
+    def check(self, s,condoned_false=False) -> bool:
+        """True if notes in s (a stave) are in the tessitura.
+        warn if a note is condoned or outside"""
+        correct = True
+        for n in s.notes:
+            if n not in self:
+                if condoned_false is True:
+                    correct = False
+                if self.isCondoned(n.pitch):
+                    warn(f"Condoned note: {n} in {s.title}")
+                else:
+                    warn(f"Note outside the tessitura: {n} in {s.title}")
+        return correct
+
 
 
 p = pitch.Pitch

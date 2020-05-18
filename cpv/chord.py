@@ -396,6 +396,18 @@ class RealizedChord:
     def __repr__(self):
         return f"RealizedChord<{self.abstract}>{self.start}:{self.end}"
 
+    def __contains__(self,notes):
+        """True if the notes
+        are in the chord. 
+        This function checks the position
+        of the notes"""
+        # TODO vérifier qu'il ne faille pas mettre supérieur(inférieur) ou égal à...
+        for n in notes:
+            if n.last_pos < self.start or n.pos > self.end or n not in self.abstract:
+                return False
+
+        return True
+
     def hasParallelIntervalWith(self,following,interval):
         """
         Return parallel interval with following in every voice,

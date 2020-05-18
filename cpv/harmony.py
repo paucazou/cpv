@@ -9,6 +9,7 @@ import harmonic
 import melodic
 import motion
 import pitch
+import tessitura
 import tools
 import util
 
@@ -173,7 +174,52 @@ def rule_14(data):
     La quinte directe est tolérable si l’une des notes de la quinte appartient à l’accord précédent, même par mouvement disjoint, à condition qu’elle ait une bonne sonorité.
     À l’intérieur d’un même accord, on tolère des quintes et des octaves directes, y compris par mouvement direct et disjoint.
     """
-    pass
+    chords = chord.RealizedChord.chordify(data)
+    extreme_titles = data[0].title, data[-1].title
+    for s1,s2 in itertools.combinations(data,2):
+        for n1,n2, na, nb in util.pairwise(tools.iter_melodies(s1,s2)):
+            # is it a fifth or an octave?
+            if not na.pitch.isQualifiedInterval((8,'perfect'),(5,'perfect'),(5,'diminished'),(5,'augmented')).With(nb.pitch):
+                continue
+            # is it in the same chord?
+            for c in chords:
+                if (n1,n2,na,nb) in c:
+                    continue
+            # is it a direct 5th or octave?
+            if motion.MotionType.motion(n1,n2,na,nb) != motion.MotionType.direct:
+                continue
+            # does the upper voice proceed by conjunct movement?
+            if n1.pitch.semitoneWith(na) in (1,2):
+                continue
+            # if it is an octave, there's no more tolerance: it's an error
+            if na.pitch.isInterval(8,min=True):
+                warn(f"Direct octaves with no conjunct movement is forbidden.",n1,n2,na,nb,s1.title, s2.title)
+                continue
+            # is it a direct 5th with lower voice going to I, IV or V
+            # by conjunct movement in non extreme parts?
+            if extreme_titles != (s1.title, s2.title):
+                # get scale of the second interval: there may be a modulation between the 2 intervals.
+                pos = max(na.pos,nb.pos)
+                current_scale = s2.scaleAt(pos)
+                best_degrees = (1,4,5)
+                if n2.pitch.semitoneWith(nb) in (1,2) and current_scale.positionOf(nb) in best_degrees:
+                    warn(f"Tolerance: direct fith with lower voice going to I, IV, V by conjunct movement between non extreme parts is tolerated. Do not hesitate to find a better disposition",n1,n2,na,nb,s1.title,s2.title)
+                    continue
+            # is it a direct 5th with a note of the 5th in the previous chord?
+            for c1, c2 in util.pairwise(chords):
+                if (na, nb) in c2 and (na in c1 or nb in c1):
+                    warn(f"Tolerance: direct fifth is tolerated if one of the notes of the 5th can be heard in the previous chord AND if the sound is good. Please check that.",n1,n2, na,nb, s1.title,s2.title)
+                    continue
+            # error
+            warn(f"Direct 5th are forbidden, except:
+            - when the higher voice moves by conjunct motion
+            - when, except in extreme parts, the lower voice moves by conjunct motion to I, IV, V
+            - when the note of the 5th can be heard in the previous chord
+            - in a change of position inside a chord.
+            """, n1,n2, na,nb,s1.title,s2.title)
+
+
+
 
 @dispatcher.two_voices
 def rule_15(s1,s2):
@@ -190,6 +236,17 @@ def rule_16(s1,s2):
         p1,p2 = [util.to_pitch(n) for n in (n1,n2)]
         if (is_s1_higher and p2 > p1) or (not is_s1_higher and p1 > p2):
             warn(f"Intersection is forbidden",n1,n2,s1.title,s2.title)
+
+@dispatcher.one_voice
+def rule_17(v):
+    """Une voix ne doit pas sortir de sa tessiture."""
+    soprano = tessitura.Tessitura(P.C4,P.A5,[P.Bb5,P.B3])
+    alto = tessitura.Tessitura(P.G3,P.D5,[P.Fs3,P.Ds5,P.Eb5,P.E5,P.F5])
+    tenor = tessitura.Tessitura(P.D3,P.G4,[P.C3,P.Cs3,P.Db3, P.Gs4,P.Ab4,P.A4,P.Bb4])
+    bass = tessitura.Tessitura(P.G3,P.D4,[P.E3,P.F3,P.Fs3,P.Gb3, P.Ds4,P.Eb4,P.E4,P.F4])
+
+    tessituras = {'Bass':bass,'Tenor':tenor,'Alto':alto,'Soprano':soprano}
+    tessituras[v.title].check(v)
     
 
 
