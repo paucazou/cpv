@@ -5,6 +5,7 @@
 from error import warn
 import chord
 import dispatcher
+import itertools
 import harmonic
 import melodic
 import motion
@@ -177,7 +178,7 @@ def rule_14(data):
     chords = chord.RealizedChord.chordify(data)
     extreme_titles = data[0].title, data[-1].title
     for s1,s2 in itertools.combinations(data,2):
-        for n1,n2, na, nb in util.pairwise(tools.iter_melodies(s1,s2)):
+        for (n1,n2), (na, nb) in util.pairwise(tools.iter_melodies(s1,s2)):
             # is it a fifth or an octave?
             if not na.pitch.isQualifiedInterval((8,'perfect'),(5,'perfect'),(5,'diminished'),(5,'augmented')).With(nb.pitch):
                 continue
@@ -189,7 +190,7 @@ def rule_14(data):
             if motion.MotionType.motion(n1,n2,na,nb) != motion.MotionType.direct:
                 continue
             # does the upper voice proceed by conjunct movement?
-            if n1.pitch.semitoneWith(na) in (1,2):
+            if n1.pitch.semitoneWith(na.pitch) in (1,2):
                 continue
             # if it is an octave, there's no more tolerance: it's an error
             if na.pitch.isInterval(8,min=True):
@@ -211,7 +212,7 @@ def rule_14(data):
                     warn(f"Tolerance: direct fifth is tolerated if one of the notes of the 5th can be heard in the previous chord AND if the sound is good. Please check that.",n1,n2, na,nb, s1.title,s2.title)
                     continue
             # error
-            warn(f"Direct 5th are forbidden, except:
+            warn(f"""Direct 5th are forbidden, except:
             - when the higher voice moves by conjunct motion
             - when, except in extreme parts, the lower voice moves by conjunct motion to I, IV, V
             - when the note of the 5th can be heard in the previous chord
@@ -223,11 +224,25 @@ def rule_14(data):
 
 @dispatcher.two_voices
 def rule_15(s1,s2):
-    """L'unisson est interdit"""
+    """L'unisson est interdit
+    Dans les accords parfaits, l'unisson peut être toléré:
+        - sur les temps faibles,
+        - en cas de saut d'octave
+        - si la basse monte haut
+        - si le soprano descend bas
+        - mais l'unisson ténor-alto est très maladroit.
+    """
     for n1, n2 in tools.iter_melodies(s1,s2):
         p1,p2 = [util.to_pitch(n) for n in (n1,n2)]
         if p1 == p2:
-            warn(f"Unisons are forbidden",n1,n2,s1.title,s2.title)
+            warn(f"""Unisons are forbidden.
+            There are tolerances in perfect chords progression at root position if:
+            - the unison is in a downbeat
+            - there is an octave leap
+            - if the bass is really high, or the soprano really low
+            - note that the unison alto-tenor is really clumsy.
+            """,n1,n2,s1.title,s2.title)
+
 @dispatcher.two_voices
 def rule_16(s1,s2):
     """Les croisements sont interdits"""
@@ -240,13 +255,45 @@ def rule_16(s1,s2):
 @dispatcher.one_voice
 def rule_17(v):
     """Une voix ne doit pas sortir de sa tessiture."""
+    P = pitch.Pitch
     soprano = tessitura.Tessitura(P.C4,P.A5,[P.Bb5,P.B3])
     alto = tessitura.Tessitura(P.G3,P.D5,[P.Fs3,P.Ds5,P.Eb5,P.E5,P.F5])
     tenor = tessitura.Tessitura(P.D3,P.G4,[P.C3,P.Cs3,P.Db3, P.Gs4,P.Ab4,P.A4,P.Bb4])
-    bass = tessitura.Tessitura(P.G3,P.D4,[P.E3,P.F3,P.Fs3,P.Gb3, P.Ds4,P.Eb4,P.E4,P.F4])
+    bass = tessitura.Tessitura(P.G2,P.D4,[P.E2,P.F2,P.Fs2,P.Gb2, P.Ds4,P.Eb4,P.E4,P.F4])
 
     tessituras = {'Bass':bass,'Tenor':tenor,'Alto':alto,'Soprano':soprano}
     tessituras[v.title].check(v)
+
+def rule_18(data):
+    """
+    On peut doubler n’importe quelle note de l’accord.
+    On peut supprimer la quinte ; dans ce cas, il vaut mieux tripler la fondamentale, mais dans certains cas, on peut aussi doubler la tierce et la fondamentale.
+    La meilleure doublure est généralement la fondamentale. Doubler l’un des bons degrés est également bon.
+    """
+    pass
+
+def rule_19(data):
+    """On ne supprime pas la tierce"""
+    for notes in tools.iter_melodies(*data,all=True):
+        pos = max(notes,key=lambda x:x.pos).pos
+        c = chord.AbstractChord.findBestChord(notes,data[0].scaleAt(pos))
+        if not c.hasThird(notes):
+            warn(f"In a chord, the third must be present: ",notes)
+
+def rule_20(data):
+    """La fausse relation de triton est proscrite."""
+    for notes1, notes2 in util.pairwise(tools.iter_melodies(*data,alone=False)):
+        clef = lambda n : n.pitch
+        h1 = max(notes1,key=clef)
+        l1 = min(notes1,key=clef)
+        h2 = max(notes2,key=clef)
+        l2 = min(notes2,key=clef)
+        if h1 == h2 or l1 == l2:
+            continue
+        if h1.pitch.isTritoneWith(l2.pitch) or l1.pitch.isTritoneWith(h2.pitch):
+            warn(f"False relation of tritone is forbidden between extreme parts.",notes1,notes2)
+
+
     
 
 

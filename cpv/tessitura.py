@@ -56,9 +56,9 @@ class Tessitura:
                 if condoned_false is True:
                     correct = False
                 if self.isCondoned(n.pitch):
-                    warn(f"Condoned note: {n} in {s.title}")
+                    error.warn(f"Condoned note: {n} in {s.title}")
                 else:
-                    warn(f"Note outside the tessitura: {n} in {s.title}")
+                    error.warn(f"Note outside the tessitura: {n} in {s.title}")
         return correct
 
 
