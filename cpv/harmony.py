@@ -151,9 +151,8 @@ def rule_11(data):
 def rule_12(data):
     """La quinte juste suivie d’une quinte diminuée est tolérée si ce n’est pas entre parties extrêmes.
     """
-    # TODO BUG
     chords = chord.RealizedChord.chordify(data)
-    extreme_titles = [data[0].title,data[-1].title]
+    extreme_titles = (data[0].title,data[-1].title)
     distance_max = data[0].breve_value
     for c1, c2 in util.pairwise(chords):
         res = c1.hasParallelIntervalWith(c2,5)
@@ -162,7 +161,7 @@ def rule_12(data):
             for r in results:
                 if r.distance < distance_max:
                     # is it a perfect 5th followed by a diminished 5th?
-                    if r.first[0].pitch.isQualifiedInterval((5,'perfect')).With(r.first[1].pitch) and r.second[0].pitch.isQualifiedInterval((5,'diminished')).With(r.second[0].pitch):
+                    if r.first[0].pitch.isQualifiedInterval((5,'perfect')).With(r.first[1].pitch) and r.second[0].pitch.isQualifiedInterval((5,'diminished')).With(r.second[1].pitch):
                         warn(f"Perfect fifth followed by a diminished 5th is {tolerance} between {titles[0]} and {titles[1]}.", r.first,r.second)
 
 
