@@ -53,7 +53,9 @@ class Importer:
         self.main_scale = scale.Scale.fromString(str_keynote)
 
     def manage_rest(self, r):
-        values = {"half":2}
+        values = {"half":2,
+                "measure":int(self.numerator),
+                }
         duration = r.find("durationType").text
         self.current_pos += values[duration]
 

@@ -151,6 +151,7 @@ def rule_11(data):
 def rule_12(data):
     """La quinte juste suivie d’une quinte diminuée est tolérée si ce n’est pas entre parties extrêmes.
     """
+    # TODO BUG
     chords = chord.RealizedChord.chordify(data)
     extreme_titles = [data[0].title,data[-1].title]
     distance_max = data[0].breve_value
@@ -193,7 +194,7 @@ def rule_14(data):
             if n1.pitch.semitoneWith(na.pitch) in (1,2):
                 continue
             # if it is an octave, there's no more tolerance: it's an error
-            if na.pitch.isInterval(8,min=True):
+            if na.pitch.isInterval(8,True):
                 warn(f"Direct octaves with no conjunct movement is forbidden.",n1,n2,na,nb,s1.title, s2.title)
                 continue
             # is it a direct 5th with lower voice going to I, IV or V

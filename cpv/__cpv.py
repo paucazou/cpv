@@ -28,7 +28,7 @@ def __get_rules(lib):
     return OrderedDict(sorted(rules.items()))
 
 def __exclude_rules(rules, not_followed_rules):
-    """Exlude very rule which is
+    """Exlude every rule which is
     in not_followed_rules
     """
     new_rules = OrderedDict([(i,r) for i, r in rules.items() if i not in not_followed_rules])
@@ -149,6 +149,26 @@ def __unfollow_linked_rules(rule_list,*rules):
             return list(set(rule_list))
 
     return rule_list
+
+__current_module = __import__(__name__)
+
+__functions_following_rules = []
+for fun_name in functions:
+    fun = getattr(__current_module,fun_name)
+    def decorator(func):
+        def wrapper(string, rules, *arg,**kwarg):
+            """Only 'rules' are followed."""
+            # I think no module should have more than 50 rules, but if necessary...
+            max_rules = 1000
+            not_followed_rules = [x for x in range(1,1000) if x not in rules]
+            return func(string,not_followed_rules=not_followed_rules,*arg,**kwarg)
+        return wrapper
+    new_fun_name = f"{fun_name}_following_only_rules"
+    __functions_following_rules.append(new_fun_name)
+
+    setattr(__current_module,new_fun_name,decorator(fun))
+
+functions.extend(__functions_following_rules)
 
 
 
