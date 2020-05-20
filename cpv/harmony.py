@@ -193,7 +193,7 @@ def rule_14(data):
             if n1.pitch.semitoneWith(na.pitch) in (1,2):
                 continue
             # if it is an octave, there's no more tolerance: it's an error
-            if na.pitch.isInterval(8,True):
+            if na.pitch.isInterval(8,True).With(nb.pitch):
                 warn(f"Direct octaves with no conjunct movement is forbidden.",n1,n2,na,nb,s1.title, s2.title)
                 continue
             # is it a direct 5th with lower voice going to I, IV or V
@@ -203,14 +203,18 @@ def rule_14(data):
                 pos = max(na.pos,nb.pos)
                 current_scale = s2.scaleAt(pos)
                 best_degrees = (1,4,5)
-                if n2.pitch.semitoneWith(nb) in (1,2) and current_scale.positionOf(nb) in best_degrees:
+                if n2.pitch.semitoneWith(nb.pitch) in (1,2) and current_scale.positionOf(nb) in best_degrees:
                     warn(f"Tolerance: direct fith with lower voice going to I, IV, V by conjunct movement between non extreme parts is tolerated. Do not hesitate to find a better disposition",n1,n2,na,nb,s1.title,s2.title)
                     continue
             # is it a direct 5th with a note of the 5th in the previous chord?
+            broken=False
             for c1, c2 in util.pairwise(chords):
                 if (na, nb) in c2 and (na in c1 or nb in c1):
                     warn(f"Tolerance: direct fifth is tolerated if one of the notes of the 5th can be heard in the previous chord AND if the sound is good. Please check that.",n1,n2, na,nb, s1.title,s2.title)
-                    continue
+                    broken=True
+                    break
+            if broken:
+                continue
             # error
             warn(f"""Direct 5th are forbidden, except:
             - when the higher voice moves by conjunct motion
