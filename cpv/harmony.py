@@ -66,7 +66,7 @@ def rule_5(voice):
 
 
 def rule_6(data):
-    """Les voix ne doivent pas toutes effectuer le même mouvement"""
+    """Les voix ne doivent pas toutes effectuer le même mouvement, sauf si on enchaîne deux accords de sixtes."""
     for group1, group2 in util.pairwise(tools.iter_melodies(*data)):
         assert len(group1) == len(group2) and "Error : pauses not handled"
         is_same_mov =  True
@@ -81,7 +81,18 @@ def rule_6(data):
                 break
 
         if is_same_mov:
-            warn(f"All the voices shouldn't be in the same direction.",group1,group2)
+            # are there 2 consecutive sixth?
+            pos1 = max(group1,key=lambda x:x.pos).pos
+            scale1 = data[0].scaleAt(pos1)
+            c1 = chord.AbstractChord.findBestChord(group1,scale1)
+            pos2 = max(group2,key=lambda x:x.pos).pos
+            scale2 = data[0].scaleAt(pos2)
+            c2 = chord.AbstractChord.findBestChord(group2,scale2)
+
+            if not (c1.isInversion(group1,1) and c2.isInversion(group2,1)):
+                warn(f"All the voices shouldn't be in the same direction.",group1,group2)
+
+
 
 def rule_7(data):
     """Il est interdit de doubler la sensible"""
@@ -296,6 +307,15 @@ def rule_20(data):
             continue
         if h1.pitch.isTritoneWith(l2.pitch) or l1.pitch.isTritoneWith(h2.pitch):
             warn(f"False relation of tritone is forbidden between extreme parts.",notes1,notes2)
+
+
+def rule_21(data):
+    """
+    Il est interdit de doubler la basse, sauf si :
+        1. la basse est l’un des bons degrés (I – IV – V) ;
+        2. lors d’un changement de position ; // TODO send a warning
+        3. si on arrive à la basse et à sa doublure par mouvement contraire et conjoint (fa et la vers sol, par exemple)
+    """
 
 
     

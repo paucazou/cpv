@@ -402,6 +402,7 @@ class RealizedChord:
         This function checks the position
         of the notes"""
         # TODO vérifier qu'il ne faille pas mettre supérieur(inférieur) ou égal à...
+        # ça semble marcher comme ça...
         try:
             len(notes)
         except TypeError:
