@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 import pitch
 import scale
 
+# TODO bug in importer: s'il y a une pause dans la mesure, toutes les notes sont mises après cette pause
 
 class Importer:
     durations = {'whole':4,
@@ -53,6 +54,7 @@ class Importer:
         self.main_scale = scale.Scale.fromString(str_keynote)
 
     def manage_rest(self, r):
+        # TODO half, maybe, is the half of the measure, and not 2
         values = {"half":2,
                 "measure":int(self.numerator),
                 }
@@ -139,12 +141,11 @@ class Importer:
                     if i not in breaks:
                         breaks.append(i-1)
 
-                if measure.find("Rest"):
-                    for r in measure.findall('Rest'):
-                        self.manage_rest(r)
+                for child in measure:
+                    if child.tag == 'Rest':
+                        self.manage_rest(child)
 
-                if measure.find("Chord"):
-                    for c in measure.findall('Chord'):
-                        self.manage_chord(c,measure)
+                    if child.tag == "Chord":
+                        self.manage_chord(child,measure)
 
 

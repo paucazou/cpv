@@ -89,7 +89,7 @@ class Note:
     def __eq__(self, other):
         return self.pitch == other.pitch and self.pos == other.pos and self.duration == other.duration
 
-    def isAtPos(pos) -> bool:
+    def isAtPos(self,pos) -> bool:
         """True if self is at position pos.
         If pos == last_pos, return False
         """
