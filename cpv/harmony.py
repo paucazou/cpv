@@ -154,10 +154,20 @@ def rule_11(data):
             for titles, results in res.items():
                 for r in results:
                     if r.distance < distance_max:
-                        warn(f"Parallel {interval} found between {titles[0]} and {titles[1]}.",c1,c2)
+                        if interval == 5:
+                            first_itvl = r.first[0].pitch.qualifiedIntervalWith(r.first[1].pitch)
+                            second_itvl = r.second[0].pitch.qualifiedIntervalWith(r.second[1].pitch)
+                            ## 2 diminished 5th
+                            if first_itvl == second_itvl == (5,"diminished"):
+                                continue
+                            ## the second is a diminished 5th
+                            if second_itvl == (5,"diminished"):
+                                continue
+                            ## all other possibilities: error
+                        warn(f"Parallel {interval} found between {titles[0]} and {titles[1]}.",c1,r.first,c2,r.second)
 
     func((8,"perfect"))
-    func((5,"perfect"))
+    func(5)
     # TODO problème avec la quinte diminuée suivie d'une quinte juste!
 
 def rule_12(data):
