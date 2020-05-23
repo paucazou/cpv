@@ -106,6 +106,11 @@ class Pitch(enum.Enum):
                 (6,"minor"),
                 (6,"major")).With(other)
 
+    def isConjunctWith(self,other) -> bool:
+        """True if the movement to other
+        is a melodic conjunct movement"""
+        return self.semitoneWith(other) in (1,2)
+
     def isInterval(self,*args):
         """This method must be used
         with the With() method of the returned

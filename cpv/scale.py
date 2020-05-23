@@ -228,6 +228,15 @@ class Scale:
         # all other scales
         return self.isDegree(note,7)
 
+    def is1_4_5(self,note):
+        """True if note is of the degree 
+        1, 4 or 5
+        """
+        for i in (1,4,5):
+            if self.isDegree(note,i):
+                return True
+        return False
+
 for i, name in enumerate(("Tonic", "Supertonic","Mediant","Subdominant","Dominant","Submediant")):
     def create_func(i):
         def __function(self, note):

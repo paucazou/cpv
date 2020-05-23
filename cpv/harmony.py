@@ -158,6 +158,7 @@ def rule_11(data):
 
     func((8,"perfect"))
     func((5,"perfect"))
+    # TODO problème avec la quinte diminuée suivie d'une quinte juste!
 
 def rule_12(data):
     """La quinte juste suivie d’une quinte diminuée est tolérée si ce n’est pas entre parties extrêmes.
@@ -213,8 +214,7 @@ def rule_14(data):
                 # get scale of the second interval: there may be a modulation between the 2 intervals.
                 pos = max(na.pos,nb.pos)
                 current_scale = s2.scaleAt(pos)
-                best_degrees = (1,4,5)
-                if n2.pitch.semitoneWith(nb.pitch) in (1,2) and current_scale.positionOf(nb) in best_degrees:
+                if n2.pitch.semitoneWith(nb.pitch) in (1,2) and current_scale.is1_4_5(nb.pitch) :
                     warn(f"Tolerance: direct fith with lower voice going to I, IV, V by conjunct movement between non extreme parts is tolerated. Do not hesitate to find a better disposition",n1,n2,na,nb,s1.title,s2.title)
                     continue
             # is it a direct 5th with a note of the 5th in the previous chord?
@@ -311,11 +311,49 @@ def rule_20(data):
 
 def rule_21(data):
     """
-    Il est interdit de doubler la basse, sauf si :
+    Dans les accords de sixte, il est interdit de doubler la basse, sauf si :
         1. la basse est l’un des bons degrés (I – IV – V) ;
         2. lors d’un changement de position ; // TODO send a warning
         3. si on arrive à la basse et à sa doublure par mouvement contraire et conjoint (fa et la vers sol, par exemple)
     """
+    for group1, group2 in util.pairwise(tools.iter_melodies(*data)):
+        c2 = chord.AbstractChord.findBestChordFromStave(group2,data[0])
+        # is it a 6th chord?
+        if not c2.isInversion(group2,1):
+            continue
+        # is the bass doubled?
+        basses = [x for x in group2 if c2.isPosition(x,3)]
+        if len(basses) <= 1:
+            continue
+        # is the bass I,IV or V?
+        bass = sorted(group2,key=lambda n:n.pitch)[0]
+        pos = max(group2,key=lambda n : n.pos).pos
+        current_scale = data[0].scaleAt(pos)
+        if current_scale.is1_4_5(bass.pitch):
+            continue
+        # is the bass in a change of position?
+        c1 = chord.AbstractChord.findBestChordFromStave(group1,data[0])
+        if c1 == c2:
+            warn(f"It is possible, but potentially not really good to double the bass of a sixth chord when the notes change their position in the chord.",group2)
+            continue
+        # is the movement to the bass and its octave conjunct and contrary?
+        ## is the note of the bass found more than 2 times?
+        if len(basses) > 2:
+            warn(f"It is not possible to double more than 2 times the bass in a 6th chord.",group2)
+            continue
+        indices = [group2.index(n) for n in basses]
+        previous_notes = [n for i,n in enumerate(group1) if i in indices]
+        if (motion.MotionType.motion(*previous_notes,*basses) == motion.MotionType.contrary ) and previous_notes[0].pitch.isConjunctWith(basses[0].pitch) and previous_notes[1].pitch.isConjunctWith(basses[1].pitch):
+            warn(f"It is possible to double the bass by conjunct and contrary motion",group1,group2)
+            continue
+
+        # error
+        warn(f"""It is forbidden to double the bass of a sixth chord, except when:
+        - the bass is I, IV, V,
+        - there is a change of position in the chord
+        - there is a conjunct and contrary motion to the bass and its octave.""",
+        group2)
+
 
 
     

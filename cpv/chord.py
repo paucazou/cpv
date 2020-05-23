@@ -209,6 +209,17 @@ class AbstractChord:
         chords.sort(key=lambda c : best_degrees.index(c.degree))
         return chords[0]
 
+    @classmethod
+    def findBestChordFromStave(cls,notes,stave):
+        """Returns the same thing as findBestChord,
+        but takes a stave to find the correct scale.
+        It is not mandatory that the notes are in the stave.
+        notes must be an iterable of Note, not Pitch
+        """
+        pos = max(notes,key=lambda x:x.pos).pos
+        scale = stave.scaleAt(pos)
+        return cls.findBestChord(notes,scale)
+
 
     @staticmethod
     def isChord(notes,scale,seventh=False) -> bool: # TEST
