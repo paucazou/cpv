@@ -168,7 +168,6 @@ def rule_11(data):
 
     func((8,"perfect"))
     func(5)
-    # TODO problème avec la quinte diminuée suivie d'une quinte juste!
 
 def rule_12(data):
     """La quinte juste suivie d’une quinte diminuée est tolérée si ce n’est pas entre parties extrêmes.
@@ -363,6 +362,59 @@ def rule_21(data):
         - there is a change of position in the chord
         - there is a conjunct and contrary motion to the bass and its octave.""",
         group2)
+
+def rule_22(data):
+    """La quarte et sixte doit être préparée, c’est-à-dire que l’une des deux notes formant la quarte doit se trouver à l’accord précédent et se prolonger par syncope dans l’accord de quarte et sixte.
+    La sixte et quarte sur dominante (deuxième renversement de l’accord de tonique) n’a pas besoin d’être préparée, même si c’est la dominante d’un nouveau ton.
+    """
+    for notes in tools.iter_melodies(*data):
+        c = chord.AbstractChord.findBestChordFromStave(notes,data[0])
+        # is it a 2nd inversion chord?
+        if not c.isInversion(notes,2):
+            continue
+        # is it a chord on dominant?
+        pos = max(notes,key=lambda x : x.pos).pos
+        current_scale = data[0].scaleAt(pos)
+        bass = [n for n in notes if c.isFifth(n)][0]
+        if current_scale.isDominant(bass.pitch):
+            continue
+        # is one of the notes prepared?
+        is_prepared = False
+        for n in notes:
+            if (c.isFifth(n) or c.isRoot(n) ) and n.pos < pos:
+                is_prepared = True
+                break
+        if is_prepared:
+            continue
+        else:
+            warn(f"In a 2nd inversion chord, one of the notes of the fourth (the root or the fifth of the chord) must be present in the previous chord at the pitch and the same voice and joined to the note in the chord by syncopation, except for a chord which bass is the dominant: in that case, it is not necessary to prepare it.",notes)
+
+
+def rule_23(data):
+    """
+    La quarte doit être sauvée : soit la note supérieure reste en place ou descend d’un degré ; soit la basse reste en place.
+    """
+    for group1, group2 in util.pairwise(tools.iter_melodies(*data)):
+        c = chord.AbstractChord.findBestChordFromStave(group1,data[0])
+        if not c.isInversion(group1,2):
+            continue
+        last_pos = min(group1,key=lambda x : x.last_pos).last_pos
+        is_correct = False
+        for n,n2 in zip(group1,group2):
+            if c.isFifth(n) and n.last_pos > last_pos:
+                is_correct = True
+                break
+            elif c.isRoot(n):
+                if (n.last_pos > last_pos):
+                    is_correct = True
+                    break
+                elif n.pitch > n2.pitch and n.pitch.isConjunctWith(n2.pitch):
+                    is_correct = True
+                    break
+        if is_correct:
+            continue
+        else:
+            warn(f"In a 2nd inversion chord, the root must go to lower degree by conjunct motion, or must continue by syncopation, or the 5th must continue by syncopation",group1)
 
 
 
