@@ -61,6 +61,11 @@ class Importer:
         duration = r.find("durationType").text
         self.current_pos += values[duration]
 
+    def manage_mark(self, mark):
+        txt = mark.find("text").text
+        for line in txt.split("\n"):
+            self.append(f"# {line}")
+
     def manage_chord(self,c,measure):
         #duration
         duration_ = c.find("durationType").text
@@ -144,6 +149,9 @@ class Importer:
                 for child in measure:
                     if child.tag == 'Rest':
                         self.manage_rest(child)
+
+                    if child.tag == "RehearsalMark":
+                        self.manage_mark(child)
 
                     if child.tag == "Chord":
                         self.manage_chord(child,measure)

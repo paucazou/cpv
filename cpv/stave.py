@@ -29,7 +29,7 @@ class Stave:
         def __repr__(self):
             return f"Bar<{self.stave.title}:{self.pos}> {self.elts}"
 
-    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M, nscale=None,modulations=None):
+    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M, nscale=None,modulations=None,comments={}):
         """If nscale is set, keynote and mode are discarded
         If modulations is set, nscale is also discarded.
         """
@@ -37,6 +37,7 @@ class Stave:
         self.rythm = rythm
         self.breve_value = breve_value
         self.title = name
+        self.comments = comments
         if modulations is not None:
             self.modulations = modulations
             first = modulations[0]
@@ -73,6 +74,10 @@ class Stave:
         Add a line comment by starting the line with #:
         # everything after in this line is commented
         something # this is not a comment, but an error
+        the comments are saved in the self.comments attribute
+        and are linked to the following note. The 2 first characters
+        are discarded. Comments can be made of more than one line.
+        Comments not followed by a note are completely discarded.
 
         Add a title by adding * at the start of the line
         The following character is discarded
@@ -81,7 +86,7 @@ class Stave:
         the function return a list of list of Stave
         """
         values = string.split('\n')
-        values = [val for val in values if val and val[0] != '#']
+        values = [val for val in values if val]
         # rythm and breve value
         try:
             rythm, breve_val = values[0].split('/')
@@ -97,6 +102,7 @@ class Stave:
         values = values[2:]
         list_of_staves = [Stave(rythm,breve_value,nscale=nscale)]
         current = list_of_staves[0]
+        previous_comment = ""
         for val in values:
             if val[0] == '*':
                 if len(current._stave) != 0:
@@ -104,8 +110,14 @@ class Stave:
                     current=list_of_staves[-1]
 
                 current.title = val[2:]
+                previous_comment = ""
+            elif val[0] == '#':
+                previous_comment += val[2:]
             else:
                 current._stave.append(note.Note.fromString(val))
+                if previous_comment:
+                    current.comments[current._stave[-1].pos] = previous_comment
+                    previous_comment = ""
 
         return list_of_staves
 
