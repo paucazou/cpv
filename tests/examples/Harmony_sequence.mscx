@@ -297,10 +297,6 @@
             <tpc>17</tpc>
             </Note>
           </Chord>
-        <RehearsalMark>
-          <pos x="2.23753" y="-3.10171"/>
-          <text>seqend</text>
-          </RehearsalMark>
         <Chord>
           <durationType>half</durationType>
           <Note>
@@ -310,6 +306,9 @@
           </Chord>
         </Measure>
       <Measure number="3">
+        <RehearsalMark>
+          <text>seqend</text>
+          </RehearsalMark>
         <Chord>
           <durationType>half</durationType>
           <Note>

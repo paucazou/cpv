@@ -95,6 +95,13 @@ class Note:
         """
         return self.pos <= pos < self.last_pos
 
+    def appearsBetween(self,start,end) -> bool:
+        """True if self
+        appears between start and end.
+        It can start before start or end
+        after end"""
+        return self.pos < end and self.last_pos > start
+
     @staticmethod
     def __to_fraction(string: str) -> F:
         if '+' not in string:

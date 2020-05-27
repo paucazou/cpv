@@ -178,6 +178,76 @@ def get_interval_string(s1, s2):
 
     return s
 
+class SequenceTracker:
+    """Given a bunch of tracks, finds all the sequences notified
+    by the user."""
+    __motif_pos = namedtuple("__motif_pos",("start","end"))
+    def __init__(self,data):
+        self.data = data
+        # collecting motifs
+        _motifs = {pos:com for s in data for pos,com in s.comments.items() if com in "seqend seqstart".split() }
+        if len(_motifs) % 2 != 0:
+            raise ValueError("Please check your score: there is not the same number of tags seqstart and seqend")
+        _fun = lambda name : sorted([pos for pos,com in _motifs.items() if com == name])
+        _start = _fun("seqstart")
+        _end = _fun("seqend")
+        self.motifs = [self.__motif_pos(start,end) for start,end in zip(_start,_end)]
+
+        # finding restatements
+        self.sequences = {motif:0 for motif in self.motifs}
+        for motif in self.motifs:
+            length = motif.end - motif.start
+            last_pos = motif.end
+            while self.match(motif,last_pos,last_pos + length) is True:
+                self.sequences[motif] += 1
+                last_pos = last_pos + length
+
+
+    def isInRestatement(self,note) -> bool:
+        """True if note is only in a restatement,
+        not in a motif or outside a sequence
+        """
+        pass
+
+    def match(self, motif, start, end) -> bool:
+        """True if part between start and end
+        matches motif"""
+        # TODO may be problematic with some kind of modulations, especially with enharmonic notes
+        # not really tolerant: syncopation at the end is forbidden, for example. Try to be more tolerant.
+        motif_notes = [
+                [n for n in s if n.pos < motif.end and n.last_pos > motif.start]
+                for s in self.data]
+        part_notes = [
+                [ n for n in s if n.appearsBetween(start,end)]
+                for s in self.data]
+        # length
+        func = lambda x : [n.duration for s in x for n in s]
+        if func(motif_notes) != func(part_notes):
+            return False
+        # relative position
+        for motif, part in zip(motif_notes,part_notes):
+            m_s_pos = motif[0].pos
+            p_s_pos = part[0].pos
+            func = lambda it, pos : [n.pos - pos for n in it]
+            if func(motif,m_s_pos) != func(part,p_s_pos):
+                return False
+
+        # relative pitch
+        func = lambda x : [ NS(self.data[0].scaleAt(n.pos),n.pitch) for n in x]
+
+        for motif, part in zip(motif_notes,part_notes):
+            print(motif, part)
+            motif_ns = func(motif)
+            part_ns = func(part)
+            distance = part_ns[0].distanceWith(motif_ns[0])
+            NS.moveSequence(distance,part_ns)
+            if [n.pos for n in motif_ns] != [n.pos for n in part_ns]:
+                return False
+
+        return True
+
+
+
 
 
 
