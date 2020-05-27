@@ -54,15 +54,18 @@ def rule_4(voice):
         if np1.semitoneWith(np4) == 6:
             warn(f"Tritone in 4 notes must be checked",notes,voice.title)
 
-@dispatcher.one_voice
-def rule_5(voice):
-    """La sensible doit monter sur la tonique"""
-    for n1, n2 in util.pairwise(voice):
-        sc1 = voice.scaleAt(n1.pos)
-        sc2 = voice.scaleAt(n2.pos)
+def rule_5(data):
+    """La sensible doit monter sur la tonique.
+    Si la sensible est dans l'une des répétitions d'une marche d'harmonie,
+    cette règle n'est pas nécessaire."""
+    st = tools.SequenceTracker(data)
+    for voice in data:
+        for n1, n2 in util.pairwise(voice):
+            sc1 = voice.scaleAt(n1.pos)
+            sc2 = voice.scaleAt(n2.pos)
 
-        if sc1 == sc2 and sc1.isLeading(n1.pitch) and (not sc2.isTonic(n2.pitch)):
-            warn(f"The leading tone should go to the tonic.",n1,n2,voice.title)
+            if sc1 == sc2 and sc1.isLeading(n1.pitch) and (not sc2.isTonic(n2.pitch)) and not st.isInRestatement(n1):
+                warn(f"The leading tone should go to the tonic, except in a restatement of a sequence.",n1,n2,voice.title)
 
 
 def rule_6(data):
@@ -96,14 +99,14 @@ def rule_6(data):
 
 def rule_7(data):
     """Il est interdit de doubler la sensible"""
+    st = tools.SequenceTracker(data)
     for notes in tools.iter_melodies(*data):
         # get scale
         pos = max([n.pos for n in notes])
         sc = data[0].scaleAt(pos)
-
-        pitches = util.to_pitch(notes)
-        if len([p for p in pitches if sc.isLeading(p)]) > 1:
-            warn(f"The leading tone can not be doubled",*notes)
+        leadings = [n for n in notes if sc.isLeading(n.pitch) and not st.isInRestatement(n)]
+        if len(leadings) > 1:
+            warn(f"The leading tone can not be doubled, except in a restatement of a sequence",*notes)
 
 @dispatcher.two_voices
 def rule_8(s1,s2,min=pitch.Pitch.F3):
@@ -306,6 +309,7 @@ def rule_19(data):
 
 def rule_20(data):
     """La fausse relation de triton est proscrite."""
+    st = tools.SequenceTracker(data)
     for notes1, notes2 in util.pairwise(tools.iter_melodies(*data,alone=False)):
         clef = lambda n : n.pitch
         h1 = max(notes1,key=clef)
@@ -314,8 +318,9 @@ def rule_20(data):
         l2 = min(notes2,key=clef)
         if h1 == h2 or l1 == l2:
             continue
-        if h1.pitch.isTritoneWith(l2.pitch) or l1.pitch.isTritoneWith(h2.pitch):
-            warn(f"False relation of tritone is forbidden between extreme parts.",notes1,notes2)
+        if ((h1.pitch.isTritoneWith(l2.pitch) or l1.pitch.isTritoneWith(h2.pitch)) and
+                (not st.isInRestatement(h1) and not st.isInRestatement(h2))):
+            warn(f"False relation of tritone is forbidden between extreme parts, except inside the restatement in a sequence.",notes1,notes2)
 
 
 def rule_21(data):
@@ -416,6 +421,16 @@ def rule_23(data):
         else:
             warn(f"In a 2nd inversion chord, the root must go to lower degree by conjunct motion, or must continue by syncopation, or the 5th must continue by syncopation",group1)
 
+def rule_24(data):
+    """
+    1. L’enchaînement d’une marche à une autre n’excuse aucune faute.
+    2. L’enchaînement de la dernière marche et de l’accord qui suit doit se faire sans faute.
+
+    """
+    st = tools.SequenceTracker(data)
+    print(f"{len(st)} sequence{'s' if len(st) > 1 else ''} found.")
+    for i, ((start,end), nb) in enumerate(st.sequences.items()):
+        print(f"Sequence n° {i+1}: motif: {start}/{end}. Number of restatements: {nb}")
 
 
     

@@ -182,6 +182,8 @@ class SequenceTracker:
     """Given a bunch of tracks, finds all the sequences notified
     by the user."""
     __motif_pos = namedtuple("__motif_pos",("start","end"))
+    __restatements_pos = namedtuple("__restatements_pos",("start","end"))
+
     def __init__(self,data):
         self.data = data
         # collecting motifs
@@ -195,19 +197,28 @@ class SequenceTracker:
 
         # finding restatements
         self.sequences = {motif:0 for motif in self.motifs}
+        self.restatements = []
         for motif in self.motifs:
             length = motif.end - motif.start
             last_pos = motif.end
             while self.match(motif,last_pos,last_pos + length) is True:
                 self.sequences[motif] += 1
                 last_pos = last_pos + length
+            self.restatements.append(self.__restatements_pos(motif.end,last_pos))
 
+
+    def __len__(self):
+        return len(self.sequences)
 
     def isInRestatement(self,note) -> bool:
         """True if note is only in a restatement,
         not in a motif or outside a sequence
         """
-        pass
+        for restatement in self.restatements:
+            if note.pos >= restatement.start and note.last_pos <= restatement.end:
+                return True
+
+        return False
 
     def match(self, motif, start, end) -> bool:
         """True if part between start and end
@@ -236,7 +247,6 @@ class SequenceTracker:
         func = lambda x : [ NS(self.data[0].scaleAt(n.pos),n.pitch) for n in x]
 
         for motif, part in zip(motif_notes,part_notes):
-            print(motif, part)
             motif_ns = func(motif)
             part_ns = func(part)
             distance = part_ns[0].distanceWith(motif_ns[0])
