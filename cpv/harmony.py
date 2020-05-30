@@ -444,7 +444,7 @@ def rule_25(s1,s2):
     for (h1,l1), (h2,l2) in util.pairwise(tools.iter_melodies(s1,s2)):
         if (h1.pitch.isChromaticInflectionWith(l2.pitch,min=True) or l1.pitch.isChromaticInflectionWith(h2.pitch,min=True)):
             if (h1.pitch.isSameNote(l1.pitch) or h2.isSameNote(l2.pitch)) and motion.MotionType.motion(h1,l1,h2,l2) == motion.MotionType.contrary:
-                text = "Doubling one of the notes of a chromatism is only tolerated."
+                text = "Doubling one of the notes of a chromatism when there's a contrary motion is only tolerated."
             else:
                 text = "It is forbidden to do a chromatic false relation"
             warn(text,h1,l1,h2,l2,s1.title,s2.title)
