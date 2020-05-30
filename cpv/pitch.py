@@ -68,6 +68,13 @@ class Pitch(enum.Enum):
             result -= 12
         return result
 
+    def isSameNote(self,other) -> bool:
+        """True if self and other
+        are the same note.
+        C0 == C4
+        """
+        return self.isQualifiedInterval((8,"perfect")).With(other)
+
     def isPerfectlyConsonantWith(self, other) -> bool:
         """True if self and other are separated
         by the following intervals (and multiple):
@@ -153,10 +160,21 @@ class Pitch(enum.Enum):
         return self.isQualifiedInterval((4,"augmented")).With(other)
 
 
-    def isChromaticInflectionWith(self, other):
+    def isChromaticInflectionWith(self, other,min=False):
         """True if a melodic motion between self and other
-        is a chromatic inflection"""
+        is a chromatic inflection
+        if min is set, True if the two notes are not separated
+        by a semitone, e.g. G0 Gs4"""
+        if min is True:
+            return self.lower().isChromaticInflectionWith(other.lower())
         return self.value.step == other.value.step and self.value.semitone != other.value.semitone
+
+    def lower(self):
+        """Return the lower pitch
+        matching with self.
+        e.g. G4 -> G0"""
+        base = self.name[:-1]
+        return Pitch[f"{base}0"]
 
     @staticmethod
     def qualifyInterval(interval : int, semitones : int):

@@ -53,7 +53,12 @@ class Stave:
             self.mode = nscale.mode
 
     def __repr__(self):
-        return f"Stave<{self.scale}>({self.title}) {self.rythm}/{self.breve_value} {self.notes}"
+        try:
+            notes = sorted(self.notes + self.modulations,
+                    key = lambda x : x.pos - (0.00001 if isinstance(x,Modulation) else 0))
+        except AttributeError:
+            notes = self.notes
+        return f"Stave<{self.scale}>({self.title}) {self.rythm}/{self.breve_value} {notes}"
 
     @staticmethod
     def fromString(string: str):
@@ -78,6 +83,14 @@ class Stave:
         and are linked to the following note. The 2 first characters
         are discarded. Comments can be made of more than one line.
         Comments not followed by a note are completely discarded.
+
+        A comment starting by 'mod' has a special meaning:
+        it means that the following note is the start of a modulation.
+        It must be followed by the keytone.
+        For the syntax, see above. No space allowed between
+        the keyword 'mod' and the keytone.
+        A modulation is valid for every stave in the string
+        if there are more than one stave.
 
         Add a title by adding * at the start of the line
         The following character is discarded
@@ -118,6 +131,13 @@ class Stave:
                 if previous_comment:
                     current.comments[current._stave[-1].pos] = previous_comment
                     previous_comment = ""
+
+        # modulations
+        raw_modulations = [(pos,com[3:]) for s in list_of_staves for pos, com in s.comments.items() if com[:3] == "mod"]
+        modulations = [Modulation(pitch.Pitch(n),scale.Scale(fromString(n)),pos)
+                for pos,n in raw_modulations]
+        for s in list_of_staves:
+            s.modulations = modulations
 
         return list_of_staves
 

@@ -161,6 +161,28 @@ class Scale:
         fifth = self.notes[4]
         return Scale(fourth,self.mode), Scale(fifth,self.mode)
 
+    def differencesWith(self,other,enharmonic=False):
+        """Return a list of pitches
+        that are used in other,
+        and not in self
+        If enharmonic is set, the pitches returned
+        do not include enharmonic notes (e.g. G#/Ab)
+        """
+        # WARNING this function must be used carefully, since
+        # there are results that can be surprising.
+        # try for example CM as self, Bs as other, enharmonic=True
+        # WARNING
+        basic = set(other.notes).difference(self.notes)
+        # we need to discard some pitches that can actually be used in self
+        # but are lower than the base key. (test for example
+        # self as G Major and other as C Major)
+        condition = lambda x: x > other.keynote
+        if enharmonic:
+            semitones = [x.value.semitone for x in self.notes]
+            condition = lambda x : x > other.keynote and x.value.semitone not in semitones
+        return sorted([p for p in basic if condition(p)])
+
+
     def isDegree(self, note, i : int):
         """True if note is the degree i
         i can't be more than 7 and under 1

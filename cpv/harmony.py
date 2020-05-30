@@ -432,6 +432,22 @@ def rule_24(data):
     for i, ((start,end), nb) in enumerate(st.sequences.items()):
         print(f"Sequence n° {i+1}: motif: {start}/{end}. Number of restatements: {nb}")
 
+@dispatcher.two_voices
+def rule_25(s1,s2):
+    """
+    1. La fausse relation chromatique est prohibée. À distance, elle peut être bonne.
+    2. Tout changement chromatique s’effectue dans la même partie.
+    3. Il est interdit de doubler la note qui est modifiée chromatiquement dans les deux accords.
+    4. On tolère le doublement de la note caractéristique si on aboutit à la note chromatique par mouvement contraire.
+    """
+    warn(f"Please check by ear that there are no distant false relations")
+    for (h1,l1), (h2,l2) in util.pairwise(tools.iter_melodies(s1,s2)):
+        if (h1.pitch.isChromaticInflectionWith(l2.pitch,min=True) or l1.pitch.isChromaticInflectionWith(h2.pitch,min=True)):
+            if (h1.pitch.isSameNote(l1.pitch) or h2.isSameNote(l2.pitch)) and motion.MotionType.motion(h1,l1,h2,l2) == motion.MotionType.contrary:
+                text = "Doubling one of the notes of a chromatism is only tolerated."
+            else:
+                text = "It is forbidden to do a chromatic false relation"
+            warn(text,h1,l1,h2,l2,s1.title,s2.title)
 
     
 
