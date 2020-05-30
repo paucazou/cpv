@@ -72,4 +72,12 @@ def cp_cf(func):
 
     return __wrapper
 
+def extreme_parts(func):
+    """Return the extreme parts as two parts
+    """
+    # TODO maybe make a more robust function, by analyzing the first notes (or the last), or even every note (moyenne des notes, en cas de croisements)
+    def __wrapper(data):
+        func(data[0],data[-1])
+    return __wrapper
+
 

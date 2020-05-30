@@ -448,6 +448,16 @@ def rule_25(s1,s2):
             else:
                 text = "It is forbidden to do a chromatic false relation"
             warn(text,h1,l1,h2,l2,s1.title,s2.title)
+            
+@dispatcher.extreme_parts
+def rule_26(soprano,bass):
+    """
+    La quinte directe entre parties extrêmes par modulation et mouvement chromatique est prohibée.
+    """
+    for (h1,l1), (h2,l2) in util.pairwise(tools.iter_melodies(soprano,bass)):
+        mot = motion.MotionType.motion(h1,l1,h2,l2)
+        if mot == motion.MotionType.direct and (h1.pitch.isChromaticInflectionWith(h2.pitch) or l1.pitch.isChromaticInflectionWith(l2.pitch)):
+            warn(f"A direct fifth by modulation and chromatic motion is forbidden",h1,h2,l1,l2,soprano.title,bass.title)
 
     
 
