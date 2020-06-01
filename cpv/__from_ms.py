@@ -3,10 +3,10 @@
 #Deus, in adjutorium meum intende
 
 import xml.etree.ElementTree as ET
+import itertools
 import pitch
 import scale
 
-# TODO bug in importer: s'il y a une pause dans la mesure, toutes les notes sont mises après cette pause
 
 class Importer:
     durations = {'whole':4,
@@ -52,10 +52,13 @@ class Importer:
                 break
         self.append(str_keynote)
         self.main_scale = scale.Scale.fromString(str_keynote)
+        self.current_scale = self.main_scale
 
     def manage_rest(self, r):
         # TODO half, maybe, is the half of the measure, and not 2
-        values = {"half":2,
+        values = {
+                "quarter":1,
+                "half":2,
                 "measure":int(self.numerator),
                 }
         duration = r.find("durationType").text
@@ -63,6 +66,8 @@ class Importer:
 
     def manage_mark(self, mark):
         txt = mark.find("text").text
+        if txt[:3] == "mod":
+            self.current_scale = scale.Scale.fromString(txt[3:])
         for line in txt.split("\n"):
             self.append(f"# {line}")
 
@@ -94,12 +99,13 @@ class Importer:
 
 
         if accidental is None:
-            for n in self.main_scale.notes:
+            for n in itertools.chain(self.accidentals, self.main_scale.notes):
                 if n.value.semitone == pitch_:
                     self.append(f"{n.name} {sduration_} {self.current_pos}")
                     break
             else:
-                raise ValueError(f"The scale mentioned doesn't seem to match the scale used. Did you really choose {main_scale}?");
+                from IPython import embed;embed()
+                raise ValueError(f"The scale mentioned doesn't seem to match the scale used. Problem at pos {self.current_pos} in {self.current_name}. Did you really choose {self.current_scale}?");
         else:
             # foreign note
             accidentals = {"":"natural","b":"flat","s":"sharp","ss":"double sharp","bb":"double flat"}
@@ -108,6 +114,7 @@ class Importer:
             for p in pitch.Pitch:
                 if pitch_ == p.value.semitone and p.accidental == acc:
                     self.append(f"{p.name} {sduration_} {self.current_pos}")
+                    self.accidentals.append(p)
                     break
             else:
                 raise ValueError("Pitch not found")
@@ -124,6 +131,7 @@ class Importer:
             part_names = [None] * len(self.staffs)
 
         for name, staff in zip(part_names, self.staffs):
+            self.current_scale = self.main_scale
             next_one=True
             for i, measure in enumerate(staff):
                 if measure.tag != "Measure":
@@ -137,6 +145,7 @@ class Importer:
                     
 
                     self.append(f"* {name}")
+                    self.current_name = name
                     next_one = False
                     # pos
                     self.current_pos = 0
@@ -145,6 +154,9 @@ class Importer:
                     next_one = True
                     if i not in breaks:
                         breaks.append(i-1)
+
+                # reinit of the accidentals in this measure
+                self.accidentals = []
 
                 for child in measure:
                     if child.tag == 'Rest':

@@ -450,7 +450,7 @@ def rule_25(s1,s2):
             warn(text,h1,l1,h2,l2,s1.title,s2.title)
             
 @dispatcher.extreme_parts
-def rule_26(soprano,bass):
+def rule_26(soprano,bass): #    TODO test
     """
     La quinte directe entre parties extrêmes par modulation et mouvement chromatique est prohibée.
     """
@@ -458,6 +458,26 @@ def rule_26(soprano,bass):
         mot = motion.MotionType.motion(h1,l1,h2,l2)
         if mot == motion.MotionType.direct and (h1.pitch.isChromaticInflectionWith(h2.pitch) or l1.pitch.isChromaticInflectionWith(l2.pitch)):
             warn(f"A direct fifth by modulation and chromatic motion is forbidden",h1,h2,l1,l2,soprano.title,bass.title)
+
+
+@dispatcher.one_voice
+def rule_27(voice):
+    """
+    Si la note caractéristique est la sensible, elle devra ensuite monter sur la tonique ; si c’est la sous-dominante, elle doit descendre sur la médiante ; ou rester en place avant de suivre le mouvement obligé.
+    """
+    for mod in voice.modulations:
+        n1 = voice.getNoteAtPos(mod.pos)
+        n1_degree = mod.scale.findDegree(n1.pitch)
+        if n1_degree not in (7,4):
+            continue
+
+        expected_degree = 1 if n1_degree == 7 else 3
+        n2 = voice.getNoteAtPos(n1.last_pos)
+        while n2 and n1.pitch == n2.pitch:
+            n2 = voice.getNoteAtPos(n2.last_pos)
+
+        if not n2 or not mod.scale.isDegree(n2.pitch,expected_degree):
+            warn(f"In a modulation, the {n1_degree} must go to the {expected_degree}, or stay on place before going to the {expected_degree}. Here, the {n1_degree} goes to the {mod.scale.findDegree(n2.pitch)}.",n1,n2,voice.title)
 
     
 

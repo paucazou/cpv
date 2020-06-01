@@ -29,7 +29,7 @@ class Stave:
         def __repr__(self):
             return f"Bar<{self.stave.title}:{self.pos}> {self.elts}"
 
-    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M, nscale=None,modulations=None,comments={}):
+    def __init__(self,rythm=4,breve_value=4,name='',keynote=pitch.Pitch.C4, mode=scale.Mode.M, nscale=None,modulations=None,comments=None):
         """If nscale is set, keynote and mode are discarded
         If modulations is set, nscale is also discarded.
         """
@@ -37,7 +37,7 @@ class Stave:
         self.rythm = rythm
         self.breve_value = breve_value
         self.title = name
-        self.comments = comments
+        self.comments = comments if comments else {}
         if modulations is not None:
             self.modulations = modulations
             first = modulations[0]
@@ -134,7 +134,7 @@ class Stave:
 
         # modulations
         raw_modulations = [(pos,com[3:]) for s in list_of_staves for pos, com in s.comments.items() if com[:3] == "mod"]
-        modulations = [Modulation(pitch.Pitch(n),scale.Scale(fromString(n)),pos)
+        modulations = [Modulation(pitch.Pitch[f"{n[:-1]}0"],scale.Scale.fromString(n),pos)
                 for pos,n in raw_modulations]
         for s in list_of_staves:
             s.modulations = modulations

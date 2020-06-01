@@ -287,6 +287,10 @@
           </Chord>
         </Measure>
       <Measure number="2">
+        <RehearsalMark>
+          <pos x="-2.09176" y="-3.35684"/>
+          <text>modAm</text>
+          </RehearsalMark>
         <Chord>
           <durationType>half</durationType>
           <Note>
@@ -310,6 +314,10 @@
           </Chord>
         </Measure>
       <Measure number="3">
+        <RehearsalMark>
+          <pos x="-0.414204" y="-3.57094"/>
+          <text>modDM</text>
+          </RehearsalMark>
         <Chord>
           <durationType>half</durationType>
           <Note>
@@ -320,8 +328,11 @@
         <Chord>
           <durationType>half</durationType>
           <Note>
-            <pitch>65</pitch>
-            <tpc>13</tpc>
+            <Accidental>
+              <subtype>sharp</subtype>
+              </Accidental>
+            <pitch>66</pitch>
+            <tpc>20</tpc>
             </Note>
           </Chord>
         </Measure>
@@ -524,11 +535,18 @@
         </Measure>
       <Measure number="3">
         <Chord>
-          <durationType>half</durationType>
+          <durationType>quarter</durationType>
           <Note>
             <Accidental>
               <subtype>sharp</subtype>
               </Accidental>
+            <pitch>49</pitch>
+            <tpc>21</tpc>
+            </Note>
+          </Chord>
+        <Chord>
+          <durationType>quarter</durationType>
+          <Note>
             <pitch>49</pitch>
             <tpc>21</tpc>
             </Note>

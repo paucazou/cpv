@@ -205,6 +205,14 @@ class Scale:
 
         return i == self.notes.index(bnote)  + 1
 
+    def findDegree(self,note) -> int:
+        """Find the degree of note
+        between 1 and 7
+        """
+        for i in range(1,8):
+            if self.isDegree(note,i):
+                return i
+
     def isRaisedSubmediant(self,note): # TEST
         """Is the note a sixth degree and a raised submediant?
         If the scale has not raised submediant,

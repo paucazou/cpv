@@ -140,6 +140,7 @@ def iter_melodies(*tracks,**options):
         - all: if True, yields only when len(notes) == len(tracks)
         - alone: if False, forbids to yield only one note
     """
+    # TODO does not work well with rests between two notes
     assert len(tracks) > 1
 
     queuer = Queue(*tracks)
