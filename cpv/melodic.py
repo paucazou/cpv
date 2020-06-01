@@ -149,3 +149,14 @@ def rythmic_pattern(s : stave.Stave, pattern : str):
     string = tools.get_rythmic_string(s)
     return re.fullmatch(pattern,string)
 
+def modulation_at(n:note.Note,s:stave.Stave) -> bool:
+    """True if a modulation occurs when n appears.
+    """
+    for m in s.modulations:
+        if n.pos == m.pos:
+            return True
+
+    return False
+
+
+

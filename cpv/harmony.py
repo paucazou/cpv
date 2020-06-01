@@ -18,25 +18,36 @@ import util
 def rule_1(voice):
     """Tout intervalle diminué ou augmenté est interdit.
     Tout intervalle supérieur à la sixte majeure est interdit, en dehors de l'octave.
-    La sixte majeure est tolérée si elle est bien prise mélodiquement."""
+    La sixte majeure est tolérée si elle est bien prise mélodiquement.
+    Ces intervalles interdits peuvent être bons ou tolérés lors d'une modulation.
+    """
     melodic.allow_under_major_sixth(voice)
     for n1, n2 in util.pairwise(voice):
         if n1.pitch.isQualifiedInterval((6,"major")).With(n2.pitch):
-            warn(f"Interval allowed by tolerance only: major 6th. Check the melody.",n1,n2,voice.title)
+            addendum = "Possibly good thanks to the modulation. " if melodic.modulation_at(n2,voice) else ""
+            warn(f"Interval allowed by tolerance only: major 6th. {addendum}Check the melody.",n1,n2,voice.title)
 
 
 @dispatcher.one_voice
 def rule_2(voice):
-    """Les tritons en trois notes sont interdits si le mouvement ne change pas de sens"""
+    """Les tritons en trois notes sont interdits si le mouvement ne change pas de sens.
+    Ces intervalles interdits peuvent être bons ou tolérés lors d'une modulation.
+    """
     for notes in util.nwise(voice,3):
         np1,np2,np3 = util.to_pitch(notes)
         if np1.semitoneWith(np3) == 6:
             if tools.is_same_direction(np1,np2,np3):
-                warn(f"Tritone in 3 notes are forbidden, except when the middle note is lower or greater than the 2 other notes",notes,voice.title)
+                if melodic.modulation_at(notes[1]) or melodic.modulation_at(notes[-1]):
+                    msg = "Tritone in 3 notes is possible when a modulation occurs."
+                else:
+                    msg = "Tritone in 3 notes are forbidden, except when the middle note is lower or greater than the 2 other notes"
+                warn(msg,notes,voice.title)
 
 @dispatcher.one_voice
 def rule_3(voice):
-    """Les neuvièmes et septièmes en trois notes sont interdits, à moins que l’un des intervalles intermédiaires soit une octave"""
+    """Les neuvièmes et septièmes en trois notes sont interdits, à moins que l’un des intervalles intermédiaires soit une octave.
+    Ces intervalles interdits peuvent être bons ou tolérés lors d'une modulation.
+    """
     for notes in util.nwise(voice,3):
         np1, np2, np3 = util.to_pitch(notes)
         if np1.isInterval(7,9).With(np3):
@@ -44,7 +55,12 @@ def rule_3(voice):
                     (2,'minor'),
                     (2,'major'),
                     (8,'perfect')).With(np2):
-                warn(f'Between 3 notes, it is not allowed to use 7th or 9nth, except where an octave leap occured between one of these 3 notes',*notes,voice.title)
+                if melodic.modulation_at(notes[1]) or melodic.modulation_at(notes[-1]):
+                    msg = "7th or 9th in 3 notes are possible in a modulation"
+                else:
+                    msg = 'Between 3 notes, it is not allowed to use 7th or 9nth, except where an octave leap occured between one of these 3 notes'
+
+                warn(msg,*notes,voice.title)
 
 @dispatcher.one_voice
 def rule_4(voice):
@@ -52,7 +68,7 @@ def rule_4(voice):
     for notes in util.nwise(voice,4):
         np1,*other,np4 = util.to_pitch(notes)
         if np1.semitoneWith(np4) == 6:
-            warn(f"Tritone in 4 notes must be checked",notes,voice.title)
+            warn(f"Tritone in 4 notes must be checked.",notes,voice.title)
 
 def rule_5(data):
     """La sensible doit monter sur la tonique.
@@ -443,14 +459,14 @@ def rule_25(s1,s2):
     warn(f"Please check by ear that there are no distant false relations")
     for (h1,l1), (h2,l2) in util.pairwise(tools.iter_melodies(s1,s2)):
         if (h1.pitch.isChromaticInflectionWith(l2.pitch,min=True) or l1.pitch.isChromaticInflectionWith(h2.pitch,min=True)):
-            if (h1.pitch.isSameNote(l1.pitch) or h2.isSameNote(l2.pitch)) and motion.MotionType.motion(h1,l1,h2,l2) == motion.MotionType.contrary:
+            if (h1.pitch.isSameNote(l1.pitch) or h2.pitch.isSameNote(l2.pitch)) and motion.MotionType.motion(h1,l1,h2,l2) == motion.MotionType.contrary:
                 text = "Doubling one of the notes of a chromatism when there's a contrary motion is only tolerated."
             else:
                 text = "It is forbidden to do a chromatic false relation"
             warn(text,h1,l1,h2,l2,s1.title,s2.title)
             
 @dispatcher.extreme_parts
-def rule_26(soprano,bass): #    TODO test
+def rule_26(soprano,bass): 
     """
     La quinte directe entre parties extrêmes par modulation et mouvement chromatique est prohibée.
     """
