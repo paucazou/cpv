@@ -193,7 +193,7 @@ class AbstractChord:
         nchords = chords[:]
         chords = [ elt for elt in chords if elt.hasRoot(notes) ]
         if len(chords) == 0:
-            return chords[0]
+            return nchords[0]
         if len(chords) == 1:
             return chords[0]
 
@@ -400,8 +400,8 @@ class RealizedChord:
 
     def __init__(self, a_chord, start,end,staves):
         self.abstract = a_chord
-        self.start = start
-        self.end = end
+        self.start = self.pos = start
+        self.end = self.last_pos = end
         self.staves = staves
 
     def __repr__(self):

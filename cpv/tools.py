@@ -153,6 +153,12 @@ def iter_melodies(*tracks,**options):
 
         yield res
 
+def iter_notes_and_chords(*data,**options):
+    """Same as iter_melodies, but accepts chords
+    """
+    for elt in iter_melodies(*data,**options):
+        yield elt
+
 def get_matching_cf(s,data):
     """For a stave s, with a title
     like 'cp1', return the matching
