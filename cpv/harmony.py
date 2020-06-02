@@ -498,7 +498,6 @@ def rule_27(voice):
 def rule_28(data):
     """Il est bon de préparer la septième de dominante (elle doit alors être présente à l’accord précédent à la même voix et à la même octave, reliée de préférence par syncope) mais ce n’est pas obligatoire.
     """
-    from IPython import embed;embed()
     chords = chord.RealizedChord.chordify(data)
     @dispatcher.one_voice
     def func(voice):

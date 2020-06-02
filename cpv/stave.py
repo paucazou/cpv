@@ -7,6 +7,7 @@ import math
 import note
 import pitch
 import scale
+import util
 
 Modulation = collections.namedtuple('Modulation',"key scale pos".split())
 
@@ -347,9 +348,9 @@ class Stave:
         """Get scale at pos"""# TODO test
         try:
             for m1,m2 in util.pairwise(self.modulations):
-                if pos >= m1.pos and pos < m2.pos
+                if pos >= m1.pos and pos < m2.pos:
                     return m1.scale
-                if pos >= m2 and m2 is self.modulations[-1]:
+                if pos >= m2.pos and m2 is self.modulations[-1]:
                     return m2.scale
             else:
                 raise AttributeError

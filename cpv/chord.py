@@ -400,8 +400,8 @@ class RealizedChord:
 
     def __init__(self, a_chord, start,end,staves):
         self.abstract = a_chord
-        self.start = self.pos = start
-        self.end = self.last_pos = end
+        self.start = start
+        self.end = end
         self.staves = staves
 
     def __repr__(self):
@@ -448,6 +448,13 @@ class RealizedChord:
             returned[title] = intervalspair_selected
 
         return returned
+
+    def _get_last_pos(self):
+        return self.end
+    last_pos = property(_get_last_pos)
+    def _get_first_pos(self):
+        return self.start
+    pos = property(_get_first_pos)
 
 
 
