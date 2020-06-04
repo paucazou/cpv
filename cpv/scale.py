@@ -213,6 +213,15 @@ class Scale:
             if self.isDegree(note,i):
                 return i
 
+    def findNoteBySemitone(self,semitone) -> pitch.Pitch:
+        """Find the note matching the semitone entered
+        raise ValueError if no note found
+        """
+        for n in self.notes:
+            if n.value.semitone == semitone:
+                return n
+        raise ValueError
+
     def isRaisedSubmediant(self,note): # TEST
         """Is the note a sixth degree and a raised submediant?
         If the scale has not raised submediant,

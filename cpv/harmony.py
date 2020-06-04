@@ -387,6 +387,7 @@ def rule_21(data):
 def rule_22(data):
     """La quarte et sixte doit être préparée, c’est-à-dire que l’une des deux notes formant la quarte doit se trouver à l’accord précédent et se prolonger par syncope dans l’accord de quarte et sixte.
     La sixte et quarte sur dominante (deuxième renversement de l’accord de tonique) n’a pas besoin d’être préparée, même si c’est la dominante d’un nouveau ton.
+    Dans l’accord de sixte sensible (deuxième renversement), il n’est pas absolument nécessaire de préparer la quarte contrairement à l’accord de quarte et sixte.
     """
     for notes in tools.iter_melodies(*data):
         c = chord.AbstractChord.findBestChordFromStave(notes,data[0])
@@ -398,6 +399,9 @@ def rule_22(data):
         current_scale = data[0].scaleAt(pos)
         bass = [n for n in notes if c.isFifth(n)][0]
         if current_scale.isDominant(bass.pitch):
+            continue
+        # is it the 2nd inversion chord of a 7th dominant chord?
+        if c.is_seventh and c.degree == 5:
             continue
         # is one of the notes prepared?
         is_prepared = False
@@ -502,8 +506,52 @@ def rule_28(data):
     @dispatcher.one_voice
     def func(voice):
         for (n1,c1), (n2,c2) in util.pairwise(tools.iter_notes_and_chords(voice,chords)):
-            if c2.abstract.isSeventh(n2) and n1.pitch != n2.pitch:
+            if c2.degree == 5 and c2.abstract.isSeventh(n2) and n1.pitch != n2.pitch:
                 warn(f"It is good to prepare the dominant seventh, though not mandatory",n2,voice.title)
+
+    func(data)
+
+def rule_29(data): # TEST TODO
+    """
+    La septième doit être résolue :
+        a) de manière habituelle en descendant d’un degré (un ton ou un demi-ton diatonique) ;
+        b) de manière exceptionnelle en descendant sur la quinte de l’accord de dominante dans le cadre d’un changement de position ;
+        c) de manière très exceptionnelle en montant, afin d’éviter la doublure de la basse de l’accord de sixte ou de doubler la sensible.
+        d) Il est aussi possible de la laisser en place à l’accord suivant.
+    """
+    chords = chord.RealizedChord.chordify(data)
+
+    @dispatcher.one_voice
+    def func(voice):
+        for (n1,c1,*notes1), (n2,c2,*notes2) in util.pairwise(tools.iter_notes_and_chords(voice,chords,*data)):
+            if not c1.abstract.isSeventh(n1):
+                continue
+            # the 7th goes to the inferior degree
+            if n1.pitch.isQualifiedInterval((2,"minor"),(2,"major")).With(n2.pitch) and n1.pitch > n2.pitch:
+                continue
+            # the 7th goes to the fifth in the same chord
+            if c1 is c2 and c2.isFifth(n2):
+                continue
+            # the 7th stays onplace in the following chord
+            if n1.pitch == n2.pitch:
+                continue
+            # the 7th goes higher to avoid doubling the leadingtone or the bass of a first inversion chord
+            expected = []
+            sc2 = c2.abstract.scale
+            for semitone in (n1.pitch.value.semitone -1,n1.pitch.value.semitone -2):
+                try:
+                    expected.append(sc2.findNoteBySemitone(semitone))
+                except ValueError:
+                    continue
+            # is it to avoid doubling the leading tone?
+            if max((sc2.isLeading(p) for p in expected)) and max((sc2.isLeading(p.pitch) for p in notes2)):
+                continue
+            # is it to avoid doubling the bass of a 1st inversion chord?
+            if c2.abstract.isInversion(notes2,1) and max((c2.abstract.isThird(p) for p in expected)):
+                continue
+
+            # error
+            warn(f"The 7th in a dominant chord must go to the inferior degree, or to the fifth of the chord, or stay onplace in the following chord",n1,n2,voice.title)
 
     func(data)
 
