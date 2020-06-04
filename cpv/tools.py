@@ -152,12 +152,26 @@ def iter_melodies(*tracks,**options):
             continue
 
         yield res
+        
+def pairwise_melodies(*tracks,**options):
+    """Equals to:
+    util.pairwise(iter_melodies(*tracks,**options)
+    """
+    for data in util.pairwise(iter_melodies(*tracks,**options)):
+        yield data
 
 def iter_notes_and_chords(*data,**options):
     """Same as iter_melodies, but accepts chords
     """
     for elt in iter_melodies(*data,**options):
         yield elt
+
+def pairwise_notes_and_chords(*data,**options):
+    """Equals to:
+    util.pairwise(iter_notes_and_chords(*data,**options)
+    """
+    for data in util.pairwise(iter_notes_and_chords(*data,**options)):
+        yield data
 
 def get_matching_cf(s,data):
     """For a stave s, with a title

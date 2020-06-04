@@ -503,6 +503,7 @@ def rule_28(data):
     """Il est bon de préparer la septième de dominante (elle doit alors être présente à l’accord précédent à la même voix et à la même octave, reliée de préférence par syncope) mais ce n’est pas obligatoire.
     """
     chords = chord.RealizedChord.chordify(data)
+
     @dispatcher.one_voice
     def func(voice):
         for (n1,c1), (n2,c2) in util.pairwise(tools.iter_notes_and_chords(voice,chords)):
@@ -511,7 +512,7 @@ def rule_28(data):
 
     func(data)
 
-def rule_29(data): # TEST TODO
+def rule_29(data): 
     """
     La septième doit être résolue :
         a) de manière habituelle en descendant d’un degré (un ton ou un demi-ton diatonique) ;
@@ -524,7 +525,7 @@ def rule_29(data): # TEST TODO
     @dispatcher.one_voice
     def func(voice):
         for (n1,c1,*notes1), (n2,c2,*notes2) in util.pairwise(tools.iter_notes_and_chords(voice,chords,*data)):
-            if not c1.abstract.isSeventh(n1):
+            if not (c1.abstract.isSeventh(n1) and c1.abstract.degree == 5):
                 continue
             # the 7th goes to the inferior degree
             if n1.pitch.isQualifiedInterval((2,"minor"),(2,"major")).With(n2.pitch) and n1.pitch > n2.pitch:
@@ -554,6 +555,30 @@ def rule_29(data): # TEST TODO
             warn(f"The 7th in a dominant chord must go to the inferior degree, or to the fifth of the chord, or stay onplace in the following chord",n1,n2,voice.title)
 
     func(data)
+
+def rule_30(data): 
+    """
+    éviter l’octave directe sur la note de résolution de la dissonance
+    """
+    chords = chord.RealizedChord.chordify(data)
+
+    @dispatcher.two_voices
+    def func(v1,v2):
+        for (h1,l1,c1),(h2,l2,c2) in tools.pairwise_notes_and_chords(v1,v2,chords):
+            #is this a 7th?
+            if not (c1.abstract.isSeventh(h1) or c1.abstract.isSeventh(l1)):
+                continue
+            # is is a dominant chord?
+            if c1.abstract.degree != 5:
+                continue
+            # is it a direct motion?
+            if motion.MotionType.motion(h1,l1,h2,l2) != motion.MotionType.direct:
+                continue
+            if h2.pitch.isInterval(8).With(l2.pitch):
+                warn(f"It is forbidden to use a direct octave to the resolution of the 7th",h1,l1,h2,l2,v1.title,v2.title)
+
+    func(data)
+
 
 
     
