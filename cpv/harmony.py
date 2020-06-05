@@ -9,6 +9,7 @@ import itertools
 import harmonic
 import melodic
 import motion
+import note
 import pitch
 import tessitura
 import tools
@@ -40,7 +41,7 @@ def rule_2(voice):
                 if melodic.modulation_at(notes[1]) or melodic.modulation_at(notes[-1]):
                     msg = "Tritone in 3 notes is possible when a modulation occurs."
                 else:
-                    msg = "Tritone in 3 notes are forbidden, except when the middle note is lower or greater than the 2 other notes"
+                    msg = "Tritone in 3 notes are forbidden, except when the middle note is lower or greater than the 2 other notes. It can also be tolerated in a seventh dominant chord. Check that."
                 warn(msg,notes,voice.title)
 
 @dispatcher.one_voice
@@ -114,13 +115,17 @@ def rule_6(data):
 
 
 def rule_7(data):
-    """Il est interdit de doubler la sensible"""
+    """Il est interdit de doubler la sensible. Pour les accords de 7ème de dominante, une exception est faite et cette question est traitée dans la règle 33"""
     st = tools.SequenceTracker(data)
     for notes in tools.iter_melodies(*data):
         # get scale
         pos = max([n.pos for n in notes])
         sc = data[0].scaleAt(pos)
         leadings = [n for n in notes if sc.isLeading(n.pitch) and not st.isInRestatement(n)]
+        current_chord = chord.findBestChord(notes,sc)
+        # is it a 7th dominant chord?
+        if current_chord.hasSeventh(notes) and current_chord.degree == 5:
+            continue
         if len(leadings) > 1:
             warn(f"The leading tone can not be doubled, except in a restatement of a sequence",*notes)
 
@@ -401,7 +406,7 @@ def rule_22(data):
         if current_scale.isDominant(bass.pitch):
             continue
         # is it the 2nd inversion chord of a 7th dominant chord?
-        if c.is_seventh and c.degree == 5:
+        if c.hasSeventh(notes) and c.degree == 5:
             continue
         # is one of the notes prepared?
         is_prepared = False
@@ -559,6 +564,7 @@ def rule_29(data):
 def rule_30(data): 
     """
     éviter l’octave directe sur la note de résolution de la dissonance
+    Le mouvement direct sur la dissonance est toléré en cas de chromatisme de l’une des parties.
     """
     chords = chord.RealizedChord.chordify(data)
 
@@ -574,10 +580,87 @@ def rule_30(data):
             # is it a direct motion?
             if motion.MotionType.motion(h1,l1,h2,l2) != motion.MotionType.direct:
                 continue
+            # is there a chromatism?
+            if h1.pitch.isChromaticInflectionWith(h2.pitch) or l1.pitch.isChromaticInflectionWith(l2.pitch):
+                msg = "Direct octave to the resolution of the 7th is tolerated whend there is a chromatic inflection of one of the parts"
+                # TODO TEST
+            else:
+                msg = "It is forbidden to use a direct octave to the resolution of the 7th"
+
             if h2.pitch.isInterval(8).With(l2.pitch):
-                warn(f"It is forbidden to use a direct octave to the resolution of the 7th",h1,l1,h2,l2,v1.title,v2.title)
+                warn(msg,h1,l1,h2,l2,v1.title,v2.title)
 
     func(data)
+
+@dispatcher.two_voices
+def rule_31(v1,v2):
+    """
+    éviter les mouvements directs vers une seconde, une septième ou une neuvième ;
+    """
+    for (h1,l1), (h2,l2)in tools.pairwise_melodies(v1,v2):
+        if motion.MotionType.motion(h1,l1,h2,l2) == motion.MotionType.direct and h2.pitch.intervalWith(l2.pitch,min=True) in (2,7):
+            warn(f"Direct motion to a 2nd, a 7th, a 9th is not good",h1,l1,h2,l2,v1.title,v2.title)
+
+def rule_32(data): # TODO test
+    """
+    il est interdit d’utiliser des quintes ou octaves directes pour sortir d’un accord de triton (troisième renversement).
+    """
+    chords = chord.RealizedChord.chordify(data)
+
+    @dispatcher.two_voices
+    def func(v1,v2):
+        for (h1,l1,c1,*notes1),(h2,l2,c2,*notes2) in tools.pairwise_notes_and_chords(v1,v2,chords,data):
+            #is it a 3rd inversion chord?
+            if not c1.abstract.isInversion(notes1,3):
+                continue
+            #is it the same chord?
+            if c1 == c2:
+                continue
+            # is the 2nd interval a octave or fifth?
+            if not h2.pitch.isQualifiedInterval((5,"perfect"),(8,"perfect")).With(l2.pitch):
+                continue
+
+            if motion.MotionType.motion(h1,l1,h2,l2) == motion.MotionType.direct:
+                warn(f"Direct 5th or 8ve is forbidden to go out of a 3rd inversion chord",h1,l1,h2,l2,v1.title,v2.title)
+
+    func(data)
+
+def rule_33(data): # TODO test
+    """Il est interdit de doubler la septième et la sensible, sauf si elles se prolongent dans l'accord suivant ou que ce sont des notes rapides
+    Fast notes here are at least quaver"""
+    chords = chord.RealizedChord.chordify(data)
+    is_fast = lambda n : n.duration <= note.Note.Duration.Quaver
+    msg = f"It's forbidden to duplicate the {}, except when the notes are fast or continued in the next chord")
+
+    for (c1, *notes1),(c2,*notes2) in tools.pairwise_notes_and_chords(chords,*data):
+        # seventh
+        duplicates = [n for n in notes1
+                if c1.abstract.isSeventh(n) is True 
+                and not is_fast(n)
+                and n.pitch not in (nn.pitch for nn in notes2)]
+        if len(duplicates) > 1:
+            warn(msg.format("7th"),duplicates)
+        # leading tone
+        duplicates = [n for n in notes1
+                if c1.abstract.scale.isLeading(n.pitch)
+                and not is_fast(n)
+                and n.pitch not in (nn.pitch for nn in notes2)]
+        if len(duplicates) > 1:
+            warn(msg.format("Leading tone"),duplicates)
+
+def rule_34(data): # TODO test
+    """
+    On peut supprimer la quinte, mais pas les autres notes
+    """
+    chords = chord.RealizedChord.chordify(data)
+    for c, *notes in tools.iter_notes_and_chords(chords,*data):
+        if not c.hasSeventh(notes):
+            continue
+        if not (c.hasRoot(notes) and c.hasThird(notes)):
+            warn(f"It's forbidden to omit the root or the 3rd of a seventh chord",notes)
+    
+
+# TODO pour les accords de septième, vérifier toutes les règles se rapportant aux septièmes de dominante et aux septièmes d'espèce et corriger ce qui ne va que d'un côté, et ce qui va des deux côtés
 
 
 
