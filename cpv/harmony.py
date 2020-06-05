@@ -601,7 +601,7 @@ def rule_31(v1,v2):
         if motion.MotionType.motion(h1,l1,h2,l2) == motion.MotionType.direct and h2.pitch.intervalWith(l2.pitch,min=True) in (2,7):
             warn(f"Direct motion to a 2nd, a 7th, a 9th is not good",h1,l1,h2,l2,v1.title,v2.title)
 
-def rule_32(data): # TODO test
+def rule_32(data): 
     """
     il est interdit d’utiliser des quintes ou octaves directes pour sortir d’un accord de triton (troisième renversement).
     """
@@ -609,7 +609,7 @@ def rule_32(data): # TODO test
 
     @dispatcher.two_voices
     def func(v1,v2):
-        for (h1,l1,c1,*notes1),(h2,l2,c2,*notes2) in tools.pairwise_notes_and_chords(v1,v2,chords,data):
+        for (h1,l1,c1,*notes1),(h2,l2,c2,*notes2) in tools.pairwise_notes_and_chords(v1,v2,chords,*data):
             #is it a 3rd inversion chord?
             if not c1.abstract.isInversion(notes1,3):
                 continue
@@ -625,14 +625,16 @@ def rule_32(data): # TODO test
 
     func(data)
 
-def rule_33(data): # TODO test
+def rule_33(data): 
     """Il est interdit de doubler la septième et la sensible, sauf si elles se prolongent dans l'accord suivant ou que ce sont des notes rapides
     Fast notes here are at least quaver"""
     chords = chord.RealizedChord.chordify(data)
-    is_fast = lambda n : n.duration <= note.Note.Duration.Quaver
-    msg = f"It's forbidden to duplicate the {}, except when the notes are fast or continued in the next chord")
+    is_fast = lambda n : n.duration <= note.Note.Duration.QUAVER.value
+    msg = "It's forbidden to duplicate the {}, except when the notes are fast or continued in the next chord"
 
     for (c1, *notes1),(c2,*notes2) in tools.pairwise_notes_and_chords(chords,*data):
+        if not c1.abstract.hasSeventh(notes1):
+            continue
         # seventh
         duplicates = [n for n in notes1
                 if c1.abstract.isSeventh(n) is True 
@@ -648,7 +650,7 @@ def rule_33(data): # TODO test
         if len(duplicates) > 1:
             warn(msg.format("Leading tone"),duplicates)
 
-def rule_34(data): # TODO test
+def rule_34(data): # This rule is probably useless
     """
     On peut supprimer la quinte, mais pas les autres notes
     """
