@@ -56,12 +56,14 @@ class Importer:
 
     def manage_rest(self, r):
         # TODO half, maybe, is the half of the measure, and not 2
+        # TODO is dot?
         values = {
                 "quarter":1,
                 "half":2,
                 "measure":int(self.numerator),
                 }
         duration = r.find("durationType").text
+        duration = self.manage_dots(r,duration)
         self.current_pos += values[duration]
 
     def manage_mark(self, mark):
@@ -71,11 +73,21 @@ class Importer:
         for line in txt.split("\n"):
             self.append(f"# {line}")
 
+    def manage_dots(self,elt,duration):
+        if elt.find("dots") is not None:
+            val_dot = int(elt.find("dots").text)
+            duration = duration + duration / (val_dot *2)
+        return duration
+
+
     def manage_chord(self,c,measure):
         #duration
         duration_ = c.find("durationType").text
-        sduration_ = str(self.durations[duration_])
+        sduration_ = self.durations[duration_]
         duration_ = float(sduration_)
+        duration_ = self.manage_dots(c,duration_)
+        sduration_ = str(duration_)
+        #TODO bug change sduration
         # pitch
         pitch_ = c.find("Note").find("pitch").text
         pitch_ = int(pitch_)
@@ -92,7 +104,7 @@ class Importer:
         end_spanner = c.find('Note').find('endSpanner')
         if end_spanner is not None:
             old_duration_ = self.ties.pop(end_spanner.get('id'))
-            sduration_ = int(old_duration_) + int(sduration_)
+            sduration_ = float(old_duration_) + float(sduration_)
             self.result = self.result.replace('TIE_' + end_spanner.get('id'),str(sduration_))
             self.current_pos += duration_
             return

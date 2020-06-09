@@ -72,7 +72,7 @@ def rule_4(voice):
             warn(f"Tritone in 4 notes must be checked.",notes,voice.title)
 
 def rule_5(data):
-    """La sensible doit monter sur la tonique.
+    """La sensible doit monter sur la tonique ou rester sur place avant de monter sur la tonique.
     Si la sensible est dans l'une des répétitions d'une marche d'harmonie,
     cette règle n'est pas nécessaire."""
     st = tools.SequenceTracker(data)
@@ -81,7 +81,7 @@ def rule_5(data):
             sc1 = voice.scaleAt(n1.pos)
             sc2 = voice.scaleAt(n2.pos)
 
-            if sc1 == sc2 and sc1.isLeading(n1.pitch) and (not sc2.isTonic(n2.pitch)) and not st.isInRestatement(n1):
+            if sc1 == sc2 and sc1.isLeading(n1.pitch) and (not sc2.isTonic(n2.pitch)) and (not sc2.isLeading(n2.pitch)) and not st.isInRestatement(n1):
                 warn(f"The leading tone should go to the tonic, except in a restatement of a sequence.",n1,n2,voice.title)
 
 
@@ -122,7 +122,7 @@ def rule_7(data):
         pos = max([n.pos for n in notes])
         sc = data[0].scaleAt(pos)
         leadings = [n for n in notes if sc.isLeading(n.pitch) and not st.isInRestatement(n)]
-        current_chord = chord.findBestChord(notes,sc)
+        current_chord = chord.AbstractChord.findBestChord(notes,sc)
         # is it a 7th dominant chord?
         if current_chord.hasSeventh(notes) and current_chord.degree == 5:
             continue

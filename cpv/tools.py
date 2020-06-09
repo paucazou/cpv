@@ -105,8 +105,13 @@ class Queue:
                 self.starting_block[i] = None
 
         # fill again the starting block
-        self.starting_block = [ q.get() if n is None else n for q, n in zip(self.tracks,self.starting_block) if not q.empty()]
+        #print("starting_block before",self.starting_block)
+        self.starting_block = [ q.get() if n is None else n
+                for q, n in zip(self.tracks,self.starting_block) 
+                if (not q.empty() or n is not None)]
         self.pos = last_pos
+        #print("starting_block after",self.starting_block)
+
 
         return returned_notes
 
