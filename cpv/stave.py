@@ -347,6 +347,9 @@ class Stave:
     def scaleAt(self,pos):
         """Get scale at pos"""# TODO test
         try:
+            if len(self.modulations) == 1:
+                if pos >= self.modulations[0].pos:
+                    return self.modulations[0].scale
             for m1,m2 in util.pairwise(self.modulations):
                 if pos >= m1.pos and pos < m2.pos:
                     return m1.scale
