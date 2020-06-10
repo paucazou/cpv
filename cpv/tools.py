@@ -74,6 +74,28 @@ def get_rythmic_string(s):
 
 
 class Queue:
+    """A queue for tracks with notes
+    of different lengths"""
+    def __init__(self,*tracks):
+        self.tracks = tracks
+        self.pos = 0
+        self.last_pos = max(n.last_pos for s in tracks for n in s)
+
+    def __call__(self):
+        """Return chords at each call
+        until queue is empty"""
+        returned_notes = (s.getNoteAtPos(self.pos) for s in self.tracks)
+        returned_notes = [n for n in returned_notes if n]
+        self.pos = min(returned_notes,key=lambda n:n.last_pos).last_pos
+        return returned_notes
+
+    def _empty(self):
+        """True if every queue is empty"""
+        return self.pos >= self.last_pos
+
+    empty = property(_empty)
+
+class OldQueue:
     """Simple class to manage tracks"""
     def __init__(self,*tracks):
         # creates queues
@@ -91,9 +113,12 @@ class Queue:
     def __call__(self):
         """Return chords at each call
         until queue is empty"""
+        print(self.pos)
         first_pos = min(self.starting_block,key=lambda x: x.pos).pos
         first_pos = first_pos if first_pos >= self.pos else self.pos
         last_pos = self._get_last_pos(first_pos)
+        print(first_pos)
+        print(last_pos)
 
         returned_notes = []
         for i, elt in enumerate(self.starting_block):
@@ -101,16 +126,18 @@ class Queue:
                 continue
             if elt.pos <= first_pos:
                 returned_notes.append(elt)
-            if elt.last_pos == last_pos:
+            if elt.last_pos <= first_pos:
+                self.starting_block[i] = None
+            elif elt.last_pos == last_pos:
                 self.starting_block[i] = None
 
         # fill again the starting block
-        #print("starting_block before",self.starting_block)
+        print("starting_block before",self.starting_block)
         self.starting_block = [ q.get() if n is None else n
                 for q, n in zip(self.tracks,self.starting_block) 
                 if (not q.empty() or n is not None)]
         self.pos = last_pos
-        #print("starting_block after",self.starting_block)
+        print("starting_block after",self.starting_block)
 
 
         return returned_notes
@@ -122,6 +149,9 @@ class Queue:
         least_last = min([elt.last_pos for elt in self.starting_block if elt.pos == first_pos])
         # getting the second first pos
         least_second_first = min([elt.pos for elt in self.starting_block if elt.pos != first_pos],default=-1)
+        print("last_pos")
+        print(least_last)
+        print(least_second_first)
         # return the good one
         return min(least_last,least_second_first) if least_second_first >= self.pos else least_last
     
