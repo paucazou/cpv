@@ -502,7 +502,8 @@ def rule_27(voice):
             n2 = voice.getNoteAtPos(n2.last_pos)
 
         if not n2 or not mod.scale.isDegree(n2.pitch,expected_degree):
-            warn(f"In a modulation, the {n1_degree} must go to the {expected_degree}, or stay on place before going to the {expected_degree}. Here, the {n1_degree} goes to the {mod.scale.findDegree(n2.pitch)}.",n1,n2,voice.title)
+            degree = f"nowhere" if not n2 else mod.scale.findDegree(n2.pitch)
+            warn(f"In a modulation, the {n1_degree} must go to the {expected_degree}, or stay on place before going to the {expected_degree}. Here, the {n1_degree} goes to {degree}.",n1,n2,voice.title)
 
 def rule_28(data):
     """Il est bon de préparer la septième de dominante (elle doit alors être présente à l’accord précédent à la même voix et à la même octave, reliée de préférence par syncope) mais ce n’est pas obligatoire.
@@ -512,7 +513,7 @@ def rule_28(data):
     @dispatcher.one_voice
     def func(voice):
         for (n1,c1), (n2,c2) in util.pairwise(tools.iter_notes_and_chords(voice,chords)):
-            if c2.degree == 5 and c2.abstract.isSeventh(n2) and n1.pitch != n2.pitch:
+            if c2.abstract.degree == 5 and c2.abstract.isSeventh(n2) and n1.pitch != n2.pitch:
                 warn(f"It is good to prepare the dominant seventh, though not mandatory",n2,voice.title)
 
     func(data)
@@ -536,7 +537,7 @@ def rule_29(data):
             if n1.pitch.isQualifiedInterval((2,"minor"),(2,"major")).With(n2.pitch) and n1.pitch > n2.pitch:
                 continue
             # the 7th goes to the fifth in the same chord
-            if c1 is c2 and c2.isFifth(n2):
+            if c1 is c2 and c2.abstract.isFifth(n2):
                 continue
             # the 7th stays onplace in the following chord
             if n1.pitch == n2.pitch:
@@ -656,9 +657,10 @@ def rule_34(data): # This rule is probably useless
     """
     chords = chord.RealizedChord.chordify(data)
     for c, *notes in tools.iter_notes_and_chords(chords,*data):
-        if not c.hasSeventh(notes):
+        abstract_chord = c.abstract
+        if not abstract_chord.hasSeventh(notes):
             continue
-        if not (c.hasRoot(notes) and c.hasThird(notes)):
+        if not (abstract_chord.hasRoot(notes) and abstract_chord.hasThird(notes)):
             warn(f"It's forbidden to omit the root or the 3rd of a seventh chord",notes)
     
 

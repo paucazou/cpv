@@ -2,6 +2,7 @@ import note
 import queue
 import rest
 import scalenote
+import stave
 import util
 from collections import namedtuple
 
@@ -95,7 +96,30 @@ class Queue:
 
     empty = property(_empty)
 
-class OldQueue:
+class QueueWithChords(Queue):
+    """Similar to Queue, but
+    accepts iterables of chords"""
+    class __mock_stave:
+        def __init__(self,chords):
+            self.chords = chords
+        def getNoteAtPos(self,pos):
+            """Actually get the chord at pos"""
+            for c in self.chords:
+                if c.pos <= pos < c.last_pos:
+                    return c
+            else:
+                return None
+
+    def __init__(self,*tracks):
+        super().__init__(*tracks)
+        self.tracks = [
+                t if isinstance(t,stave.Stave) else self.__mock_stave(t)
+                for t in tracks]
+
+
+
+
+class OldQueue: # DEPRECATED
     """Simple class to manage tracks"""
     def __init__(self,*tracks):
         # creates queues
@@ -174,11 +198,13 @@ def iter_melodies(*tracks,**options):
     options can be set with a key:
         - all: if True, yields only when len(notes) == len(tracks)
         - alone: if False, forbids to yield only one note
+        - queue: the class of the queue. Default is Queue
     """
-    # TODO does not work well with rests between two notes
+    # TODO does not work well with rests between two notes: maybe works better now.
     assert len(tracks) > 1
 
-    queuer = Queue(*tracks)
+    queue_class = options.get("queue",Queue)
+    queuer = queue_class(*tracks)
     while not queuer.empty:
         res = queuer()
         if options.get("all",False) is True and len(res) != len(tracks):
@@ -198,6 +224,8 @@ def pairwise_melodies(*tracks,**options):
 def iter_notes_and_chords(*data,**options):
     """Same as iter_melodies, but accepts chords
     """
+    if "queue" not in options:
+        options["queue"] = QueueWithChords
     for elt in iter_melodies(*data,**options):
         yield elt
 
