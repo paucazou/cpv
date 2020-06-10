@@ -66,7 +66,10 @@ class Importer:
         duration = self.manage_dots(r,duration)
         self.current_pos += values[duration]
 
-    def manage_mark(self, mark):
+    def manage_mark(self, mark): # DEPRECATED
+        pass
+
+    def manage_stafftext(self,mark):
         txt = mark.find("text").text
         if txt[:3] == "mod":
             self.current_scale = scale.Scale.fromString(txt[3:])
@@ -151,6 +154,7 @@ class Importer:
                 if next_one:
                     # title
                     if not name:
+                        # DEPRECATED
                         if measure.find('StaffText') is None:
                             raise SyntaxError("A title lacks")
                         name = measure.find('StaffText').find('text').text
@@ -176,6 +180,9 @@ class Importer:
 
                     if child.tag == "RehearsalMark":
                         self.manage_mark(child)
+
+                    if child.tag == "StaffText":
+                        self.manage_stafftext(child)
 
                     if child.tag == "Chord":
                         self.manage_chord(child,measure)

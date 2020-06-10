@@ -503,7 +503,7 @@ def rule_27(voice):
 
         if not n2 or not mod.scale.isDegree(n2.pitch,expected_degree):
             degree = f"nowhere" if not n2 else mod.scale.findDegree(n2.pitch)
-            warn(f"In a modulation, the {n1_degree} must go to the {expected_degree}, or stay on place before going to the {expected_degree}. Here, the {n1_degree} goes to {degree}.",n1,n2,voice.title)
+            warn(f"In a modulation, the {n1_degree} must go to the {expected_degree}, or stay on place before going to the {expected_degree}. Here, the {n1_degree} goes to {degree}.",n1,n2,voice.title,mod)
 
 def rule_28(data):
     """Il est bon de préparer la septième de dominante (elle doit alors être présente à l’accord précédent à la même voix et à la même octave, reliée de préférence par syncope) mais ce n’est pas obligatoire.
