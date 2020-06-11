@@ -22,11 +22,18 @@ def rule_1(voice):
     La sixte majeure est tolérée si elle est bien prise mélodiquement.
     Ces intervalles interdits peuvent être bons ou tolérés lors d'une modulation.
     """
-    melodic.allow_under_major_sixth(voice)
     for n1, n2 in util.pairwise(voice):
+        # is there a modulation between the 2 notes?
+        if melodic.modulation_at(n2,voice):
+            continue
+
+        np1,np2 = (n.pitch for n in (n1,n2))
+        itvl,qual= np1.qualifiedIntervalWith(np2)
+        if itvl > 8 or itvl == 7 or qual in ("diminished","augmented"):
+            warn(f"Intervals over the 8ve, or equal to a seventh, or augmented or diminished are forbidden",n1,n2,voice.title)
+
         if n1.pitch.isQualifiedInterval((6,"major")).With(n2.pitch):
-            addendum = "Possibly good thanks to the modulation. " if melodic.modulation_at(n2,voice) else ""
-            warn(f"Interval allowed by tolerance only: major 6th. {addendum}Check the melody.",n1,n2,voice.title)
+            warn(f"Interval allowed by tolerance only: major 6th. Check the melody.",n1,n2,voice.title)
 
 
 @dispatcher.one_voice
