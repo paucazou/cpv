@@ -45,7 +45,7 @@ def rule_2(voice):
         np1,np2,np3 = util.to_pitch(notes)
         if np1.semitoneWith(np3) == 6:
             if tools.is_same_direction(np1,np2,np3):
-                if melodic.modulation_at(notes[1]) or melodic.modulation_at(notes[-1]):
+                if melodic.modulation_at(notes[1],voice) or melodic.modulation_at(notes[-1],voice):
                     msg = "Tritone in 3 notes is possible when a modulation occurs."
                 else:
                     msg = "Tritone in 3 notes are forbidden, except when the middle note is lower or greater than the 2 other notes. It can also be tolerated in a seventh dominant chord. Check that."
@@ -63,7 +63,7 @@ def rule_3(voice):
                     (2,'minor'),
                     (2,'major'),
                     (8,'perfect')).With(np2):
-                if melodic.modulation_at(notes[1]) or melodic.modulation_at(notes[-1]):
+                if melodic.modulation_at(notes[1],voice) or melodic.modulation_at(notes[-1],voice):
                     msg = "7th or 9th in 3 notes are possible in a modulation"
                 else:
                     msg = 'Between 3 notes, it is not allowed to use 7th or 9nth, except where an octave leap occured between one of these 3 notes'
@@ -186,9 +186,14 @@ def rule_11(data):
                 for r in results:
                     if r.distance < distance_max:
                         if interval == 5:
+                            # il suffit de regarder s'il s'agit d'une quinte juste puis augmentée, cela dit, o
                             first_itvl = r.first[0].pitch.qualifiedIntervalWith(r.first[1].pitch)
                             second_itvl = r.second[0].pitch.qualifiedIntervalWith(r.second[1].pitch)
-                            ## 2 diminished 5th
+                            ## one interval is augmented
+                            if "augmented" in (first_itvl[1],second_itvl[1]):
+                                continue
+
+                            ## 2 diminished 5th or augmented
                             if first_itvl == second_itvl == (5,"diminished"):
                                 continue
                             ## the second is a diminished 5th

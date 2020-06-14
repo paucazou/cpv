@@ -1,3 +1,4 @@
+import itertools
 import note
 import queue
 import rest
@@ -308,7 +309,7 @@ class SequenceTracker:
         """True if part between start and end
         matches motif"""
         # TODO may be problematic with some kind of modulations, especially with enharmonic notes
-        # not really tolerant: syncopation at the end is forbidden, for example. Try to be more tolerant.
+        # not really tolerant: syncopation at the start/end is forbidden, for example. Try to be more tolerant.
         motif_notes = [
                 [n for n in s if n.pos < motif.end and n.last_pos > motif.start]
                 for s in self.data]
@@ -331,14 +332,33 @@ class SequenceTracker:
         func = lambda x : [ NS(self.data[0].scaleAt(n.pos),n.pitch) for n in x]
 
         for motif, part in zip(motif_notes,part_notes):
+            # diatonic sequence?
             motif_ns = func(motif)
             part_ns = func(part)
-            distance = part_ns[0].distanceWith(motif_ns[0])
-            NS.moveSequence(distance,part_ns)
-            if [n.pos for n in motif_ns] != [n.pos for n in part_ns]:
-                return False
+            try:
+                distance = part_ns[0].distanceWith(motif_ns[0])
+                NS.moveSequence(distance,part_ns)
+                if [n.pos for n in motif_ns] != [n.pos for n in part_ns]:
+                    return False
+            except AssertionError:
+                # modulating sequence?
+                motif_intervals = self.intervals(motif_notes)
+                part_intervals = self.intervals(part_notes)
+                if motif_intervals != part_intervals:
+                    return False
+
 
         return True
+
+    def intervals(self,*data):
+        """Return a string of intervals
+        in data, which must be of an iterable
+        of more than one iterables of notes
+        """
+        string = ""
+        for s1, s2 in itertools.combinations(data,2):
+            string += get_interval_string(s1,s2)
+        return string
 
 
 

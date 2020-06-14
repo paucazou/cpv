@@ -137,6 +137,7 @@ class Stave:
         raw_modulations = [(pos,com[3:]) for s in list_of_staves for pos, com in s.comments.items() if com[:3] == "mod"]
         modulations = [Modulation(pitch.Pitch[f"{n[:-1]}0"],scale.Scale.fromString(n),pos)
                 for pos,n in raw_modulations]
+        modulations.sort(key=lambda m:m.pos)
         for s in list_of_staves:
             s.modulations = modulations
 
