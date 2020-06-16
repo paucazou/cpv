@@ -80,7 +80,7 @@ class Queue:
     of different lengths"""
     def __init__(self,*tracks):
         self.tracks = tracks
-        self.pos = 0
+        self.pos = min(n.pos for s in tracks for n in s)
         self.last_pos = max(n.last_pos for s in tracks for n in s)
 
     def __call__(self):
@@ -406,6 +406,7 @@ def cut_stave(s : stave.Stave, start=0,end=None, by_measure=False):
 
     if first is None:
         first = stave.Modulation(s.keynote,s.scale,0)
+    first = stave.Modulation(first.key,first.scale,start)
     modulations.insert(0,first)
 
     returned = stave.Stave(s.rythm,s.breve_value,s.title,modulations=modulations,comments=comments)
