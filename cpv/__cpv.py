@@ -10,6 +10,7 @@ import cantus_firmus
 import dupre_improvisation_ex_3
 import harmony
 import note
+import tools
 import stave
 
 functions = "cf cp_2_1_1 cp_2_1_2 dupre_improvisation_3 harmony_koechlin".split()
@@ -117,22 +118,23 @@ def dupre_improvisation_3(string : str, not_followed_rules=[]) -> bool:
     lib = dupre_improvisation_ex_3
     return __rules_checker(string,not_followed_rules,lib)
 
-def harmony_koechlin(string : str, not_followed_rules=[]) -> bool:
+def harmony_koechlin(string : str, not_followed_rules=[],start=0,end=None) -> bool:
     """This function checks that the rules followed by Charles Koechlin are followed.
     It requires a string with the usual syntax with four pats:
     Soprano, Alto, Tenor, Bass (case sensitive)."""
     not_followed_rules = list(not_followed_rules)
     lib = harmony
-    return __rules_checker(string, not_followed_rules,lib)
+    return __rules_checker(string, not_followed_rules,lib,start,end)
 
 
 
-def __rules_checker(string : str, not_followed_rules,lib) -> bool:
+def __rules_checker(string : str, not_followed_rules,lib,start=0,end=None) -> bool:
     """Generic function"""
     rules =  __get_rules(lib)
     rules = __exclude_rules(rules,not_followed_rules)
 
     data = stave.Stave.fromString(string)
+    data = [tools.cut_stave(s,start,end,by_measure=True) for s in data]
     # rules application...
     for i,rule in rules.items():
         print(f"Checking rule {i}...")

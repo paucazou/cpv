@@ -491,10 +491,11 @@ def rule_26(soprano,bass):
     """
     La quinte directe entre parties extrêmes par modulation et mouvement chromatique est prohibée.
     """
+    # TODO on ne vérifie pas s'il y a une quinte...
     for (h1,l1), (h2,l2) in util.pairwise(tools.iter_melodies(soprano,bass)):
         mot = motion.MotionType.motion(h1,l1,h2,l2)
         if mot == motion.MotionType.direct and (h1.pitch.isChromaticInflectionWith(h2.pitch) or l1.pitch.isChromaticInflectionWith(l2.pitch)):
-            warn(f"A direct fifth by modulation and chromatic motion is forbidden",h1,h2,l1,l2,soprano.title,bass.title)
+            warn(f"A direct fifth by modulation and chromatic motion is forbidden between extreme parts",h1,h2,l1,l2,soprano.title,bass.title)
 
 
 @dispatcher.one_voice
@@ -512,6 +513,10 @@ def rule_27(voice):
         n2 = voice.getNoteAtPos(n1.last_pos)
         while n2 and n1.pitch == n2.pitch:
             n2 = voice.getNoteAtPos(n2.last_pos)
+        
+        # is the second note in another scale?
+        if n2 and voice.scaleAt(n2.pos) != mod.scale:
+            continue
 
         if not n2 or not mod.scale.isDegree(n2.pitch,expected_degree):
             degree = f"nowhere" if not n2 else mod.scale.findDegree(n2.pitch)
@@ -537,7 +542,9 @@ def rule_29(data):
         b) de manière exceptionnelle en descendant sur la quinte de l’accord de dominante dans le cadre d’un changement de position ;
         c) de manière très exceptionnelle en montant, afin d’éviter la doublure de la basse de l’accord de sixte ou de doubler la sensible.
         d) Il est aussi possible de la laisser en place à l’accord suivant.
+        e) Dans le cas d'une modulation, la septième peut conduire à une autre note.
     """
+        # TODO e) Dans le cas d'une modulation, la septième peut conduire à une autre note.
     chords = chord.RealizedChord.chordify(data)
 
     @dispatcher.one_voice

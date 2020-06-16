@@ -360,6 +360,58 @@ class SequenceTracker:
             string += get_interval_string(s1,s2)
         return string
 
+def cut_stave(s : stave.Stave, start=0,end=None, by_measure=False):
+    """Cut s from start to end. If start is not filled,
+    cut from the start of the stave; if end is not filled,
+    cut until the end.
+    If by_measure is set, start and end points to the measure to start and end
+    (end is NOT included).
+    """
+    # measure
+    if by_measure: # TODO WARNING works only if no change of rythm
+        start *= s.rythm
+        end *= s.rythm
+    # notes
+    notes = []
+    for n in s:
+        # note is inside the range
+        if n.pos >= start and n.last_pos <= end:
+            notes.append(n)
+        # note starts before the start and ends in the range
+        elif start < n.last_pos <= end:
+            n.duration = n.duration - (start - n.pos)
+            n.pos = start
+            notes.append(n)
+        # note starts in the range but ends after
+        elif start <= n.pos < end:
+            n.duration = n.duration - (end - last_pos)
+            notes.append(n)
+        # note starts before the start and ends after the end
+        elif n.pos < start and n.last_pos > end:
+            n.pos = start
+            n.duration = end - start
+            notes.append(n)
+
+    # comments
+    comments = { k:v for k, v in s.comments.items() if start <= k < end}
+
+    # modulations
+    modulations = []
+    first = None
+    for m in s.modulations:
+        if m.pos <= start:
+            first = m
+        elif start < m.pos < end:
+            modulations.append(m)
+
+    if first is None:
+        first = stave.Modulation(s.keynote,s.scale,0)
+    modulations.insert(0,first)
+
+    returned = stave.Stave(s.rythm,s.breve_value,s.title,modulations=modulations,comments=comments)
+    returned.notes = notes
+    return returned
+
 
 
 

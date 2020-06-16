@@ -97,7 +97,7 @@ class Stave:
         The following character is discarded
         * Title
         If a file contains at least two titles
-        the function return a list of list of Stave
+        the function return a list of lists of Stave
         """
         values = string.split('\n')
         values = [val for val in values if val]
