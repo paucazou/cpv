@@ -201,6 +201,7 @@ def rule_11(data):
                                 continue
                             ## all other possibilities: error
                         warn(f"Parallel {interval} found between {titles[0]} and {titles[1]}.",c1,r.first,c2,r.second)
+                        #from IPython import embed;embed()
 
     func((8,"perfect"))
     func(5)

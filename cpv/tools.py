@@ -83,9 +83,16 @@ class Queue:
         self.pos = min(n.pos for s in tracks for n in s)
         self.last_pos = max(n.last_pos for s in tracks for n in s)
 
-    def __call__(self):
+    def __call__(self,with_titles=False):
         """Return chords at each call
-        until queue is empty"""
+        until queue is empty
+        if with_titles is True, return a dict with the names of the tracks as key"""
+        if with_titles is True:
+            returned_notes = {s.title:s.getNoteAtPos(self.pos) for s in self.tracks}
+            not_empty_notes = (n for n in returned_notes.values() if n)
+            self.pos = min(not_empty_notes,key=lambda n : n.last_pos).last_pos
+            return returned_notes
+
         returned_notes = (s.getNoteAtPos(self.pos) for s in self.tracks)
         returned_notes = [n for n in returned_notes if n]
         self.pos = min(returned_notes,key=lambda n:n.last_pos).last_pos
@@ -200,6 +207,7 @@ def iter_melodies(*tracks,**options):
         - all: if True, yields only when len(notes) == len(tracks)
         - alone: if False, forbids to yield only one note
         - queue: the class of the queue. Default is Queue
+        - with_titles: yield the notes with the names of the voices. Default is False
     """
     # TODO does not work well with rests between two notes: maybe works better now.
     assert len(tracks) > 1
@@ -207,7 +215,7 @@ def iter_melodies(*tracks,**options):
     queue_class = options.get("queue",Queue)
     queuer = queue_class(*tracks)
     while not queuer.empty:
-        res = queuer()
+        res = queuer(with_titles=options.get("with_titles",False))
         if options.get("all",False) is True and len(res) != len(tracks):
             continue
         if options.get("alone",True) is False and len(res) == 1:
@@ -384,7 +392,7 @@ def cut_stave(s : stave.Stave, start=0,end=None, by_measure=False):
             notes.append(n)
         # note starts in the range but ends after
         elif start <= n.pos < end:
-            n.duration = n.duration - (end - last_pos)
+            n.duration = n.duration - (end - n.last_pos)
             notes.append(n)
         # note starts before the start and ends after the end
         elif n.pos < start and n.last_pos > end:

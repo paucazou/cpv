@@ -183,6 +183,12 @@ class AbstractChord:
         """Similar to findChord(seventh=True,best=True), but the way to select
         the best chord is different.
         """
+        # special case: only one note: we return the chord whose this
+        # one note is the root
+        if len(notes) == 1:
+            degree = scale.findDegree(notes[0].pitch)
+            return AbstractChord(degree,scale,seventh=True)
+
         chords = AbstractChord.findChord(notes,scale,seventh=True,best=True)
         if isinstance(chords,AbstractChord):
             return chords
@@ -385,24 +391,27 @@ class RealizedChord:
         """Takes a bunch of staves (data) and finds the chords
         inside. Return a list of RealizedChord"""
         chords = []
-        for notes in tools.iter_melodies(*data):
-            start = max([n.pos for n in notes])
-            end = min([n.last_pos for n in notes])
+        for notes in tools.iter_melodies(*data,with_titles=True):
+            start = max([n.pos for n in notes.values() if n])
+            end = min([n.last_pos for n in notes.values() if n])
 
             sc = data[0].scaleAt(start)
-            c = AbstractChord.findBestChord(notes,sc)
+            c = AbstractChord.findBestChord([n for n in notes.values() if n], sc)
             assert not isinstance(c,list)
             if chords and chords[-1].abstract == c:
                 chords[-1].end = end
+                chords[-1].columns.append(notes)
             else:
-                chords.append(RealizedChord(c, start, end, data))
+                chords.append(RealizedChord(c, start, end, data,columns=[notes]))
         return chords
 
-    def __init__(self, a_chord, start,end,staves):
+    def __init__(self, a_chord, start,end,staves,columns={}):
+        """columns is a list of dicts. Each dict contains the name of the voice as the key, and only one note. Each column represents a change in the position of the chord"""
         self.abstract = a_chord
         self.start = start
         self.end = end
         self.staves = staves
+        self.columns = columns
 
     def __repr__(self):
         return f"RealizedChord<{self.abstract}>{self.start}:{self.end}"
@@ -433,6 +442,7 @@ class RealizedChord:
                 for s1,s2 in itertools.combinations(self.staves,2)}
 
         returned = {}
+        # BUG
         for title, intervalspair in all_staves_results.items():
             intervalspair_selected = []
             for itvl in intervalspair:
@@ -441,11 +451,12 @@ class RealizedChord:
                 # are the intervals different?
                 if motion.MotionType.motion(*itvl.first,*itvl.second) == motion.MotionType.no:
                     continue
-                if pos1 > self.start and pos2 < following.end:
+                elif pos1 > self.start and pos2 < following.end:
                     # check that the intervals are in two different chords
                     if itvl.first in self.abstract and itvl.second in following.abstract:
                         intervalspair_selected.append(itvl)
             returned[title] = intervalspair_selected
+
 
         return returned
 

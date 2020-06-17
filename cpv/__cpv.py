@@ -8,6 +8,7 @@ import cp2_note_against_note
 import cp2_note_against_two_notes
 import cantus_firmus
 import dupre_improvisation_ex_3
+import functools
 import harmony
 import note
 import tools
@@ -158,6 +159,7 @@ __functions_following_rules = []
 for fun_name in functions:
     fun = getattr(__current_module,fun_name)
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(string, rules, *arg,**kwarg):
             """Only 'rules' are followed."""
             # I think no module should have more than 50 rules, but if necessary...
