@@ -440,27 +440,33 @@ class RealizedChord:
         with the distance between them.
         """
         __result = collections.namedtuple("__result","first second distance".split())
+        def check_interval(n1,n2):
+            if isinstance(interval,tuple):
+                return n1.pitch.isQualifiedInterval(interval).With(n2.pitch)
+            return n1.pitch.isInterval(interval,True).With(n2.pitch)
+
         results = {}
         for t1,t2 in itertools.combinations([s.title for s in self.staves],2):
+            results.setdefault((t1,t2),[])
             for col1 in self.columns:
                 # first notes
                 f1,f2 = col1[t1],col1[t2]
                 # in the column, is it the interval expected?
-                if not f1.pitch.isInterval(interval,True).With(f2.pitch):
+                if not check_interval(f1,f2):
                     continue
                 # check the intervals in the second chord
                 for col2 in following.columns:
                     # second notes
                     s1,s2 = col2[t1],col2[t2]
-                    if (s1.pitch.isInterval(interval,True).With(s2.pitch) and
+                    if (check_interval(s1,s2) and
                     motion.MotionType.motion(f1,f2,s1,s2) != motion.MotionType.no):
                         first_pos = min((n.last_pos for n in (f1,f2)))
                         second_pos = max((n.pos for n in (s1,s2)))
                         distance = second_pos - first_pos
-                        results[(t1,t2)] = __result(
+                        results[(t1,t2)].append( __result(
                                 [col1[t1],col1[t2]],
                                 [col2[t1],col2[t2]],
-                                distance)
+                                distance))
         return results
 
         ### DEPRECATED ###
