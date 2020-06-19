@@ -186,7 +186,6 @@ def rule_11(data):
                 for r in results:
                     if r.distance < distance_max:
                         if interval == 5:
-                            # il suffit de regarder s'il s'agit d'une quinte juste puis augmentée, cela dit, o
                             first_itvl = r.first[0].pitch.qualifiedIntervalWith(r.first[1].pitch)
                             second_itvl = r.second[0].pitch.qualifiedIntervalWith(r.second[1].pitch)
                             ## one interval is augmented
@@ -201,7 +200,6 @@ def rule_11(data):
                                 continue
                             ## all other possibilities: error
                         warn(f"Parallel {interval} found between {titles[0]} and {titles[1]}.",c1,r.first,c2,r.second)
-                        #from IPython import embed;embed()
 
     func((8,"perfect"))
     func(5)

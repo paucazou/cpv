@@ -2,6 +2,7 @@
 # -*-coding:Utf-8 -*
 #Deus, in adjutorium meum intende
 
+import collections
 import itertools
 import harmonic
 import motion
@@ -438,11 +439,35 @@ class RealizedChord:
         Return parallel interval with following in every voice,
         with the distance between them.
         """
+        __result = collections.namedtuple("__result","first second distance".split())
+        results = {}
+        for t1,t2 in itertools.combinations([s.title for s in self.staves],2):
+            for col1 in self.columns:
+                # first notes
+                f1,f2 = col1[t1],col1[t2]
+                # in the column, is it the interval expected?
+                if not f1.pitch.isInterval(interval,True).With(f2.pitch):
+                    continue
+                # check the intervals in the second chord
+                for col2 in following.columns:
+                    # second notes
+                    s1,s2 = col2[t1],col2[t2]
+                    if (s1.pitch.isInterval(interval,True).With(s2.pitch) and
+                    motion.MotionType.motion(f1,f2,s1,s2) != motion.MotionType.no):
+                        first_pos = min((n.last_pos for n in (f1,f2)))
+                        second_pos = max((n.pos for n in (s1,s2)))
+                        distance = second_pos - first_pos
+                        results[(t1,t2)] = __result(
+                                [col1[t1],col1[t2]],
+                                [col2[t1],col2[t2]],
+                                distance)
+        return results
+
+        ### DEPRECATED ###
         all_staves_results = {(s1.title,s2.title) : harmonic.distance_between_intervals(s1,s2,interval)
                 for s1,s2 in itertools.combinations(self.staves,2)}
 
         returned = {}
-        # BUG
         for title, intervalspair in all_staves_results.items():
             intervalspair_selected = []
             for itvl in intervalspair:
