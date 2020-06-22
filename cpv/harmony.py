@@ -510,7 +510,7 @@ def rule_27(voice):
 
         expected_degree = 1 if n1_degree == 7 else 3
         n2 = voice.getNoteAtPos(n1.last_pos)
-        while n2 and n1.pitch == n2.pitch:
+        while n2 and (n1.pitch == n2.pitch or mod.scale.findDegree(n1.pitch) == mod.scale.findDegree(n2.pitch)):
             n2 = voice.getNoteAtPos(n2.last_pos)
         
         # is the second note in another scale?
