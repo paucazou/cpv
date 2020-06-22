@@ -375,6 +375,8 @@ def cut_stave(s : stave.Stave, start=0,end=None, by_measure=False):
     If by_measure is set, start and end points to the measure to start and end
     (end is NOT included).
     """
+    if end is None:
+        end = s.lastPos if not by_measure else s.barNumber
     # measure
     if by_measure: # TODO WARNING works only if no change of rythm
         start *= s.rythm
@@ -404,6 +406,7 @@ def cut_stave(s : stave.Stave, start=0,end=None, by_measure=False):
     comments = { k:v for k, v in s.comments.items() if start <= k < end}
 
     # modulations
+    # TODO problème: la première modulation est donc enregistrée à l'emplacement où on coupe, or ce n'est pas forcément là qu'a lieu la modulation. Donc certaines règles spécifiques s'appliquent et provoquent des faux positifs. Faut-il supprimer la première modulation (qui semble inutile, mais à vérifier) ?
     modulations = []
     first = None
     for m in s.modulations:
