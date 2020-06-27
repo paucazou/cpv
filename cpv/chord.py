@@ -184,6 +184,11 @@ class AbstractChord:
         """Similar to findChord(seventh=True,best=True), but the way to select
         the best chord is different.
         """
+        # are notes in the scale?
+        for n in notes:
+            if n.pitch not in scale:
+                raise ValueError(f"{n} not in {scale}")
+
         # special case: only one note: we return the chord whose this
         # one note is the root
         if len(notes) == 1:

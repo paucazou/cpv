@@ -402,6 +402,10 @@ def cut_stave(s : stave.Stave, start=0,end=None, by_measure=False):
             n.duration = end - start
             notes.append(n)
 
+    ## check that last note does not exceed end
+    notes[-1].last_pos = end
+
+
     # comments
     comments = { k:v for k, v in s.comments.items() if start <= k < end}
 

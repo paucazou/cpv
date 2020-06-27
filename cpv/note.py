@@ -84,7 +84,15 @@ class Note:
         the starting of the following one"""
         return self.pos + self.duration
 
-    last_pos = property(_get_last_pos)
+    def _set_last_pos(self,pos):
+        """set last position.
+        Raise ValueError if pos <= self.pos
+        """
+        if pos <= self.pos:
+            raise ValueError("Invalid position: too low")
+        self.duration = pos - self.pos
+
+    last_pos = property(_get_last_pos,_set_last_pos)
 
     def __eq__(self, other):
         return self.pitch == other.pitch and self.pos == other.pos and self.duration == other.duration

@@ -73,6 +73,8 @@ def rule_3(voice):
 @dispatcher.one_voice
 def rule_4(voice):
     """Les tritons en quatre notes sont à surveiller"""
+    # AJOUTER: s'ils sont dans la même direction (sinon peu importe)
+    # TODO
     for notes in util.nwise(voice,4):
         np1,*other,np4 = util.to_pitch(notes)
         if np1.semitoneWith(np4) == 6:
@@ -95,7 +97,10 @@ def rule_5(data):
 def rule_6(data):
     """Les voix ne doivent pas toutes effectuer le même mouvement, sauf si on enchaîne deux accords de sixtes."""
     for group1, group2 in util.pairwise(tools.iter_melodies(*data)):
-        assert len(group1) == len(group2) and "Error : pauses not handled"
+        try:
+            assert len(group1) == len(group2) and "Error : pauses not handled"
+        except:
+            from IPython import embed;embed()
         is_same_mov =  True
         for i in range(len(group1)):
             for j in range(i+1,len(group1)):
